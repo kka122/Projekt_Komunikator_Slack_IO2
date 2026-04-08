@@ -3,7 +3,10 @@ import './App.css'
 function App() {
   return (
     <>
-      Kutas kozła
+      <big>
+        aaa
+      </big>
+      aaa
     </>
   )
 }
