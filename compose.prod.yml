@@ -1,0 +1,46 @@
+name: szponcik
+
+services:
+  db:
+    container_name: db
+    image: postgres:latest
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: 1234
+      POSTGRES_DB: baza_danych
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U postgres" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    container_name: backend
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: baza_danych
+      DB_USER: postgres
+      DB_PASSWORD: 1234
+      FLASK_DEBUG: "0"
+    ports:
+      - "5000:5000"
+    command: [ "gunicorn", "-w", "4", "-b", "0.0.0.0:5000", "main:app" ]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  app:
+    container_name: app
+    build:
+      context: ./app
+      dockerfile: Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - backend

@@ -1,8 +1,0 @@
-services:
-  app:
-    container_name: app
-    build:
-      context: /app
-      dockerfile: Dockerfile
-    ports:
-      - "8080:8080"

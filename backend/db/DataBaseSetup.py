@@ -122,12 +122,14 @@ class DirectChat(Base):
 
 
 class Setup:
-    def __init__(self,*,PORT = 6000,BASE_NAME = "baza_danych",PASSWORD = "1234"):
+    def __init__(self,*,HOST = "localhost",PORT = 6000,BASE_NAME = "baza_danych",USER = "postgres",PASSWORD = "1234"):
+        self.HOST = HOST
         self.PORT = PORT
         self.BASE_NAME = BASE_NAME
+        self.USER = USER
         self.PASSWORD = PASSWORD
-        self.SETUP_DATABASE_URI = f"postgresql+psycopg2://postgres:{PASSWORD}@localhost:{PORT}/postgres"
-        self.APP_DATABASE_URI = f"postgresql+psycopg2://postgres:{self.PASSWORD}@localhost:{self.PORT}/{self.BASE_NAME}"
+        self.SETUP_DATABASE_URI = f"postgresql+psycopg2://{USER}:{PASSWORD}@{HOST}:{PORT}/postgres"
+        self.APP_DATABASE_URI = f"postgresql+psycopg2://{self.USER}:{self.PASSWORD}@{self.HOST}:{self.PORT}/{self.BASE_NAME}"
         self.app_engine = None
 
     def _createDataBase(self):
