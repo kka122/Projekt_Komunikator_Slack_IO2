@@ -154,6 +154,7 @@ class Setup:
             self._dataBaseConnection()
 
         Base.metadata.create_all(self.app_engine)
+        self.app_engine.dispose()
 
     def initialize(self):
         self._createTables()

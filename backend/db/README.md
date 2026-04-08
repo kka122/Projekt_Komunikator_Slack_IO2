@@ -1,2 +1,2 @@
 # Szponcik - Slack like communication platform 
-[Frontend]
+[Database]
