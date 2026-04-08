@@ -1,0 +1,108 @@
+openapi: 3.1.0
+
+info:
+  title: Szponcik communicator API
+  version: 0.0.1
+  description: Slack-like communicator schemas for Typescript and Python
+
+tags:
+  - name: Auth
+    description: Endpoints related to user authentication and registration
+
+servers:
+  - url: http://localhost:6789/api
+    description: Local development server
+
+components:
+  securitySchemes:
+    CookieAuth:
+      type: apiKey
+      in: cookie
+      name: SZPONTSESSIONID
+
+  schemas:
+    RegisterRequest:
+      type: object
+      required: [ name, surname, email, password ]
+      properties:
+        name:
+          type: string
+          example: John
+        surname:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        password:
+          type: string
+          format: password
+          example: Qwerty123!@#
+        avatar:
+          type: string
+          format: binary
+          description: Optional avatar image file
+
+    LoginRequest:
+      type: object
+      required: [ email, password ]
+      properties:
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        password:
+          type: string
+          format: password
+          example: Qwerty123!@#
+
+security:
+  - CookieAuth: [ ]
+
+paths:
+  /auth/register:
+    post:
+      operationId: registerUser
+      tags: [ Auth ]
+      summary: Register a new user
+      security: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+
+      responses:
+        '201':
+          description: User registered successfully
+        '400':
+          description: Bad request - invalid input data
+
+  /auth/login:
+    post:
+      operationId: loginUser
+      tags: [ Auth ]
+      summary: Log in a user and obtain an authentication token
+      security: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+
+      responses:
+        '200':
+          description: User logged in successfully
+          headers:
+            Set-Cookie:
+              description: Authentication token set in a cookie
+              schema:
+                type: string
+
+        '400':
+          description: Bad request - invalid input data
+        '401':
+          description: Unauthorized - invalid credentials
