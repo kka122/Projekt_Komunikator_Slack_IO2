@@ -10,7 +10,7 @@ tags:
     description: Endpoints related to user authentication and registration
 
 servers:
-  - url: http://localhost:6789/api
+  - url: http://localhost:5000
     description: Local development server
 
 components:
@@ -61,7 +61,7 @@ security:
   - CookieAuth: [ ]
 
 paths:
-  /auth/register:
+  /register:
     post:
       operationId: registerUser
       tags: [ Auth ]
@@ -80,7 +80,7 @@ paths:
         '400':
           description: Bad request - invalid input data
 
-  /auth/login:
+  /login:
     post:
       operationId: loginUser
       tags: [ Auth ]

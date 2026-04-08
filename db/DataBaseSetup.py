@@ -1,6 +1,6 @@
 from sqlalchemy import create_engine, Column, Integer, String, Text, text, Enum, DateTime, ForeignKey,Boolean
-from sqlalchemy.orm import declarative_base,relationship
-from DataTypes import WorkspaceUserRole, UserStatus
+from sqlalchemy.orm import declarative_base, relationship, Session
+from db.DataTypes import WorkspaceUserRole, UserStatus
 from datetime import datetime
 
 Base = declarative_base()
@@ -21,7 +21,7 @@ class User(Base):
     surname = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
     password = Column(String, nullable=False)
-    status = Column(Enum(UserStatus), nullable=False, default=Enum(str(UserStatus.offline)))
+    status = Column(Enum(UserStatus), nullable=False, default=UserStatus.offline)
     avatarUrl = Column(String, nullable=False, default="")
     createAt = Column(DateTime, default=datetime.now)
 
@@ -155,3 +155,16 @@ class Setup:
 
     def initialize(self):
         self._createTables()
+
+    def addUser(self,name,surname,email,password,avatarUrl = ""):
+        with Session(self.app_engine) as session:
+            newUser = User(name=name,surname=surname,email=email,password=password,avatarUrl=avatarUrl)
+            session.add(newUser)
+            session.commit()
+
+    def checkUser(self,email,password):
+        with Session(self.app_engine) as session:
+            if session.query(User).filter(User.email == email).first() and session.query(User).filter(User.password == password):
+                return True
+            else:
+                return False
