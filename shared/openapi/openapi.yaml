@@ -16,20 +16,93 @@ servers:
 components:
   securitySchemes:
     CookieAuth:
-      $ref: './schemas/security.yaml#/CookieAuth'
+      type: apiKey
+      in: cookie
+      name: SZPONTSESSIONID
 
   schemas:
     RegisterRequest:
-      $ref: './schemas/auth.yaml#/RegisterRequest'
+      type: object
+      required: [ name, surname, email, password ]
+      properties:
+        name:
+          type: string
+          example: John
+        surname:
+          type: string
+          example: Doe
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        password:
+          type: string
+          format: password
+          example: Qwerty123!@#
+        avatar:
+          type: string
+          format: binary
+          description: Optional avatar image file
+
     LoginRequest:
-      $ref: './schemas/auth.yaml#/LoginRequest'
+      type: object
+      required: [ email, password ]
+      properties:
+        email:
+          type: string
+          format: email
+          example: john.doe@example.com
+        password:
+          type: string
+          format: password
+          example: Qwerty123!@#
 
 security:
-  - BearerAuth: [ ]
+  - CookieAuth: [ ]
 
 paths:
   /auth/register:
-    $ref: './paths/auth.yaml#/register'
+    post:
+      operationId: registerUser
+      tags: [ Auth ]
+      summary: Register a new user
+      security: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterRequest'
+
+      responses:
+        '201':
+          description: User registered successfully
+        '400':
+          description: Bad request - invalid input data
 
   /auth/login:
-    $ref: './paths/auth.yaml#/login'
+    post:
+      operationId: loginUser
+      tags: [ Auth ]
+      summary: Log in a user and obtain an authentication token
+      security: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+
+      responses:
+        '200':
+          description: User logged in successfully
+          headers:
+            Set-Cookie:
+              description: Authentication token set in a cookie
+              schema:
+                type: string
+
+        '400':
+          description: Bad request - invalid input data
+        '401':
+          description: Unauthorized - invalid credentials
