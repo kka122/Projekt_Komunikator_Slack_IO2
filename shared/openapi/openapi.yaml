@@ -1,0 +1,35 @@
+openapi: 3.1.0
+
+info:
+  title: Szponcik communicator API
+  version: 0.0.1
+  description: Slack-like communicator schemas for Typescript and Python
+
+tags:
+  - name: Auth
+    description: Endpoints related to user authentication and registration
+
+servers:
+  - url: http://localhost:6789/api
+    description: Local development server
+
+components:
+  securitySchemes:
+    CookieAuth:
+      $ref: './schemas/security.yaml#/CookieAuth'
+
+  schemas:
+    RegisterRequest:
+      $ref: './schemas/auth.yaml#/RegisterRequest'
+    LoginRequest:
+      $ref: './schemas/auth.yaml#/LoginRequest'
+
+security:
+  - BearerAuth: [ ]
+
+paths:
+  /auth/register:
+    $ref: './paths/auth.yaml#/register'
+
+  /auth/login:
+    $ref: './paths/auth.yaml#/login'
