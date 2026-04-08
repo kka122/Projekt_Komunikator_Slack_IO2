@@ -14,9 +14,16 @@ Run the production version of the application:
 docker compose -f compose.yml -f compose.prod.yml up --build
 ```
 
+Or run the development version of the application:
+
+```bash
+docker compose -f compose.yml -f compose.dev.yml up --build
+```
+
 After docker finishes building the images and starting the containers,
 you can access the application by navigating to `http://localhost:8080` 
-in your web browser.
+for the production version or `http://localhost:5173` for the development 
+version in your web browser.
 
 ## Tech stack
 

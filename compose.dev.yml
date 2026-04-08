@@ -28,3 +28,13 @@ services:
     volumes:
       - ./app:/app
       - /app/node_modules
+
+  openAPI:
+    container_name: openAPI
+    image: swaggerapi/swagger-ui
+    environment:
+      SWAGGER_JSON: /openapi/openapi.yaml
+    volumes:
+      - ./shared/openapi/openapi.yaml:/openapi/openapi.yaml:ro
+    ports:
+      - "5001:8080"
