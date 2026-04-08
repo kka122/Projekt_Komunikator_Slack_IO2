@@ -2,6 +2,8 @@ name: Generate Shared Schemas
 
 on:
   push:
+    branches:
+      - main
     paths:
       - 'shared/**'
       - '.github/workflows/shared-generating.yml'
