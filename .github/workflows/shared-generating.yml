@@ -21,6 +21,7 @@ jobs:
       - name: Install Node tools
         run: |
           npm install -g @redocly/cli
+          npm install -g orval
           npm install -d orval
 
       - name: Generate Zod + React Query Schemas
