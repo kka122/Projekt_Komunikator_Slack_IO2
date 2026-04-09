@@ -30,10 +30,10 @@ jobs:
         run: orval --config shared/generators/orval.config.ts
 
       - name: Generate Redocly Docs Schemas
-        run: redocly build-docs shared/openapi/openapi.yaml --output docs/index.html
+        run: redocly build-docs shared/openapi/openapi.yaml --output docs/openapi.html
 
       - name: Commit and push generated files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: update generated schemas"
-          file_pattern: './docs/index.html ./app/schemas/**/*'
+          file_pattern: './docs/openapi.html ./app/schemas/**/*'
