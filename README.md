@@ -1,7 +1,5 @@
 # Szponcik - Slack like communication platform
 
-<hr>
-
 Szponcik is a Slack-like communication platform designed to facilitate team collaboration and communication.
 It provides features such as channels, direct messaging, file sharing, and more, all within a user-friendly interface.
 
