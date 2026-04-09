@@ -1,12 +1,20 @@
 name: szponcik-prod
 
 services:
+  kafka:
+    container_name: kafka-prod
+
+  db:
+    container_name: db-prod
+
   backend:
+    container_name: backend-prod
     environment:
       FLASK_DEBUG: "0"
     command: [ "gunicorn", "--preload", "-w", "4", "-b", "0.0.0.0:5000", "main:app" ]
 
   app:
+    container_name: app-prod
     build:
       dockerfile: Dockerfile
     ports:
