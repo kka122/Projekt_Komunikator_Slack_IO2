@@ -76,6 +76,3 @@ readme files:
 - [Frontend](./app/README.md)
 - [Backend](./backend/README.md)
 - [Database](./backend/db/README.md)
-
-
-- [OpenAPI specification](./docs/openapi.html)
