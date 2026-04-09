@@ -3,10 +3,9 @@ import './App.css'
 function App() {
   return (
     <>
-      <big>
-        aaaasdasd
-      </big>
-      aaa
+      <h1>
+        adasd
+      </h1>
     </>
   )
 }
