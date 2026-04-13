@@ -1,0 +1,9 @@
+{
+  "name": "orval-generators",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "orval": "^8.7.0"
+  }
+}
+

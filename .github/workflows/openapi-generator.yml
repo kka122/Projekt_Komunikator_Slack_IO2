@@ -31,8 +31,12 @@ jobs:
       - name: Install Node tools
         run: npm install -g @redocly/cli orval
 
+      - name: Install local orval (for config resolution)
+        run: npm install
+        working-directory: shared/generators/orval
+
       - name: Generate Zod + React Query Schemas
-        run: orval --config shared/generators/orval.config.ts
+        run: orval --config shared/generators/orval/orval.config.ts
 
       - name: Generate Redocly Docs
         run: redocly build-docs shared/openapi/openapi.yaml --output docs/openapi.html
