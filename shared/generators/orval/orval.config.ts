@@ -3,11 +3,11 @@ import { defineConfig } from 'orval';
 
 export default defineConfig({
   szponcik: {
-    input: '/shared/openapi/openapi.yaml',
+    input: '../../openapi/openapi.yaml',
     output: {
       mode: 'tags-split',
-      target: '/app/schemas/endpoints',
-      schemas: '/app/schemas/models',
+      target: '../../../app/schemas/endpoints',
+      schemas: '../../../app/schemas/models',
       client: 'react-query',
       mock: true,
       override: {
@@ -20,12 +20,12 @@ export default defineConfig({
   },
   szponcikZod: {
     input: {
-      target: '/shared/openapi/openapi.yaml',
+      target: '../../openapi/openapi.yaml',
     },
     output: {
       mode: 'tags-split',
       client: 'zod',
-      target: '/app/schemas/endpoints',
+      target: '../../../app/schemas/endpoints',
       fileExtension: '.zod.ts',
     },
   }
