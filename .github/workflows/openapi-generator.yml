@@ -1,16 +1,24 @@
-name: Generate Shared Schemas
+name: Generate OpenAPI Schemas and Documentation
 
 on:
   push:
     branches:
       - main
     paths:
-      - 'shared/**'
-      - '.github/workflows/shared-generating.yml'
+      - 'shared/openapi/**'
+      - '.github/workflows/openapi-generator.yml'
+
+permissions:
+  contents: write
+
+concurrency:
+  group: openapi-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  generate-schemas:
+  generate-schemas-and-docs:
     runs-on: ubuntu-latest
+    timeout-minutes: 10
     steps:
       - name: Checkout repository
         uses: actions/checkout@v6
@@ -21,19 +29,16 @@ jobs:
           node-version: '24'
 
       - name: Install Node tools
-        run: |
-          npm install -g @redocly/cli
-          npm install -g orval
-          npm install -d orval
+        run: npm install -g @redocly/cli orval
 
       - name: Generate Zod + React Query Schemas
         run: orval --config shared/generators/orval.config.ts
 
-      - name: Generate Redocly Docs Schemas
+      - name: Generate Redocly Docs
         run: redocly build-docs shared/openapi/openapi.yaml --output docs/openapi.html
 
       - name: Commit and push generated files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: update generated schemas"
-          file_pattern: './docs/openapi.html ./app/schemas/**/*'
+          file_pattern: 'docs/openapi.html app/schemas/**/*'
