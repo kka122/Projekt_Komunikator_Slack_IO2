@@ -15,16 +15,6 @@ export default defineConfig({
     hmr: {
       clientPort: 5173,
     },
-    proxy: {
-      '/api': {
-        target: 'http://localhost:5000',
-        changeOrigin: true,
-      },
-      '/socket': {
-        target: 'ws://localhost:5000',
-        ws: true,
-      }
-    }
   },
   test: {
     environment: 'jsdom',
