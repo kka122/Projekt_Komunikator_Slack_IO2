@@ -1,0 +1,87 @@
+enum UserStatus {
+  online
+  meeting
+  vacations
+  notDisturb
+  workAtHome
+  freeTime
+  offline
+}
+
+Table user {
+  id integer [pk, not null, unique]
+  name varchar [not null]
+  surname varchar [not null]
+  email varchar [not null]
+  password varchar [note: "set only for users registered via email"]
+  google_id varchar [note: "set only for users registered via Google"]
+  status UserStatus [not null]
+  avatar_url varchar
+  created_at datetime [not null]
+}
+
+Table workspace {
+  id integer [pk, not null, unique]
+  name varchar [not null]
+  logo_url varchar
+}
+
+enum WorkspaceUserRole {
+  owner
+  admin
+  member
+}
+
+Table workspace_user {
+  workspace_id integer [pk, not null, ref: < workspace.id]
+  user_id integer [pk, not null, ref: < user.id]
+  role WorkspaceUserRole [not null]
+}
+
+Table channel {
+  id integer [pk, not null, unique]
+  workspace_id integer [not null, ref: > workspace.id]
+  name varchar [not null]
+}
+
+Table channel_user {
+  id_channel integer [pk, not null, ref: < channel.id]
+  user_id integer [pk, not null, ref: < user.id]
+  last_read_at datetime [not null]
+}
+
+Table direct_chat {
+  id integer [pk, not null, unique]
+  user1_id integer [not null, ref: > user.id]
+  user2_id integer [not null, ref: > user.id]
+  workspace_id integer [not null, ref: > workspace.id]
+}
+
+Table message {
+  id integer [pk, not null, unique]
+  workspace_id integer [not null, ref: > workspace.id]
+  channel_id integer [note: "null if direct_chat set", ref: > channel.id]
+  direct_chat_id integer [note: "null if channel set", ref: > direct_chat.id]
+  parent_message_id integer [ref: < message.id]
+  author_id integer [not null, ref: > user.id]
+  body text [not null]
+  is_edited bool [not null]
+  is_deleted bool [not null]
+  created_at datetime [not null]
+}
+
+Table reaction {
+  id integer [pk, not null, unique]
+  message_id integer [not null, ref: > message.id]
+  user_id integer [not null, ref: > user.id]
+  emoji varchar [not null]
+}
+
+Table attachment {
+  id integer [pk, not null, unique]
+  message_id integer [not null, ref: > message.id]
+  user_id integer [not null, ref: > user.id]
+  file_name varchar [not null]
+  file_url varchar [not null]
+  file_size bigint [not null]
+}

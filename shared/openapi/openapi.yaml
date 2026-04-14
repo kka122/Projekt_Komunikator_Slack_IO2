@@ -57,6 +57,14 @@ components:
           format: password
           example: Qwerty123!@#
 
+    GoogleAuthRequest:
+      type: object
+      required: [ token ]
+      properties:
+        token:
+          type: string
+          description: Google OAuth token obtained from the client
+
 security:
   - CookieAuth: [ ]
 
@@ -106,3 +114,31 @@ paths:
           description: Bad request - invalid input data
         '401':
           description: Unauthorized - invalid credentials
+
+  /auth/google:
+    post:
+      operationId: googleAuth
+      tags: [ Auth ]
+      summary: Authenticate a user using Google OAuth token
+      security: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GoogleAuthRequest'
+
+      responses:
+        '200':
+          description: User authenticated successfully
+          headers:
+            Set-Cookie:
+              description: >
+                Authentication token set in a cookie named `SZPONTSESSIONID`
+              schema:
+                type: string
+
+        '400':
+          description: Bad request - invalid input data
+        '401':
+          description: Unauthorized - invalid Google token
