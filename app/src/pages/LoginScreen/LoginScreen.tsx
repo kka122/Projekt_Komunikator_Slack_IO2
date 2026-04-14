@@ -4,7 +4,8 @@ import {GoogleLogin} from "@react-oauth/google";
 function LoginScreen(): JSX.Element {
   return <>
     <GoogleLogin onSuccess={credentialResponse => {
-      fetch("/api/auth/google", {
+      console.log(credentialResponse)
+      fetch("http://localhost:5000/api/auth/google", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
