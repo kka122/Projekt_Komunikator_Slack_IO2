@@ -6,6 +6,7 @@
  * OpenAPI spec version: 0.0.1
  */
 
-export * from './googleAuthRequest';
-export * from './loginRequest';
-export * from './registerRequest';
+export interface GoogleAuthRequest {
+  /** Google OAuth token obtained from the client */
+  token: string;
+}

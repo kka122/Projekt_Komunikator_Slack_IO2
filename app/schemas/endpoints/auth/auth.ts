@@ -15,6 +15,7 @@ import type {
 } from '@tanstack/react-query';
 
 import type {
+  GoogleAuthRequest,
   LoginRequest,
   RegisterRequest
 } from '../../models';
@@ -221,4 +222,104 @@ export const useLoginUser = <TError = void,
         TContext
       > => {
       return useMutation(getLoginUserMutationOptions(options));
+    }
+    /**
+ * @summary Authenticate a user using Google OAuth token
+ */
+export type googleAuthResponse200 = {
+  data: void
+  status: 200
+}
+
+export type googleAuthResponse400 = {
+  data: void
+  status: 400
+}
+
+export type googleAuthResponse401 = {
+  data: void
+  status: 401
+}
+
+export type googleAuthResponseSuccess = (googleAuthResponse200) & {
+  headers: Headers;
+};
+export type googleAuthResponseError = (googleAuthResponse400 | googleAuthResponse401) & {
+  headers: Headers;
+};
+
+export type googleAuthResponse = (googleAuthResponseSuccess | googleAuthResponseError)
+
+export const getGoogleAuthUrl = () => {
+
+
+
+
+  return `/auth/google`
+}
+
+export const googleAuth = async (googleAuthRequest: GoogleAuthRequest, options?: RequestInit): Promise<googleAuthResponse> => {
+
+  const res = await fetch(getGoogleAuthUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...options?.headers },
+    body: JSON.stringify(
+      googleAuthRequest,)
+  }
+)
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: googleAuthResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as googleAuthResponse
+}
+
+
+
+
+export const getGoogleAuthMutationOptions = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof googleAuth>>, TError,{data: GoogleAuthRequest}, TContext>, fetch?: RequestInit}
+): UseMutationOptions<Awaited<ReturnType<typeof googleAuth>>, TError,{data: GoogleAuthRequest}, TContext> => {
+
+const mutationKey = ['googleAuth'];
+const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, fetch: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof googleAuth>>, {data: GoogleAuthRequest}> = (props) => {
+          const {data} = props ?? {};
+
+          return  googleAuth(data,fetchOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type GoogleAuthMutationResult = NonNullable<Awaited<ReturnType<typeof googleAuth>>>
+    export type GoogleAuthMutationBody = GoogleAuthRequest
+    export type GoogleAuthMutationError = void
+
+    /**
+ * @summary Authenticate a user using Google OAuth token
+ */
+export const useGoogleAuth = <TError = void,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof googleAuth>>, TError,{data: GoogleAuthRequest}, TContext>, fetch?: RequestInit}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof googleAuth>>,
+        TError,
+        {data: GoogleAuthRequest},
+        TContext
+      > => {
+      return useMutation(getGoogleAuthMutationOptions(options));
     }

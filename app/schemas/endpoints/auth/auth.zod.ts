@@ -27,3 +27,10 @@ export const LoginUserBody = zod.object({
   "password": zod.string()
 })
 
+/**
+ * @summary Authenticate a user using Google OAuth token
+ */
+export const GoogleAuthBody = zod.object({
+  "token": zod.string().describe('Google OAuth token obtained from the client')
+})
+

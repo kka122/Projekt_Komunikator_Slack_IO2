@@ -34,7 +34,18 @@ export const getLoginUserMockHandler = (overrideResponse?: void | ((info: Parame
       })
   }, options)
 }
+
+export const getGoogleAuthMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
+  return http.post('*/auth/google', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
+
+    return new HttpResponse(null,
+      { status: 200
+      })
+  }, options)
+}
 export const getAuthMock = () => [
   getRegisterUserMockHandler(),
-  getLoginUserMockHandler()
+  getLoginUserMockHandler(),
+  getGoogleAuthMockHandler()
 ]
