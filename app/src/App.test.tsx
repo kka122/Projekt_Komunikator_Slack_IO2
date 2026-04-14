@@ -5,7 +5,7 @@ import App from "./App";
 describe("App", () => {
   it("renders correctly", () => {
     render(<App/>)
-    const heading = screen.getByRole("heading", {name: /adasd/i})
+    const heading = screen.getByRole("heading", {name: /kocham jucie/i})
     expect(heading).toBeInTheDocument()
   })
 })
