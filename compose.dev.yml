@@ -16,6 +16,7 @@ services:
   backend:
     environment:
       FLASK_DEBUG: "1"
+      GOOGLE_CLIENT_ID: "494938514607-19dj1p23gj58cbmsb6sbb0d4eoljmoao.apps.googleusercontent.com"
     volumes:
       - ./backend:/backend
     command: [ "python", "-u", "main.py" ]

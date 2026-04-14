@@ -2,3 +2,6 @@ sqlalchemy
 psycopg2-binary
 flask
 gunicorn
+flask_cors
+google-auth
+requests

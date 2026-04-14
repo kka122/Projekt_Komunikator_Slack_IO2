@@ -1,38 +1,16 @@
-from flask import Flask, request
-import os
-import db.DataBaseSetup as s
-
+import os,sys
+from flask import Flask
+from routes.post_auth_route import post_auth_route
+from flask_cors import CORS
 app = Flask(__name__)
-setup = s.Setup(
-    HOST=os.environ.get("DB_HOST", "localhost"),
-    PORT=int(os.environ.get("DB_PORT", "5432")),
-    BASE_NAME=os.environ.get("DB_NAME", "baza_danych"),
-    USER=os.environ.get("DB_USER", "postgres"),
-    PASSWORD=os.environ.get("DB_PASSWORD", "1234"),
-)
-setup.initialize()
-@app.route("/register", methods=["POST"])
-def register():
-    registerData = request.get_json()
-    name = registerData["name"]
-    surname = registerData["surname"]
-    email = registerData["email"]
-    password = registerData["password"]
-    avatar = registerData["avatar"]
-    setup.addUser(name, surname, email, password, avatar)
-    return "Rejestracja zakończona pomyślnie"
+CORS(app, supports_credentials=True, origins=["http://localhost:5173","http://localhost:8080","http://localhost:5001"])
 
-@app.route("/login", methods=["POST"])
-def login():
-    loginData = request.get_json()
-    email = loginData["email"]
-    password = loginData["password"]
-    if setup.checkUser(email, password):
-        return "Zalogowano pomyślnie"
-    else:
-        return "Zły adres email lub hasło"
-
+try:
+    app.register_blueprint(post_auth_route)
+except Exception as blueprintError:
+    print(f"Wystapil blad podczas rejestracji blueprinta: {blueprintError}")
+    sys.exit(1)
+    
 if __name__ == "__main__":
     debug = os.environ.get("FLASK_DEBUG", "0") == "1"
     app.run(debug=debug, host="0.0.0.0", port=5000)
-

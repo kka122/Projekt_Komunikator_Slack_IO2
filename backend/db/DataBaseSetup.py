@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Text, text, Enum, DateTime, ForeignKey,Boolean
+from sqlalchemy import create_engine, Column, Integer, String, Text, text, Enum, DateTime, ForeignKey, Boolean, CheckConstraint
 from sqlalchemy.orm import declarative_base, relationship, Session
 from db.DataTypes import WorkspaceUserRole, UserStatus
 from datetime import datetime
@@ -16,11 +16,20 @@ class WorkSpaceUser(Base):
 
 class User(Base):
     __tablename__ = "user"
+    __table_args__ = (
+        CheckConstraint(
+            "(\"googleId\" IS NOT NULL AND (password IS NULL OR password = '')) OR "
+            "(\"googleId\" IS NULL AND password IS NOT NULL AND password <> '')",
+            name="ck_user_password_xor_googleid",
+        ),
+    )
+
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     surname = Column(String, nullable=False)
     email = Column(String, nullable=False, unique=True)
-    password = Column(String, nullable=False)
+    password = Column(String, nullable=True)
+    googleId = Column(String, nullable=True, unique=True)
     status = Column(Enum(UserStatus), nullable=False, default=UserStatus.offline)
     avatarUrl = Column(String, nullable=False, default="")
     createAt = Column(DateTime, default=datetime.now)
@@ -159,15 +168,68 @@ class Setup:
     def initialize(self):
         self._createTables()
 
-    def addUser(self,name,surname,email,password,avatarUrl = ""):
-        with Session(self.app_engine) as session:
-            newUser = User(name=name,surname=surname,email=email,password=password,avatarUrl=avatarUrl)
-            session.add(newUser)
-            session.commit()
+    def addUser(self, name, surname, email, password=None, avatarUrl="", googleId=None):
+        password = password if password else None
+        googleId = googleId if googleId else None
 
-    def checkUser(self,email,password):
+        if (password is None and googleId is None) or (password is not None and googleId is not None):
+            raise ValueError("Dokladnie jedno z pol: password albo googleId musi byc ustawione")
+
         with Session(self.app_engine) as session:
-            if session.query(User).filter(User.email == email).first() and session.query(User).filter(User.password == password):
-                return True
-            else:
-                return False
+            if session.query(User).filter(User.email == email).first():
+                raise ValueError("Uzytkownik z tym emailem juz istnieje")
+
+            if googleId and session.query(User).filter(User.googleId == googleId).first():
+                raise ValueError("Uzytkownik z tym googleId juz istnieje")
+
+            new_user = User(
+                name=name,
+                surname=surname,
+                email=email,
+                password=password,
+                googleId=googleId,
+                avatarUrl=avatarUrl
+            )
+            session.add(new_user)
+            session.commit()
+            session.refresh(new_user)
+            return new_user
+
+    def checkUser(self, email, password):
+        with Session(self.app_engine) as session:
+            user = (
+                session.query(User)
+                .filter(
+                    User.email == email,
+                    User.password == password,
+                    User.googleId.is_(None)
+                )
+                .first()
+            )
+            return user is not None
+
+    def getOrCreateGoogleUser(self, googleId, email, name, surname, avatarUrl=""):
+        with Session(self.app_engine) as session:
+            user = session.query(User).filter(User.googleId == googleId).first()
+            if user:
+                return user, False
+
+            existing_email = session.query(User).filter(User.email == email).first()
+            if existing_email and existing_email.googleId is None:
+                raise ValueError("Email zajety przez konto haslowe")
+            if existing_email and existing_email.googleId != googleId:
+                raise ValueError("Email zajety przez inne konto Google")
+
+            user = User(
+                name=name,
+                surname=surname,
+                email=email,
+                password=None,
+                googleId=googleId,
+                avatarUrl=avatarUrl or ""
+            )
+            session.add(user)
+            session.commit()
+            session.refresh(user)
+            return user, True
+

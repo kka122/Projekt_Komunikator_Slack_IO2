@@ -52,6 +52,7 @@ services:
       DB_USER: postgres
       DB_PASSWORD: 1234
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      GOOGLE_CLIENT_ID: "494938514607-19dj1p23gj58cbmsb6sbb0d4eoljmoao.apps.googleusercontent.com"
     ports:
       - "5000:5000"
     depends_on:
