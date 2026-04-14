@@ -5,7 +5,6 @@
  * OpenAPI spec version: 0.0.1
  */
 
-export interface GoogleAuthRequest {
-  /** Google OAuth token obtained from the client */
-  token: string;
+export interface ErrorResponse {
+  error?: string;
 }
