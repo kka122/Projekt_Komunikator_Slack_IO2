@@ -5,8 +5,8 @@ on:
     branches:
       - main
     paths:
-      - 'shared/openapi/**'
       - '.github/workflows/openapi-generator.yml'
+      - 'shared/openapi/**'
       - 'shared/generators/orval/**'
 
 permissions:
