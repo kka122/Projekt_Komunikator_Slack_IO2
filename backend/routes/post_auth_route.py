@@ -2,6 +2,7 @@ import os
 from flask import Blueprint, request, jsonify
 from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
+from google.auth import exceptions as google_auth_exceptions
 from db.DataBaseSetupInitialize import setup
 
 post_auth_route = Blueprint("post_auth_route", __name__)
@@ -79,5 +80,27 @@ def google_auth():
         )
         return jsonify({"message": "Google auth OK", "created": created}), (201 if created else 200)
 
-    except ValueError:
-        return jsonify({"error": "Nieprawidlowy token Google"}), 401
+    except ValueError as e:
+        print(f"[GoogleAuth] ValueError: {e}")
+        return jsonify({
+            "error": "Nieprawidlowy token Google",
+            "details": str(e)
+        }), 401
+
+    except google_auth_exceptions.TransportError as e:
+        print(f"[GoogleAuth] TransportError: {e}")
+        return jsonify({
+            "error": "Blad polaczenia z Google podczas weryfikacji tokenu"
+        }), 503
+
+    except KeyError as e:
+        print(f"[GoogleAuth] Missing claim: {e}")
+        return jsonify({
+            "error": f"Brak pola w tokenie: {e}"
+        }), 401
+
+    except Exception as e:
+        print(f"[GoogleAuth] Unexpected error: {e}")
+        return jsonify({
+            "error": "Nieoczekiwany blad podczas logowania Google"
+        }), 500
