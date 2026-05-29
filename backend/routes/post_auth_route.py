@@ -6,7 +6,7 @@ from google.auth import exceptions as google_auth_exceptions
 from db.DataBaseSetupInitialize import setup
 
 post_auth_route = Blueprint("post_auth_route", __name__)
-GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID")
+GOOGLE_CLIENT_ID = "494938514607-anfdu3la3q4g31uo7q1dit1dpkd2p98q.apps.googleusercontent.com"
 
 
 @post_auth_route.route("/api/auth/register", methods=["POST"])

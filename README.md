@@ -7,31 +7,49 @@ It provides features such as channels, direct messaging, file sharing, and more,
 
 Make sure you have [Docker](https://www.docker.com/) installed on your machine.
 
-Create a `.env` file in the `/app` directory with the
-following content:
+### Production
 
-```env
-VITE_GOOGLE_CLIENT_ID=[your_google_client_id]
-```
-
-Then open terminal, in the root directory of the project.
-
-Run the production version of the application:
+To run the application in production mode, use the following command:
 
 ```bash
-docker compose -f compose.yml -f compose.prod.yml up --build
+docker compose -f compose.yml up --build
 ```
 
-Or run the development version of the application:
+App will be available at http://localhost:8080/.
+
+### Development
+
+To run Kafka and PostgreSQL, use the following command:
 
 ```bash
-docker compose -f compose.yml -f compose.dev.yml up --build
+docker compose -f compose.db.yml up --build
 ```
 
-After docker finishes building the images and starting the containers,
-you can access the application by navigating to `http://localhost:8080`
-for the production version or `http://localhost:5173` for the development
-version in your web browser.
+Then for backend open a new terminal for /backend directory and run:
+
+```bash
+# to install dependencies
+pip install -r requirements.txt
+```
+
+```bash
+# to run the application
+python main.py
+```
+
+For frontend, open a new terminal for /app directory and run:
+
+```bash 
+# to install dependencies
+npm install
+```
+
+```bash
+# to run the application
+npm run dev
+```
+
+App will be available at http://localhost:5173/.
 
 ## Tech stack
 
