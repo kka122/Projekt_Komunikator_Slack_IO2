@@ -8,7 +8,6 @@ const router = createBrowserRouter([
   {
     path: "/",
     Component: Root,
-    ErrorBoundary: () => <div>Spierdzielaj</div>,
     children: [
       {
         path: "auth",

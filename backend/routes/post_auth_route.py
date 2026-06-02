@@ -4,10 +4,13 @@ from google.oauth2 import id_token
 from google.auth.transport import requests as google_requests
 from google.auth import exceptions as google_auth_exceptions
 from db.DataBaseSetupInitialize import setup
+from dotenv import load_dotenv
+
+load_dotenv('./.env')
+load_dotenv('../.env')
 
 post_auth_route = Blueprint("post_auth_route", __name__)
-GOOGLE_CLIENT_ID = "494938514607-anfdu3la3q4g31uo7q1dit1dpkd2p98q.apps.googleusercontent.com"
-
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_AUTH_CLIENT_ID")
 
 @post_auth_route.route("/api/auth/register", methods=["POST"])
 def register():

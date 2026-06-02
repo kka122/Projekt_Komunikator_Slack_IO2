@@ -7,12 +7,18 @@ It provides features such as channels, direct messaging, file sharing, and more,
 
 Make sure you have [Docker](https://www.docker.com/) installed on your machine.
 
+Create a `.env` file in the root directory of the project with the following content:
+
+```env
+GOOGLE_AUTH_CLIENT_ID=[your_google_auth_client_id]
+```
+
 ### Production
 
 To run the application in production mode, use the following command:
 
 ```bash
-docker compose -f compose.yml up --build
+docker compose -f compose.yml up --build -d
 ```
 
 App will be available at http://localhost:8080/.
@@ -22,7 +28,7 @@ App will be available at http://localhost:8080/.
 To run Kafka and PostgreSQL, use the following command:
 
 ```bash
-docker compose -f compose.db.yml up --build
+docker compose -f compose.db.yml up --build -d
 ```
 
 Then for backend open a new terminal for /backend directory and run:

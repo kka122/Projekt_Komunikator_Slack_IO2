@@ -7,8 +7,8 @@ services:
   backend:
     container_name: backend
     build:
-      context: ./backend
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./backend/Dockerfile
     environment:
       FLASK_DEBUG: "0"
       DB_HOST: db
@@ -29,8 +29,8 @@ services:
   app:
     container_name: app
     build:
-      context: ./app
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./app/Dockerfile
     ports:
       - "8080:8080"
     depends_on:

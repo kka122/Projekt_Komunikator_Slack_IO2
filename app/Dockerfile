@@ -1,16 +1,19 @@
 FROM node:25-alpine as builder
 WORKDIR /app
 
-COPY package.json package-lock.json ./
+COPY ./app/package.json .
+COPY ./app/package-lock.json .
 RUN npm ci
 
-COPY . .
+COPY ./app .
+COPY .env .
+
 RUN npm run build
 
 FROM nginx:alpine
 
 COPY --from=builder /app/dist /usr/share/nginx/html
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+COPY ./app/nginx.conf /etc/nginx/conf.d/default.conf
 
 EXPOSE 8080
 
