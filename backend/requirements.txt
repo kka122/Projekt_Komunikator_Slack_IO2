@@ -5,4 +5,4 @@ gunicorn
 flask_cors
 google-auth
 requests
-dotenv
+python-dotenv
