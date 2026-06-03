@@ -17,12 +17,27 @@ import type {
 } from 'msw';
 
 import type {
-  CreatePaymentResponse
+  CreatePaymentResponse,
+  Workspace
 } from '../../models';
 
 
+export const getGetUserWorkspacesResponseMock = (): Workspace[] => (Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), logoUrl: faker.helpers.arrayElement([faker.internet.url(), undefined])})))
+
 export const getCreateWorkspaceResponseMock = (overrideResponse: Partial<Extract<CreatePaymentResponse, object>> = {}): CreatePaymentResponse => ({clientSecret: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
 
+
+export const getGetUserWorkspacesMockHandler = (overrideResponse?: Workspace[] | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<Workspace[]> | Workspace[]), options?: RequestHandlerOptions) => {
+  return http.get('*/workspace', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+
+
+    return HttpResponse.json(overrideResponse !== undefined
+    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
+    : getGetUserWorkspacesResponseMock(),
+      { status: 200
+      })
+  }, options)
+}
 
 export const getCreateWorkspaceMockHandler = (overrideResponse?: CreatePaymentResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<CreatePaymentResponse> | CreatePaymentResponse), options?: RequestHandlerOptions) => {
   return http.post('*/workspace/create', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
@@ -46,6 +61,7 @@ export const getConfirmWorkspacePaymentMockHandler = (overrideResponse?: void | 
   }, options)
 }
 export const getWorkspaceMock = () => [
+  getGetUserWorkspacesMockHandler(),
   getCreateWorkspaceMockHandler(),
   getConfirmWorkspacePaymentMockHandler()
 ]

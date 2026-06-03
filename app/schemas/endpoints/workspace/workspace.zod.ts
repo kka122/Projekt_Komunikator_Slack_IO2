@@ -8,6 +8,16 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Get a list of workspaces the authenticated user belongs to
+ */
+export const GetUserWorkspacesResponseItem = zod.object({
+  "id": zod.string(),
+  "name": zod.string(),
+  "logoUrl": zod.string().url().optional()
+})
+export const GetUserWorkspacesResponse = zod.array(GetUserWorkspacesResponseItem)
+
+/**
  * @summary Create a new workspace
  */
 export const CreateWorkspaceBody = zod.object({
@@ -23,7 +33,8 @@ export const CreateWorkspaceResponse = zod.object({
  */
 export const ConfirmWorkspacePaymentBody = zod.object({
   "paymentIntentId": zod.string().describe('ID of the Stripe Payment Intent to confirm'),
-  "workspaceName": zod.string()
+  "workspaceName": zod.string(),
+  "workspaceLogo": zod.instanceof(File).optional().describe('Optional workspace logo image file')
 })
 
 export const ConfirmWorkspacePaymentResponse = zod.void()

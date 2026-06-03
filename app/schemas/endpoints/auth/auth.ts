@@ -65,13 +65,21 @@ export const getRegisterUserUrl = () => {
  * @summary Register a new user
  */
 export const registerUser = async (registerRequest: RegisterRequest, options?: RequestInit): Promise<registerUserResponse> => {
+    const formData = new FormData();
+formData.append(`name`, registerRequest.name);
+formData.append(`surname`, registerRequest.surname);
+formData.append(`email`, registerRequest.email);
+formData.append(`password`, registerRequest.password);
+if(registerRequest.avatar !== undefined) {
+ formData.append(`avatar`, registerRequest.avatar);
+ }
 
   const res = await fetch(getRegisterUserUrl(),
   {
     ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(registerRequest)
+    method: 'POST'
+    ,
+    body: formData
   }
 )
 

@@ -5,11 +5,14 @@
  * OpenAPI spec version: 0.0.1
  */
 import {
+  useInfiniteQuery,
   useQuery
 } from '@tanstack/react-query';
 import type {
   QueryFunction,
   QueryKey,
+  UseInfiniteQueryOptions,
+  UseInfiniteQueryResult,
   UseQueryOptions,
   UseQueryResult
 } from '@tanstack/react-query';
@@ -18,13 +21,165 @@ import type {
   ConfirmWorkspacePaymentRequest,
   CreatePaymentResponse,
   CreateWorkspaceRequest,
-  ErrorResponse
+  ErrorResponse,
+  Workspace
 } from '../../models';
 
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
       type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
+
+
+
+
+export type getUserWorkspacesResponse200 = {
+  data: Workspace[]
+  status: 200
+}
+
+export type getUserWorkspacesResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type getUserWorkspacesResponseSuccess = (getUserWorkspacesResponse200) & {
+  headers: Headers;
+};
+export type getUserWorkspacesResponseError = (getUserWorkspacesResponse401) & {
+  headers: Headers;
+};
+
+export type getUserWorkspacesResponse = (getUserWorkspacesResponseSuccess | getUserWorkspacesResponseError)
+
+export const getGetUserWorkspacesUrl = () => {
+
+
+
+
+  return `/workspace`
+}
+
+/**
+ * @summary Get a list of workspaces the authenticated user belongs to
+ */
+export const getUserWorkspaces = async ( options?: RequestInit): Promise<getUserWorkspacesResponse> => {
+
+  const res = await fetch(getGetUserWorkspacesUrl(),
+  {
+    ...options,
+    method: 'GET'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: getUserWorkspacesResponse['data'] = body ? JSON.parse(body) : {}
+  return { data, status: res.status, headers: res.headers } as getUserWorkspacesResponse
+}
+
+
+
+
+
+export const getGetUserWorkspacesInfiniteQueryKey = () => {
+    return [
+    'infinite', `/workspace`
+    ] as const;
+    }
+
+export const getGetUserWorkspacesQueryKey = () => {
+    return [
+    `/workspace`
+    ] as const;
+    }
+
+
+export const getGetUserWorkspacesInfiniteQueryOptions = <TData = Awaited<ReturnType<typeof getUserWorkspaces>>, TError = ErrorResponse>( options?: { query?:UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUserWorkspaces>>, TError, TData>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUserWorkspacesInfiniteQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserWorkspaces>>> = ({ signal }) => getUserWorkspaces({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUserWorkspaces>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetUserWorkspacesInfiniteQueryResult = NonNullable<Awaited<ReturnType<typeof getUserWorkspaces>>>
+export type GetUserWorkspacesInfiniteQueryError = ErrorResponse
+
+
+/**
+ * @summary Get a list of workspaces the authenticated user belongs to
+ */
+
+export function useGetUserWorkspacesInfinite<TData = Awaited<ReturnType<typeof getUserWorkspaces>>, TError = ErrorResponse>(
+  options?: { query?:UseInfiniteQueryOptions<Awaited<ReturnType<typeof getUserWorkspaces>>, TError, TData>, fetch?: RequestInit}
+
+ ):  UseInfiniteQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetUserWorkspacesInfiniteQueryOptions(options)
+
+  const query = useInfiniteQuery(queryOptions) as  UseInfiniteQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+
+export const getGetUserWorkspacesQueryOptions = <TData = Awaited<ReturnType<typeof getUserWorkspaces>>, TError = ErrorResponse>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserWorkspaces>>, TError, TData>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getGetUserWorkspacesQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserWorkspaces>>> = ({ signal }) => getUserWorkspaces({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof getUserWorkspaces>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type GetUserWorkspacesQueryResult = NonNullable<Awaited<ReturnType<typeof getUserWorkspaces>>>
+export type GetUserWorkspacesQueryError = ErrorResponse
+
+
+/**
+ * @summary Get a list of workspaces the authenticated user belongs to
+ */
+
+export function useGetUserWorkspaces<TData = Awaited<ReturnType<typeof getUserWorkspaces>>, TError = ErrorResponse>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserWorkspaces>>, TError, TData>, fetch?: RequestInit}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getGetUserWorkspacesQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
 
 
 
@@ -187,13 +342,19 @@ export const getConfirmWorkspacePaymentUrl = () => {
  * @summary Confirm the workspace payment after successful Stripe transaction
  */
 export const confirmWorkspacePayment = async (confirmWorkspacePaymentRequest: ConfirmWorkspacePaymentRequest, options?: RequestInit): Promise<confirmWorkspacePaymentResponse> => {
+    const formData = new FormData();
+formData.append(`paymentIntentId`, confirmWorkspacePaymentRequest.paymentIntentId);
+formData.append(`workspaceName`, confirmWorkspacePaymentRequest.workspaceName);
+if(confirmWorkspacePaymentRequest.workspaceLogo !== undefined) {
+ formData.append(`workspaceLogo`, confirmWorkspacePaymentRequest.workspaceLogo);
+ }
 
   const res = await fetch(getConfirmWorkspacePaymentUrl(),
   {
     ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(confirmWorkspacePaymentRequest)
+    method: 'POST'
+    ,
+    body: formData
   }
 )
 

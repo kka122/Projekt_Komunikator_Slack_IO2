@@ -12,3 +12,4 @@ export * from './errorResponse';
 export * from './googleAuthRequest';
 export * from './loginRequest';
 export * from './registerRequest';
+export * from './workspace';

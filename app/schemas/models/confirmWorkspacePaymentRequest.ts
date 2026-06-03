@@ -9,4 +9,6 @@ export interface ConfirmWorkspacePaymentRequest {
   /** ID of the Stripe Payment Intent to confirm */
   paymentIntentId: string;
   workspaceName: string;
+  /** Optional workspace logo image file */
+  workspaceLogo?: Blob;
 }
