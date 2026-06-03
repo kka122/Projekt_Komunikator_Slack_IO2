@@ -350,3 +350,110 @@ export function useGoogleAuth<TData = Awaited<ReturnType<typeof googleAuth>>, TE
 
 
 
+export type refreshTokenResponse200 = {
+  data: void
+  status: 200
+}
+
+export type refreshTokenResponse401 = {
+  data: ErrorResponse
+  status: 401
+}
+
+export type refreshTokenResponse403 = {
+  data: ErrorResponse
+  status: 403
+}
+
+export type refreshTokenResponseSuccess = (refreshTokenResponse200) & {
+  headers: Headers;
+};
+export type refreshTokenResponseError = (refreshTokenResponse401 | refreshTokenResponse403) & {
+  headers: Headers;
+};
+
+export type refreshTokenResponse = (refreshTokenResponseSuccess | refreshTokenResponseError)
+
+export const getRefreshTokenUrl = () => {
+
+
+
+
+  return `/auth/refresh`
+}
+
+/**
+ * @summary Refresh the authentication token using the refresh token
+ */
+export const refreshToken = async ( options?: RequestInit): Promise<refreshTokenResponse> => {
+
+  const res = await fetch(getRefreshTokenUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+)
+
+
+  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
+
+  const data: refreshTokenResponse['data'] = body ? JSON.parse(body) : undefined
+  return { data, status: res.status, headers: res.headers } as refreshTokenResponse
+}
+
+
+
+
+
+export const getRefreshTokenQueryKey = () => {
+    return [
+    'POST', `/auth/refresh`
+    ] as const;
+    }
+
+
+export const getRefreshTokenQueryOptions = <TData = Awaited<ReturnType<typeof refreshToken>>, TError = ErrorResponse>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof refreshToken>>, TError, TData>, fetch?: RequestInit}
+) => {
+
+const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+
+  const queryKey =  queryOptions?.queryKey ?? getRefreshTokenQueryKey();
+
+
+
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof refreshToken>>> = ({ signal }) => refreshToken({ signal, ...fetchOptions });
+
+
+
+
+
+   return  { queryKey, queryFn, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof refreshToken>>, TError, TData> & { queryKey: QueryKey }
+}
+
+export type RefreshTokenQueryResult = NonNullable<Awaited<ReturnType<typeof refreshToken>>>
+export type RefreshTokenQueryError = ErrorResponse
+
+
+/**
+ * @summary Refresh the authentication token using the refresh token
+ */
+
+export function useRefreshToken<TData = Awaited<ReturnType<typeof refreshToken>>, TError = ErrorResponse>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof refreshToken>>, TError, TData>, fetch?: RequestInit}
+
+ ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
+
+  const queryOptions = getRefreshTokenQueryOptions(options)
+
+  const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
+
+  return { ...query, queryKey: queryOptions.queryKey };
+}
+
+
+
+
+
+

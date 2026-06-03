@@ -39,3 +39,8 @@ export const GoogleAuthBody = zod.object({
 
 export const GoogleAuthResponse = zod.unknown()
 
+/**
+ * @summary Refresh the authentication token using the refresh token
+ */
+export const RefreshTokenResponse = zod.unknown()
+
