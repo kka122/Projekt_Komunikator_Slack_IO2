@@ -6,3 +6,4 @@ flask_cors
 google-auth
 requests
 python-dotenv
+flask-jwt-extended

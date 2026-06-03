@@ -11,6 +11,9 @@ Create a `.env` file in the root directory of the project with the following con
 
 ```env
 GOOGLE_AUTH_CLIENT_ID=[your_google_auth_client_id]
+STRIPE_PUBLISHABLE_KEY=[your_stripe_publishable_key]
+STRIPE_SECRET_KEY=[your_stripe_secret_key]
+JWT_SECRET_KEY=[your_jwt_secret_key]
 ```
 
 ### Production

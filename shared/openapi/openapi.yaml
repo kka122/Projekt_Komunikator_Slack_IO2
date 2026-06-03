@@ -26,10 +26,14 @@ servers:
 
 components:
   securitySchemes:
-    CookieAuth:
+    TokenAuth:
       type: apiKey
       in: cookie
-      name: SZPONTSESSIONID
+      name: access_token
+    RefreshTokenAuth:
+      type: apiKey
+      in: cookie
+      name: refresh_token
 
   schemas:
     # ----- Error -----
@@ -116,7 +120,7 @@ components:
           example: My Workspace
 
 security:
-  - CookieAuth: [ ]
+  - TokenAuth: [ ]
 
 paths:
   # ----- Auth -----
@@ -129,6 +133,7 @@ paths:
       requestBody:
         required: true
         content:
+          # TODO: change to multipart/form-data when avatar upload is implemented
           application/json:
             schema:
               $ref: '#/components/schemas/RegisterRequest'
@@ -167,8 +172,7 @@ paths:
           description: User logged in successfully
           headers:
             Set-Cookie:
-              description: >
-                Authentication token set in a cookie named `SZPONTSESSIONID`
+              description: Sets both access_token and refresh_token cookies
               schema:
                 type: string
 
@@ -203,8 +207,7 @@ paths:
           description: User authenticated successfully
           headers:
             Set-Cookie:
-              description: >
-                Authentication token set in a cookie named `SZPONTSESSIONID`
+              description: Sets both access_token and refresh_token cookies
               schema:
                 type: string
 
@@ -221,13 +224,43 @@ paths:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
 
+  /auth/refresh:
+    post:
+      operationId: refreshToken
+      tags: [ Auth ]
+      summary: Refresh the authentication token using the refresh token
+      security:
+        - RefreshTokenAuth: [ ]
+
+      responses:
+        '200':
+          description: Token refreshed successfully
+          headers:
+            Set-Cookie:
+              description: Sets a new access_token cookie
+              schema:
+                type: string
+
+        '401':
+          description: Unauthorized - invalid or expired refresh token
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '403':
+          description: Forbidden - refresh token revoked or not valid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
   # ----- Workspace -----
   /workspace/create:
     post:
       operationId: createWorkspace
       tags: [ Workspace ]
       security:
-        - CookieAuth: [ ]
+        - TokenAuth: [ ]
       summary: Create a new workspace
       requestBody:
         required: true
@@ -243,6 +276,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/CreatePaymentResponse'
+
         '400':
           description: Bad request - invalid input data
           content:
@@ -267,7 +301,7 @@ paths:
       operationId: confirmWorkspacePayment
       tags: [ Workspace ]
       security:
-        - CookieAuth: [ ]
+        - TokenAuth: [ ]
       summary: Confirm the workspace payment after successful Stripe transaction
       requestBody:
         required: true
@@ -277,8 +311,9 @@ paths:
               $ref: '#/components/schemas/ConfirmWorkspacePaymentRequest'
 
       responses:
-        '200':
+        '202':
           description: Workspace waiting for creation
+
         '400':
           description: Bad request - invalid input data
           content:

@@ -15,7 +15,6 @@ Table user {
   email varchar [not null]
   password varchar [note: "set only for users registered via email"]
   google_id varchar [note: "set only for users registered via Google"]
-  auth_token varchar
   status UserStatus [not null]
   avatar_url varchar
   created_at datetime [not null]

@@ -5,7 +5,6 @@ import App from './App.tsx'
 import {GoogleOAuthProvider} from "@react-oauth/google";
 
 const GOOGLE_AUTH_CLIENT_ID = import.meta.env.GOOGLE_AUTH_CLIENT_ID
-console.log(`GOOGLE_AUTH_CLIENT_ID: ${GOOGLE_AUTH_CLIENT_ID}`)
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
