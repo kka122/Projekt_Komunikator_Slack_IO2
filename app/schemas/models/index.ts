@@ -5,6 +5,8 @@
  * OpenAPI spec version: 0.0.1
  */
 
+export * from './confirmWorkspacePaymentRequest';
+export * from './createPaymentResponse';
 export * from './createWorkspaceRequest';
 export * from './errorResponse';
 export * from './googleAuthRequest';
