@@ -5,6 +5,8 @@
  * OpenAPI spec version: 0.0.1
  */
 
-export interface CreateWorkspaceRequest {
+export interface ConfirmWorkspacePaymentRequest {
+  /** ID of the Stripe Payment Intent to confirm */
+  paymentIntentId: string;
   workspaceName: string;
 }
