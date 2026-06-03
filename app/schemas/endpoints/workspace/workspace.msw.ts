@@ -41,7 +41,7 @@ export const getConfirmWorkspacePaymentMockHandler = (overrideResponse?: void | 
   if (typeof overrideResponse === 'function') {await overrideResponse(info); }
 
     return new HttpResponse(null,
-      { status: 200
+      { status: 202
       })
   }, options)
 }

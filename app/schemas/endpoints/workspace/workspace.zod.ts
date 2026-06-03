@@ -26,5 +26,5 @@ export const ConfirmWorkspacePaymentBody = zod.object({
   "workspaceName": zod.string()
 })
 
-export const ConfirmWorkspacePaymentResponse = zod.unknown()
+export const ConfirmWorkspacePaymentResponse = zod.void()
 

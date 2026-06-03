@@ -141,9 +141,9 @@ export function useCreateWorkspace<TData = Awaited<ReturnType<typeof createWorks
 
 
 
-export type confirmWorkspacePaymentResponse200 = {
+export type confirmWorkspacePaymentResponse202 = {
   data: void
-  status: 200
+  status: 202
 }
 
 export type confirmWorkspacePaymentResponse400 = {
@@ -166,7 +166,7 @@ export type confirmWorkspacePaymentResponse409 = {
   status: 409
 }
 
-export type confirmWorkspacePaymentResponseSuccess = (confirmWorkspacePaymentResponse200) & {
+export type confirmWorkspacePaymentResponseSuccess = (confirmWorkspacePaymentResponse202) & {
   headers: Headers;
 };
 export type confirmWorkspacePaymentResponseError = (confirmWorkspacePaymentResponse400 | confirmWorkspacePaymentResponse401 | confirmWorkspacePaymentResponse402 | confirmWorkspacePaymentResponse409) & {
