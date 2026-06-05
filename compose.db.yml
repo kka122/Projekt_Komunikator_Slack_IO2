@@ -1,4 +1,4 @@
-name: szponcik-db
+name: szponcik
 
 services:
   kafka:
@@ -60,7 +60,7 @@ services:
     environment:
       SWAGGER_JSON: /openapi/openapi.yaml
     volumes:
-      - ./shared/openapi/openapi.yaml:/openapi/openapi.yaml:ro
+      - ./shared/openapi:/openapi
     ports:
       - "5001:8080"
 

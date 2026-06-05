@@ -1,0 +1,10 @@
+AcceptPaymentRequest:
+  content:
+    application/json:
+      schema:
+        type: object
+        required: [ paymentIntentId ]
+        properties:
+          paymentIntentId:
+            type: string
+            description: ID of the Stripe Payment Intent to confirm

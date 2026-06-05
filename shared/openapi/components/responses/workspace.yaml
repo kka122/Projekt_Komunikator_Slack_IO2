@@ -1,0 +1,11 @@
+WorkspaceListResponse:
+  description: List of workspaces retrieved successfully
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          workspaces:
+            type: array
+            items:
+              $ref: '../schemas/workspace.yaml#/Workspace'

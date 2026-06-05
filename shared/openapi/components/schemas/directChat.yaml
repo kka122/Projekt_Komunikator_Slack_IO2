@@ -1,0 +1,13 @@
+DirectChat:
+  type: object
+  required: [ id, participant, newMessagesCount ]
+  properties:
+    id:
+      type: string
+      description: Unique identifier for the direct chat
+    participant:
+      $ref: '../schemas/user.yaml#/User'
+      description: The other participant in the direct chat
+    newMessagesCount:
+      type: integer
+      description: Number of new messages in the direct chat

@@ -1,0 +1,15 @@
+LoginResponse:
+  description: User logged in successfully
+  headers:
+    Set-Cookie:
+      description: Sets both access_token and refresh_token cookies
+      schema:
+        type: string
+
+TokenRefreshResponse:
+  description: Token refreshed successfully
+  headers:
+    Set-Cookie:
+      description: Sets a new access_token cookie
+      schema:
+        type: string

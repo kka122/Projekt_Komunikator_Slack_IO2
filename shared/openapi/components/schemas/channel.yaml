@@ -1,0 +1,13 @@
+Channel:
+  type: object
+  required: [ id, name, newMessagesCount ]
+  properties:
+    id:
+      type: string
+      description: Unique identifier for the channel
+    name:
+      type: string
+      description: Name of the channel
+    newMessagesCount:
+      type: integer
+      description: Number of new messages in the channel

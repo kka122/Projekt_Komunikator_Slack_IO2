@@ -1,0 +1,13 @@
+Reaction:
+  type: object
+  required: [ id, emoji, user ]
+  properties:
+    id:
+      type: string
+      description: The unique identifier of the reaction.
+    emoji:
+      type: string
+      description: The emoji used in the reaction.
+    user:
+      $ref: '#/components/schemas/User'
+      description: The user who made the reaction.

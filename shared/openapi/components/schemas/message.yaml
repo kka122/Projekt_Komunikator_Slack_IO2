@@ -1,0 +1,30 @@
+Message:
+  type: object
+  required: [ id, content, sender, timestamp ]
+  properties:
+    id:
+      type: string
+      description: Unique identifier for the message.
+    content:
+      type: string
+      description: The content of the message.
+    sender:
+      $ref: '../schemas/user.yaml#/User'
+      description: The user who sent the message.
+    timestamp:
+      type: string
+      format: date-time
+      description: The time when the message was sent.
+    attachments:
+      type: array
+      items:
+        $ref: '../schemas/attachment.yaml#/Attachment'
+      description: List of attachments included in the message.
+    reactions:
+      type: array
+      items:
+        $ref: '../schemas/reaction.yaml#/Reaction'
+      description: List of reactions to the message.
+    isEdited:
+      type: boolean
+      description: Indicates whether the message has been edited.

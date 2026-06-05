@@ -1,0 +1,26 @@
+CreateWorkspaceRequest:
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        required: [ workspaceName ]
+        properties:
+          workspaceName:
+            type: string
+            example: My Workspace
+          workspaceLogo:
+            type: string
+            format: binary
+            description: Optional workspace logo image file
+
+UpdateWorkspaceLogoRequest:
+  content:
+    multipart/form-data:
+      schema:
+        type: object
+        required: [ workspaceLogo ]
+        properties:
+          workspaceLogo:
+            type: string
+            format: binary
+            description: New workspace logo image file

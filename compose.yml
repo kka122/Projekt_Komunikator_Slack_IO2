@@ -1,5 +1,3 @@
-name: szponcik-app
-
 include:
   - compose.db.yml
 
