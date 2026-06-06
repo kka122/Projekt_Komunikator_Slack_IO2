@@ -32,11 +32,11 @@ jobs:
         run: npm install -g @redocly/cli orval
 
       - name: Install orval for schema directory
-        working-directory: shared/geneators/orval
+        working-directory: shared/generators/orval
         run: npm install
 
       - name: Generate orval schemas
-        working-directory: shared/geneators/orval
+        working-directory: shared/generators/orval
         run: orval --config orval.config.ts
 
       - name: Generate Redocly Docs
