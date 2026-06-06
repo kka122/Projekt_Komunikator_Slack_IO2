@@ -481,6 +481,7 @@ components:
         multipart/form-data:
           schema:
             type: object
+            required: [ name, surname, email, status ]
             properties:
               name:
                 type: string
@@ -507,6 +508,7 @@ components:
         application/json:
           schema:
             type: object
+            required: [ role ]
             properties:
               role:
                 type: string
@@ -559,6 +561,7 @@ components:
         application/json:
           schema:
             type: object
+            required: [ workspaces ]
             properties:
               workspaces:
                 type: array
@@ -572,6 +575,7 @@ components:
         application/json:
           schema:
             type: object
+            required: [ channels ]
             properties:
               channels:
                 type: array
@@ -585,6 +589,7 @@ components:
         application/json:
           schema:
             type: object
+            required: [ directChats ]
             properties:
               directChats:
                 type: array
@@ -598,6 +603,7 @@ components:
         application/json:
           schema:
             type: object
+            required: [ messages ]
             properties:
               messages:
                 type: array
@@ -611,7 +617,12 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/User'
+            type: object
+            required: [ user ]
+            properties:
+              user:
+                $ref: '#/components/schemas/User'
+                description: The current user's profile information.
 
     UsersListResponse:
       description: A list of users.
@@ -619,6 +630,7 @@ components:
         application/json:
           schema:
             type: object
+            required: [ users ]
             properties:
               users:
                 type: array
