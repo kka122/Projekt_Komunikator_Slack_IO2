@@ -1,8 +1,0 @@
-MessageIDParameter:
-  name: messageId
-  in: path
-  description: The unique identifier of the message.
-  required: true
-  schema:
-    type: string
-    format: uuid

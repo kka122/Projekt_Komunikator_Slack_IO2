@@ -1,8 +1,0 @@
-WorkspaceIDParameter:
-  name: workspaceId
-  in: path
-  description: The ID of the workspace.
-  required: true
-  schema:
-    type: string
-    format: uuid

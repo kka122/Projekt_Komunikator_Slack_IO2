@@ -39,11 +39,634 @@ components:
       type: apiKey
       in: cookie
       name: access_token
-
     RefreshTokenAuth:
       type: apiKey
       in: cookie
       name: refresh_token
+
+  schemas:
+    # ----- Error -----
+    ErrorSchema:
+      type: object
+      required: [ error ]
+      properties:
+        error:
+          type: string
+          example: Something went wrong
+
+    # ----- User -----
+    User:
+      type: object
+      required: [ id, name, surname, email, avatarUrl, status ]
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the user
+        name:
+          type: string
+          description: Name of the user
+        surname:
+          type: string
+          description: Surname of the user
+        email:
+          type: string
+          description: Email address of the user
+        avatarUrl:
+          type: string
+          description: URL of the user's avatar image
+        status:
+          type: string
+          enum: [ online, meeting, vacation, notDisturb, workAtHome, freeTime, offline ]
+
+    # ----- Channel -----
+    Channel:
+      type: object
+      required: [ id, name, newMessagesCount ]
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the channel
+        name:
+          type: string
+          description: Name of the channel
+        newMessagesCount:
+          type: integer
+          description: Number of new messages in the channel
+
+    # ----- Workspace -----
+    Workspace:
+      type: object
+      required: [ id, name, logoUrl, userRole, channels, users ]
+      properties:
+        id:
+          type: string
+          example: 123e4567-e89b-12d3-a456-426614174000
+        name:
+          type: string
+          example: My Workspace
+        logoUrl:
+          type: string
+          format: uri
+          example: https://example.com/workspace-logo.png
+        userRole:
+          type: string
+          enum: [ owner, admin, member ]
+          description: The role of the authenticated user within the workspace
+        channels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Channel'
+          description: List of channels within the workspace
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+          description: List of users who are members of the workspace
+
+    # ----- Attachment -----
+    Attachment:
+      type: object
+      required: [ id, filename, url, size ]
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the attachment.
+        filename:
+          type: string
+          description: Name of the attached file.
+        url:
+          type: string
+          format: uri
+          description: URL where the attachment can be accessed.
+        size:
+          type: integer
+          description: Size of the attached file in bytes.
+
+    # ----- Reaction -----
+    Reaction:
+      type: object
+      required: [ id, emoji, user ]
+      properties:
+        id:
+          type: string
+          description: The unique identifier of the reaction.
+        emoji:
+          type: string
+          description: The emoji used in the reaction.
+        user:
+          $ref: '#/components/schemas/User'
+          description: The user who made the reaction.
+
+    # -----  Message -----
+    Message:
+      type: object
+      required: [ id, content, sender, timestamp ]
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the message.
+        content:
+          type: string
+          description: The content of the message.
+        sender:
+          $ref: '#/components/schemas/User'
+          description: The user who sent the message.
+        timestamp:
+          type: string
+          format: date-time
+          description: The time when the message was sent.
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attachment'
+          description: List of attachments included in the message.
+        reactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reaction'
+          description: List of reactions to the message.
+        isEdited:
+          type: boolean
+          description: Indicates whether the message has been edited.
+
+    # ----- Direct Chat -----
+    DirectChat:
+      type: object
+      required: [ id, participant, newMessagesCount ]
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the direct chat
+        participant:
+          $ref: '#/components/schemas/User'
+          description: The other participant in the direct chat
+        newMessagesCount:
+          type: integer
+          description: Number of new messages in the direct chat
+
+  parameters:
+    # ----- Workspace -----
+    WorkspaceIDParameter:
+      name: workspaceId
+      in: path
+      description: The ID of the workspace.
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    # ----- Channel -----
+    ChannelIDParameter:
+      name: channelId
+      in: path
+      description: The unique identifier of the channel.
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    # ----- Message -----
+    MessageIDParameter:
+      name: messageId
+      in: path
+      description: The unique identifier of the message.
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    # ----- Direct Chat -----
+    DirectChatIDParameter:
+      name: directChatId
+      in: path
+      description: The ID of the direct chat.
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    # -----  Reaction -----
+    ReactionIDParameter:
+      name: reaction_id
+      in: path
+      description: The ID of the reaction.
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    # ----- Attachment -----
+    AttachmentIDParameter:
+      name: attachmentId
+      in: path
+      description: The ID of the attachment.
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    # ----- User -----
+    UserIDParameter:
+      name: user_id
+      in: path
+      description: The ID of the user.
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    UserEmailRegexParameter:
+      name: emailRegex
+      in: path
+      description: The email regex of the user.
+      required: true
+      schema:
+        type: string
+
+    # ----- Pagination -----
+    PageParameter:
+      name: page
+      in: path
+      description: The page number to retrieve.
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    PageSizeParameter:
+      name: pageSize
+      in: path
+      description: The number of items to retrieve per page.
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+
+  requestBodies:
+    # ----- Auth -----
+    RegisterRequest:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required: [ name, surname, email, password ]
+            properties:
+              name:
+                type: string
+                example: John
+              surname:
+                type: string
+                example: Doe
+              email:
+                type: string
+                format: email
+                example: john.doe@example.com
+              password:
+                type: string
+                format: password
+                example: Qwerty123!@#
+              avatar:
+                type: string
+                format: binary
+                description: Optional avatar image file
+
+    LoginRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ email, password ]
+            properties:
+              email:
+                type: string
+                format: email
+                example: john.doe@example.com
+              password:
+                type: string
+                format: password
+                example: Qwerty123!@#
+
+    GoogleAuthRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ token ]
+            properties:
+              token:
+                type: string
+                description: Google OAuth token obtained from the client
+
+    # ----- Workspace -----
+    CreateWorkspaceRequest:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required: [ workspaceName ]
+            properties:
+              workspaceName:
+                type: string
+                example: My Workspace
+              workspaceLogo:
+                type: string
+                format: binary
+                description: Optional workspace logo image file
+
+    UpdateWorkspaceLogoRequest:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required: [ workspaceLogo ]
+            properties:
+              workspaceLogo:
+                type: string
+                format: binary
+                description: New workspace logo image file
+
+    # ----- Payment -----
+    AcceptPaymentRequest:
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ paymentIntentId ]
+            properties:
+              paymentIntentId:
+                type: string
+                description: ID of the Stripe Payment Intent to confirm
+
+    # ----- Channel -----
+    CreateChannelRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ name ]
+            properties:
+              name:
+                type: string
+                description: The name of the channel
+
+    UpdateChannelNameRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ name ]
+            properties:
+              name:
+                type: string
+                description: The new name of the channel
+
+    # ----- Message -----
+    CreateMessageRequest:
+      description: Request body for creating a new message.
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required: [ content, attachments ]
+            properties:
+              content:
+                type: string
+                description: The content of the message.
+              attachments:
+                type: array
+                items:
+                  type: string
+                  format: binary
+                description: A list of attachment files for the message.
+
+    UpdateMessageRequest:
+      description: Request body for updating an existing message.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ content ]
+            properties:
+              content:
+                type: string
+                description: The updated content of the message.
+
+    # ----- Reaction -----
+    AddReactionRequest:
+      description: Request body for adding a reaction to a message.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ emoji ]
+            properties:
+              emoji:
+                type: string
+                description: The emoji to add as a reaction. This should be a valid Unicode emoji.
+
+    # ----- User -----
+    UpdateCurrentUserProfileRequest:
+      description: Request body for updating the current user's profile.
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            properties:
+              name:
+                type: string
+                description: The user's name.
+              surname:
+                type: string
+                description: The user's surname.
+              email:
+                type: string
+                description: The user's email address.
+              avatar:
+                type: string
+                format: binary
+                description: The user's avatar image file.
+              status:
+                type: string
+                enum: [ online, meeting, vacation, notDisturb, workAtHome, freeTime, offline ]
+                description: The user's current status.
+
+    UpdateUserRoleRequest:
+      description: Request body for updating a user's role.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              role:
+                type: string
+                enum: [ admin, member ]
+                description: The new role for the user.
+
+  responses:
+    # ----- Auth -----
+    LoginResponse:
+      description: User logged in successfully
+      headers:
+        Set-Cookie:
+          description: Sets both access_token and refresh_token cookies
+          schema:
+            type: string
+
+    TokenRefreshResponse:
+      description: Token refreshed successfully
+      headers:
+        Set-Cookie:
+          description: Sets a new access_token cookie
+          schema:
+            type: string
+
+    LogoutResponse:
+      description: User logged out successfully
+      headers:
+        Set-Cookie:
+          description: Clears both access_token and refresh_token cookies
+          schema:
+            type: string
+
+    # ----- Payment -----
+    CreatePaymentResponse:
+      description: Payment created
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ clientSecret ]
+            properties:
+              clientSecret:
+                type: string
+                description: Secret key generated by Stripe for processing the payment
+
+    # ----- Workspace -----
+    WorkspaceListResponse:
+      description: List of workspaces retrieved successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              workspaces:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workspace'
+
+    # ---- Channel -----
+    ChannelListResponse:
+      description: A list of channels.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              channels:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Channel'
+
+    # ----- Direct Chat -----
+    DirectChatListResponse:
+      description: A list of direct chats.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              directChats:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DirectChat'
+
+    # ----- Message -----
+    MessageListResponse:
+      description: A list of messages.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              messages:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+                description: List of messages.
+
+    # ----- User -----
+    CurrentUserProfileResponse:
+      description: The current user's profile information.
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/User'
+
+    UsersListResponse:
+      description: A list of users.
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              users:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+    # ----- Error -----
+    '400':
+      description: Bad Request - The request could not be understood or was missing required parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorSchema'
+
+    '401':
+      description: Unauthorized - Authentication is required and has failed or has not yet been provided
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorSchema'
+
+    '402':
+      description: Payment Required - Payment is required to access the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorSchema'
+
+    '403':
+      description: Forbidden - The user does not have permission to access the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorSchema'
+
+    '404':
+      description: Not Found - The requested resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorSchema'
+
+    '409':
+      description: Conflict - The request could not be completed due to a conflict with the current state of the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorSchema'
 
 security:
   - TokenAuth: [ ]
@@ -59,16 +682,16 @@ paths:
       security: [ ]
 
       requestBody:
-        $ref: 'components/requestBodies/auth.yaml#/RegisterRequest'
+        $ref: '#/components/requestBodies/RegisterRequest'
 
       responses:
         '201':
           description: User registered successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '409':
-          $ref: 'components/responses/error.yaml#/409'
+          $ref: '#/components/responses/409'
 
   /auth/login:
     post:
@@ -79,16 +702,16 @@ paths:
       security: [ ]
 
       requestBody:
-        $ref: 'components/requestBodies/auth.yaml#/LoginRequest'
+        $ref: '#/components/requestBodies/LoginRequest'
 
       responses:
         '200':
-          $ref: 'components/responses/auth.yaml#/LoginResponse'
+          $ref: '#/components/responses/LoginResponse'
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
 
   /auth/google:
     post:
@@ -99,16 +722,16 @@ paths:
       security: [ ]
 
       requestBody:
-        $ref: 'components/requestBodies/auth.yaml#/GoogleAuthRequest'
+        $ref: '#/components/requestBodies/GoogleAuthRequest'
 
       responses:
         '200':
-          $ref: 'components/responses/auth.yaml#/LoginResponse'
+          $ref: '#/components/responses/LoginResponse'
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
 
   /auth/refresh:
     post:
@@ -121,12 +744,12 @@ paths:
 
       responses:
         '200':
-          $ref: 'components/responses/auth.yaml#/TokenRefreshResponse'
+          $ref: '#/components/responses/TokenRefreshResponse'
 
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
 
   /auth/logout:
     post:
@@ -139,10 +762,10 @@ paths:
 
       responses:
         '200':
-          $ref: 'components/responses/auth.yaml#/LogoutResponse'
+          $ref: '#/components/responses/LogoutResponse'
 
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
 
   # ----- Workspace -----
   /workspaces:
@@ -155,16 +778,16 @@ paths:
         - TokenAuth: [ ]
 
       requestBody:
-        $ref: 'components/requestBodies/workspace.yaml#/CreateWorkspaceRequest'
+        $ref: '#/components/requestBodies/CreateWorkspaceRequest'
 
       responses:
         '201':
-          $ref: 'components/responses/payment.yaml#/CreatePaymentResponse'
+          $ref: '#/components/responses/CreatePaymentResponse'
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
 
     get:
       operationId: listWorkspaces
@@ -176,10 +799,10 @@ paths:
 
       responses:
         '200':
-          $ref: 'components/responses/workspace.yaml#/WorkspaceListResponse'
+          $ref: '#/components/responses/WorkspaceListResponse'
 
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
 
   /workspaces/accept-payment:
     post:
@@ -191,18 +814,18 @@ paths:
         - TokenAuth: [ ]
 
       requestBody:
-        $ref: 'components/requestBodies/payment.yaml#/AcceptPaymentRequest'
+        $ref: '#/components/requestBodies/AcceptPaymentRequest'
 
       responses:
         '200':
           description: Payment accepted and workspace created successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '402':
-          $ref: 'components/responses/error.yaml#/402'
+          $ref: '#/components/responses/402'
 
   /workspaces/{workspaceId}:
     patch:
@@ -213,22 +836,23 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
 
       requestBody:
-        $ref: 'components/requestBodies/workspace.yaml#/UpdateWorkspaceLogoRequest'
+        $ref: '#/components/requestBodies/UpdateWorkspaceLogoRequest'
 
       responses:
         '200':
           description: Workspace logo updated successfully
+
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
   # ----- Channel -----
   /workspaces/{workspaceId}/channels:
@@ -240,23 +864,23 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
 
       requestBody:
-        $ref: 'components/requestBodies/channel.yaml#/CreateChannelRequest'
+        $ref: '#/components/requestBodies/CreateChannelRequest'
 
       responses:
         '201':
           description: Channel created successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
     get:
       operationId: listChannels
@@ -266,20 +890,20 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
 
       responses:
         '200':
-          $ref: 'components/responses/channel.yaml#/ChannelListResponse'
+          $ref: '#/components/responses/ChannelListResponse'
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
   /workspaces/{workspaceId}/channels/{channelId}:
     patch:
@@ -290,24 +914,24 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
-        - $ref: 'components/parameters/channel.yaml#/ChannelIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/ChannelIDParameter'
 
       requestBody:
-        $ref: 'components/requestBodies/channel.yaml#/UpdateChannelNameRequest'
+        $ref: '#/components/requestBodies/UpdateChannelNameRequest'
 
       responses:
         '200':
           description: Channel name updated successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
     delete:
       operationId: deleteChannel
@@ -317,21 +941,21 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
-        - $ref: 'components/parameters/channel.yaml#/ChannelIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/ChannelIDParameter'
 
       responses:
         '200':
           description: Channel deleted successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
   # ----- Direct Chat -----
   /workspaces/{workspaceId}/direct-chats:
@@ -343,20 +967,20 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
 
       responses:
         '200':
-          $ref: 'components/responses/directChat.yaml#/DirectChatListResponse'
+          $ref: '#/components/responses/DirectChatListResponse'
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
   # ----- Message -----
   /workspaces/{workspaceId}/channels/{channelId}/messages:
@@ -368,24 +992,24 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
-        - $ref: 'components/parameters/channel.yaml#/ChannelIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/ChannelIDParameter'
 
       requestBody:
-        $ref: 'components/requestBodies/message.yaml#/CreateMessageRequest'
+        $ref: '#/components/requestBodies/CreateMessageRequest'
 
       responses:
         '201':
           description: Message created successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
   /workspaces/{workspaceId}/channels/{channelId}/messages/{page}/{pageSize}:
     get:
@@ -396,23 +1020,23 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
-        - $ref: 'components/parameters/channel.yaml#/ChannelIDParameter'
-        - $ref: 'components/parameters/pagination.yaml#/PageParameter'
-        - $ref: 'components/parameters/pagination.yaml#/PageSizeParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/ChannelIDParameter'
+        - $ref: '#/components/parameters/PageParameter'
+        - $ref: '#/components/parameters/PageSizeParameter'
 
       responses:
         '200':
-          $ref: 'components/responses/message.yaml#/MessageListResponse'
+          $ref: '#/components/responses/MessageListResponse'
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
   /workspaces/{workspaceId}/channels/{channelId}/messages/{messageId}:
     patch:
@@ -423,25 +1047,25 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
-        - $ref: 'components/parameters/channel.yaml#/ChannelIDParameter'
-        - $ref: 'components/parameters/message.yaml#/MessageIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/ChannelIDParameter'
+        - $ref: '#/components/parameters/MessageIDParameter'
 
       requestBody:
-        $ref: 'components/requestBodies/message.yaml#/UpdateMessageRequest'
+        $ref: '#/components/requestBodies/UpdateMessageRequest'
 
       responses:
         '200':
           description: Message updated successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
     delete:
       operationId: deleteChannelMessage
@@ -451,22 +1075,22 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
-        - $ref: 'components/parameters/channel.yaml#/ChannelIDParameter'
-        - $ref: 'components/parameters/message.yaml#/MessageIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/ChannelIDParameter'
+        - $ref: '#/components/parameters/MessageIDParameter'
 
       responses:
         '200':
           description: Message deleted successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
   /workspaces/{workspaceId}/direct-chats/{directChatId}/messages:
     post:
@@ -477,24 +1101,24 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
-        - $ref: 'components/parameters/directChat.yaml#/DirectChatIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/DirectChatIDParameter'
 
       requestBody:
-        $ref: 'components/requestBodies/message.yaml#/CreateMessageRequest'
+        $ref: '#/components/requestBodies/CreateMessageRequest'
 
       responses:
         '201':
           description: Message created successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
   /workspaces/{workspaceId}/direct-chats/{directChatId}/messages/{page}/{pageSize}:
     get:
@@ -505,23 +1129,23 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
-        - $ref: 'components/parameters/directChat.yaml#/DirectChatIDParameter'
-        - $ref: 'components/parameters/pagination.yaml#/PageParameter'
-        - $ref: 'components/parameters/pagination.yaml#/PageSizeParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/DirectChatIDParameter'
+        - $ref: '#/components/parameters/PageParameter'
+        - $ref: '#/components/parameters/PageSizeParameter'
 
       responses:
         '200':
-          $ref: 'components/responses/message.yaml#/MessageListResponse'
+          $ref: '#/components/responses/MessageListResponse'
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
   /workspaces/{workspaceId}/direct-chats/{directChatId}/messages/{messageId}:
     patch:
@@ -532,25 +1156,25 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
-        - $ref: 'components/parameters/directChat.yaml#/DirectChatIDParameter'
-        - $ref: 'components/parameters/message.yaml#/MessageIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/DirectChatIDParameter'
+        - $ref: '#/components/parameters/MessageIDParameter'
 
       requestBody:
-        $ref: 'components/requestBodies/message.yaml#/UpdateMessageRequest'
+        $ref: '#/components/requestBodies/UpdateMessageRequest'
 
       responses:
         '200':
           description: Message updated successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
     delete:
       operationId: deleteDirectChatMessage
@@ -560,22 +1184,22 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
-        - $ref: 'components/parameters/directChat.yaml#/DirectChatIDParameter'
-        - $ref: 'components/parameters/message.yaml#/MessageIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/DirectChatIDParameter'
+        - $ref: '#/components/parameters/MessageIDParameter'
 
       responses:
         '200':
           description: Message deleted successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
   # ----- Reaction -----
   /workspaces/{workspaceId}/channels/{channelId}/messages/{messageId}/reactions:
@@ -587,25 +1211,25 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
-        - $ref: 'components/parameters/channel.yaml#/ChannelIDParameter'
-        - $ref: 'components/parameters/message.yaml#/MessageIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/ChannelIDParameter'
+        - $ref: '#/components/parameters/MessageIDParameter'
 
       requestBody:
-        $ref: 'components/requestBodies/reaction.yaml#/AddReactionRequest'
+        $ref: '#/components/requestBodies/AddReactionRequest'
 
       responses:
         '201':
           description: Reaction added successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
   /workspaces/{workspaceId}/channels/{channelId}/messages/{messageId}/reactions/{reactionId}:
     delete:
@@ -616,23 +1240,23 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
-        - $ref: 'components/parameters/channel.yaml#/ChannelIDParameter'
-        - $ref: 'components/parameters/message.yaml#/MessageIDParameter'
-        - $ref: 'components/parameters/reaction.yaml#/ReactionIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/ChannelIDParameter'
+        - $ref: '#/components/parameters/MessageIDParameter'
+        - $ref: '#/components/parameters/ReactionIDParameter'
 
       responses:
         '200':
           description: Reaction removed successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
   /workspaces/{workspaceId}/direct-chats/{directChatId}/messages/{messageId}/reactions:
     post:
@@ -643,25 +1267,25 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
-        - $ref: 'components/parameters/directChat.yaml#/DirectChatIDParameter'
-        - $ref: 'components/parameters/message.yaml#/MessageIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/DirectChatIDParameter'
+        - $ref: '#/components/parameters/MessageIDParameter'
 
       requestBody:
-        $ref: 'components/requestBodies/reaction.yaml#/AddReactionRequest'
+        $ref: '#/components/requestBodies/AddReactionRequest'
 
       responses:
         '201':
           description: Reaction added successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
   /workspaces/{workspaceId}/direct-chats/{directChatId}/messages/{messageId}/reactions/{reactionId}:
     delete:
@@ -672,23 +1296,23 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
-        - $ref: 'components/parameters/directChat.yaml#/DirectChatIDParameter'
-        - $ref: 'components/parameters/message.yaml#/MessageIDParameter'
-        - $ref: 'components/parameters/reaction.yaml#/ReactionIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/DirectChatIDParameter'
+        - $ref: '#/components/parameters/MessageIDParameter'
+        - $ref: '#/components/parameters/ReactionIDParameter'
 
       responses:
         '200':
           description: Reaction removed successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
   # ----- Attachment -----
   /workspaces/{workspaceId}/channels/{channelId}/messages/{messageId}/attachments/{attachmentId}:
@@ -700,23 +1324,23 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
-        - $ref: 'components/parameters/channel.yaml#/ChannelIDParameter'
-        - $ref: 'components/parameters/message.yaml#/MessageIDParameter'
-        - $ref: 'components/parameters/attachment.yaml#/AttachmentIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/ChannelIDParameter'
+        - $ref: '#/components/parameters/MessageIDParameter'
+        - $ref: '#/components/parameters/AttachmentIDParameter'
 
       responses:
         '200':
           description: Attachment deleted successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
   # ----- User -----
   /users/me:
@@ -730,12 +1354,12 @@ paths:
 
       responses:
         '200':
-          $ref: 'components/responses/user.yaml#/CurrentUserProfileResponse'
+          $ref: '#/components/responses/CurrentUserProfileResponse'
 
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
     patch:
       operationId: updateCurrentUserProfile
@@ -746,18 +1370,18 @@ paths:
         - TokenAuth: [ ]
 
       requestBody:
-        $ref: 'components/requestBodies/user.yaml#/UpdateCurrentUserProfileRequest'
+        $ref: '#/components/requestBodies/UpdateCurrentUserProfileRequest'
 
       responses:
         '200':
           description: User profile updated successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
     delete:
       operationId: deleteCurrentUserAccount
@@ -772,10 +1396,10 @@ paths:
           description: User account deleted successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
-          
+          $ref: '#/components/responses/401'
+
   /users/{emailRegex}:
     get:
       operationId: getUserProfileByEmail
@@ -784,23 +1408,22 @@ paths:
       description: Retrieve the profile information of a user by their email address. This endpoint is useful for searching users when adding them to a workspace. Only workspace owners and admins can search for users by email.
       security:
         - TokenAuth: [ ]
-
       parameters:
-        - $ref: 'components/parameters/user.yaml#/UserEmailRegexParameter'
+        - $ref: '#/components/parameters/UserEmailRegexParameter'
 
       responses:
         '200':
-          $ref: 'components/responses/user.yaml#/UsersListResponse'
+          $ref: '#/components/responses/UsersListResponse'
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
-          
+          $ref: '#/components/responses/404'
+
   /users/{userId}/workspaces/{workspaceId}:
     post:
       operationId: addUserToWorkspace
@@ -810,21 +1433,21 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/user.yaml#/UserIDParameter'
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/UserIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
 
       responses:
         '200':
           description: User added to workspace successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
     delete:
       operationId: removeUserFromWorkspace
@@ -834,21 +1457,21 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/user.yaml#/UserIDParameter'
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/UserIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
 
       responses:
         '200':
           description: User removed from workspace successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'
 
   /users/{userId}/workspaces/{workspaceId}/role:
     patch:
@@ -859,21 +1482,21 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: 'components/parameters/user.yaml#/UserIDParameter'
-        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/UserIDParameter'
+        - $ref: '#/components/parameters/WorkspaceIDParameter'
 
       requestBody:
-        $ref: 'components/requestBodies/user.yaml#/UpdateUserRoleRequest'
+        $ref: '#/components/requestBodies/UpdateUserRoleRequest'
 
       responses:
         '200':
           description: User role updated successfully
 
         '400':
-          $ref: 'components/responses/error.yaml#/400'
+          $ref: '#/components/responses/400'
         '401':
-          $ref: 'components/responses/error.yaml#/401'
+          $ref: '#/components/responses/401'
         '403':
-          $ref: 'components/responses/error.yaml#/403'
+          $ref: '#/components/responses/403'
         '404':
-          $ref: 'components/responses/error.yaml#/404'
+          $ref: '#/components/responses/404'

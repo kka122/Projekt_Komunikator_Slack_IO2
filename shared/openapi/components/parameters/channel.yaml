@@ -1,8 +1,0 @@
-ChannelIDParameter:
-  name: channelId
-  in: path
-  description: The unique identifier of the channel.
-  required: true
-  schema:
-    type: string
-    format: uuid

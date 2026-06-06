@@ -1,8 +1,0 @@
-ReactionIDParameter:
-  name: reaction_id
-  in: path
-  description: The ID of the reaction.
-  required: true
-  schema:
-    type: string
-    format: uuid
