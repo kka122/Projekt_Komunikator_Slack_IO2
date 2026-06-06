@@ -73,7 +73,7 @@ export const ListChannelMessagesResponse = zod.object({
 }).describe('The user who made the reaction.')
 })).optional().describe('List of reactions to the message.'),
   "isEdited": zod.boolean().optional().describe('Indicates whether the message has been edited.')
-})).optional().describe('List of messages.')
+})).describe('List of messages.')
 })
 
 /**
@@ -170,7 +170,7 @@ export const ListDirectChatMessagesResponse = zod.object({
 }).describe('The user who made the reaction.')
 })).optional().describe('List of reactions to the message.'),
   "isEdited": zod.boolean().optional().describe('Indicates whether the message has been edited.')
-})).optional().describe('List of messages.')
+})).describe('List of messages.')
 })
 
 /**

@@ -34,7 +34,7 @@ export const ListChannelsResponse = zod.object({
   "id": zod.string().describe('Unique identifier for the channel'),
   "name": zod.string().describe('Name of the channel'),
   "newMessagesCount": zod.number().describe('Number of new messages in the channel')
-})).optional()
+}))
 })
 
 /**

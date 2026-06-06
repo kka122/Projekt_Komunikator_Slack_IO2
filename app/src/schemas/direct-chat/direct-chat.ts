@@ -27,6 +27,6 @@ export const ListDirectChatsResponse = zod.object({
   "status": zod.enum(['online', 'meeting', 'vacation', 'notDisturb', 'workAtHome', 'freeTime', 'offline'])
 }).describe('The other participant in the direct chat'),
   "newMessagesCount": zod.number().describe('Number of new messages in the direct chat')
-})).optional()
+}))
 })
 

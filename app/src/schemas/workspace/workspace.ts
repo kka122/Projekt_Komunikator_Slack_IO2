@@ -41,7 +41,7 @@ export const ListWorkspacesResponse = zod.object({
   "avatarUrl": zod.string().describe('URL of the user\'s avatar image'),
   "status": zod.enum(['online', 'meeting', 'vacation', 'notDisturb', 'workAtHome', 'freeTime', 'offline'])
 })).describe('List of users who are members of the workspace')
-})).optional()
+}))
 })
 
 /**

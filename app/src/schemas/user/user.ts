@@ -12,12 +12,14 @@ import * as zod from 'zod';
  * @summary Get the profile of the currently authenticated user
  */
 export const GetCurrentUserProfileResponse = zod.object({
+  "user": zod.object({
   "id": zod.string().describe('Unique identifier for the user'),
   "name": zod.string().describe('Name of the user'),
   "surname": zod.string().describe('Surname of the user'),
   "email": zod.string().describe('Email address of the user'),
   "avatarUrl": zod.string().describe('URL of the user\'s avatar image'),
   "status": zod.enum(['online', 'meeting', 'vacation', 'notDisturb', 'workAtHome', 'freeTime', 'offline'])
+}).describe('The current user\'s profile information.')
 })
 
 /**
@@ -25,11 +27,11 @@ export const GetCurrentUserProfileResponse = zod.object({
  * @summary Update the profile of the currently authenticated user
  */
 export const UpdateCurrentUserProfileBody = zod.object({
-  "name": zod.string().optional().describe('The user\'s name.'),
-  "surname": zod.string().optional().describe('The user\'s surname.'),
-  "email": zod.string().optional().describe('The user\'s email address.'),
+  "name": zod.string().describe('The user\'s name.'),
+  "surname": zod.string().describe('The user\'s surname.'),
+  "email": zod.string().describe('The user\'s email address.'),
   "avatar": zod.instanceof(File).optional().describe('The user\'s avatar image file.'),
-  "status": zod.enum(['online', 'meeting', 'vacation', 'notDisturb', 'workAtHome', 'freeTime', 'offline']).optional().describe('The user\'s current status.')
+  "status": zod.enum(['online', 'meeting', 'vacation', 'notDisturb', 'workAtHome', 'freeTime', 'offline']).describe('The user\'s current status.')
 })
 
 export const UpdateCurrentUserProfileResponse = zod.unknown()
@@ -56,7 +58,7 @@ export const GetUserProfileByEmailResponse = zod.object({
   "email": zod.string().describe('Email address of the user'),
   "avatarUrl": zod.string().describe('URL of the user\'s avatar image'),
   "status": zod.enum(['online', 'meeting', 'vacation', 'notDisturb', 'workAtHome', 'freeTime', 'offline'])
-})).optional()
+}))
 })
 
 /**
@@ -91,7 +93,7 @@ export const UpdateUserRoleInWorkspaceParams = zod.object({
 })
 
 export const UpdateUserRoleInWorkspaceBody = zod.object({
-  "role": zod.enum(['admin', 'member']).optional().describe('The new role for the user.')
+  "role": zod.enum(['admin', 'member']).describe('The new role for the user.')
 })
 
 export const UpdateUserRoleInWorkspaceResponse = zod.unknown()
