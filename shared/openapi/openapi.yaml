@@ -20,6 +20,12 @@ tags:
   - name: Message
     description: Messages in channels and direct chats management
 
+  - name: Reaction
+    description: Reactions to messages management
+
+  - name: Attachment
+    description: Attachments management
+
   - name: User
     description: User profile and settings management
 
@@ -121,6 +127,22 @@ paths:
           $ref: 'components/responses/error.yaml#/401'
         '403':
           $ref: 'components/responses/error.yaml#/403'
+
+  /auth/logout:
+    post:
+      operationId: logoutUser
+      tags: [ Auth ]
+      summary: Log out the authenticated user
+      description: Log out the currently authenticated user by clearing the access_token and refresh_token cookies.
+      security:
+        - TokenAuth: [ ]
+
+      responses:
+        '200':
+          $ref: 'components/responses/auth.yaml#/LogoutResponse'
+
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
 
   # ----- Workspace -----
   /workspaces:
@@ -326,6 +348,526 @@ paths:
       responses:
         '200':
           $ref: 'components/responses/directChat.yaml#/DirectChatListResponse'
+
+        '400':
+          $ref: 'components/responses/error.yaml#/400'
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+        '403':
+          $ref: 'components/responses/error.yaml#/403'
+        '404':
+          $ref: 'components/responses/error.yaml#/404'
+
+  # ----- Message -----
+  /workspaces/{workspaceId}/channels/{channelId}/messages:
+    post:
+      operationId: createChannelMessage
+      tags: [ Message ]
+      summary: Create a new message in a channel
+      description: Create a new message within the specified channel. The authenticated user will be set as the author of the message. Only members of the channel can create messages.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: 'components/parameters/channel.yaml#/ChannelIDParameter'
+
+      requestBody:
+        $ref: 'components/requestBodies/message.yaml#/CreateMessageRequest'
+
+      responses:
+        '201':
+          description: Message created successfully
+
+        '400':
+          $ref: 'components/responses/error.yaml#/400'
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+        '403':
+          $ref: 'components/responses/error.yaml#/403'
+        '404':
+          $ref: 'components/responses/error.yaml#/404'
+
+  /workspaces/{workspaceId}/channels/{channelId}/messages/{page}/{pageSize}:
+    get:
+      operationId: listChannelMessages
+      tags: [ Message ]
+      summary: List messages in a channel with pagination
+      description: Retrieve a paginated list of messages within the specified channel. Only members of the channel can view its messages.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: 'components/parameters/channel.yaml#/ChannelIDParameter'
+        - $ref: 'components/parameters/pagination.yaml#/PageParameter'
+        - $ref: 'components/parameters/pagination.yaml#/PageSizeParameter'
+
+      responses:
+        '200':
+          $ref: 'components/responses/message.yaml#/MessageListResponse'
+
+        '400':
+          $ref: 'components/responses/error.yaml#/400'
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+        '403':
+          $ref: 'components/responses/error.yaml#/403'
+        '404':
+          $ref: 'components/responses/error.yaml#/404'
+
+  /workspaces/{workspaceId}/channels/{channelId}/messages/{messageId}:
+    patch:
+      operationId: updateChannelMessage
+      tags: [ Message ]
+      summary: Update a message in a channel
+      description: Update the content of an existing message within the specified channel. Only the author of the message can update it.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: 'components/parameters/channel.yaml#/ChannelIDParameter'
+        - $ref: 'components/parameters/message.yaml#/MessageIDParameter'
+
+      requestBody:
+        $ref: 'components/requestBodies/message.yaml#/UpdateMessageRequest'
+
+      responses:
+        '200':
+          description: Message updated successfully
+
+        '400':
+          $ref: 'components/responses/error.yaml#/400'
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+        '403':
+          $ref: 'components/responses/error.yaml#/403'
+        '404':
+          $ref: 'components/responses/error.yaml#/404'
+
+    delete:
+      operationId: deleteChannelMessage
+      tags: [ Message ]
+      summary: Delete a message from a channel
+      description: Delete an existing message from the specified channel. Only the author of the message or workspace admins can delete messages.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: 'components/parameters/channel.yaml#/ChannelIDParameter'
+        - $ref: 'components/parameters/message.yaml#/MessageIDParameter'
+
+      responses:
+        '200':
+          description: Message deleted successfully
+
+        '400':
+          $ref: 'components/responses/error.yaml#/400'
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+        '403':
+          $ref: 'components/responses/error.yaml#/403'
+        '404':
+          $ref: 'components/responses/error.yaml#/404'
+
+  /workspaces/{workspaceId}/direct-chats/{directChatId}/messages:
+    post:
+      operationId: createDirectChatMessage
+      tags: [ Message ]
+      summary: Create a new message in a direct chat
+      description: Create a new message within the specified direct chat. The authenticated user will be set as the author of the message. Only members of the direct chat can create messages.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: 'components/parameters/directChat.yaml#/DirectChatIDParameter'
+
+      requestBody:
+        $ref: 'components/requestBodies/message.yaml#/CreateMessageRequest'
+
+      responses:
+        '201':
+          description: Message created successfully
+
+        '400':
+          $ref: 'components/responses/error.yaml#/400'
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+        '403':
+          $ref: 'components/responses/error.yaml#/403'
+        '404':
+          $ref: 'components/responses/error.yaml#/404'
+
+  /workspaces/{workspaceId}/direct-chats/{directChatId}/messages/{page}/{pageSize}:
+    get:
+      operationId: listDirectChatMessages
+      tags: [ Message ]
+      summary: List messages in a direct chat with pagination
+      description: Retrieve a paginated list of messages within the specified direct chat. Only members of the direct chat can view its messages.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: 'components/parameters/directChat.yaml#/DirectChatIDParameter'
+        - $ref: 'components/parameters/pagination.yaml#/PageParameter'
+        - $ref: 'components/parameters/pagination.yaml#/PageSizeParameter'
+
+      responses:
+        '200':
+          $ref: 'components/responses/message.yaml#/MessageListResponse'
+
+        '400':
+          $ref: 'components/responses/error.yaml#/400'
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+        '403':
+          $ref: 'components/responses/error.yaml#/403'
+        '404':
+          $ref: 'components/responses/error.yaml#/404'
+
+  /workspaces/{workspaceId}/direct-chats/{directChatId}/messages/{messageId}:
+    patch:
+      operationId: updateDirectChatMessage
+      tags: [ Message ]
+      summary: Update a message in a direct chat
+      description: Update the content of an existing message within the specified direct chat. Only the author of the message can update it.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: 'components/parameters/directChat.yaml#/DirectChatIDParameter'
+        - $ref: 'components/parameters/message.yaml#/MessageIDParameter'
+
+      requestBody:
+        $ref: 'components/requestBodies/message.yaml#/UpdateMessageRequest'
+
+      responses:
+        '200':
+          description: Message updated successfully
+
+        '400':
+          $ref: 'components/responses/error.yaml#/400'
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+        '403':
+          $ref: 'components/responses/error.yaml#/403'
+        '404':
+          $ref: 'components/responses/error.yaml#/404'
+
+    delete:
+      operationId: deleteDirectChatMessage
+      tags: [ Message ]
+      summary: Delete a message from a direct chat
+      description: Delete an existing message from the specified direct chat. Only the author of the message or workspace admins can delete messages.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: 'components/parameters/directChat.yaml#/DirectChatIDParameter'
+        - $ref: 'components/parameters/message.yaml#/MessageIDParameter'
+
+      responses:
+        '200':
+          description: Message deleted successfully
+
+        '400':
+          $ref: 'components/responses/error.yaml#/400'
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+        '403':
+          $ref: 'components/responses/error.yaml#/403'
+        '404':
+          $ref: 'components/responses/error.yaml#/404'
+
+  # ----- Reaction -----
+  /workspaces/{workspaceId}/channels/{channelId}/messages/{messageId}/reactions:
+    post:
+      operationId: addReactionToChannelMessage
+      tags: [ Reaction ]
+      summary: Add a reaction to a message in a channel
+      description: Add a reaction to a specific message within a channel. The authenticated user will be set as the author of the reaction. Only members of the channel can add reactions to its messages.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: 'components/parameters/channel.yaml#/ChannelIDParameter'
+        - $ref: 'components/parameters/message.yaml#/MessageIDParameter'
+
+      requestBody:
+        $ref: 'components/requestBodies/reaction.yaml#/AddReactionRequest'
+
+      responses:
+        '201':
+          description: Reaction added successfully
+
+        '400':
+          $ref: 'components/responses/error.yaml#/400'
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+        '403':
+          $ref: 'components/responses/error.yaml#/403'
+        '404':
+          $ref: 'components/responses/error.yaml#/404'
+
+  /workspaces/{workspaceId}/channels/{channelId}/messages/{messageId}/reactions/{reactionId}:
+    delete:
+      operationId: removeReactionFromChannelMessage
+      tags: [ Reaction ]
+      summary: Remove a reaction from a message in a channel
+      description: Remove an existing reaction from a specific message within a channel. Only the author of the reaction or workspace admins can remove reactions.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: 'components/parameters/channel.yaml#/ChannelIDParameter'
+        - $ref: 'components/parameters/message.yaml#/MessageIDParameter'
+        - $ref: 'components/parameters/reaction.yaml#/ReactionIDParameter'
+
+      responses:
+        '200':
+          description: Reaction removed successfully
+
+        '400':
+          $ref: 'components/responses/error.yaml#/400'
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+        '403':
+          $ref: 'components/responses/error.yaml#/403'
+        '404':
+          $ref: 'components/responses/error.yaml#/404'
+
+  /workspaces/{workspaceId}/direct-chats/{directChatId}/messages/{messageId}/reactions:
+    post:
+      operationId: addReactionToDirectChatMessage
+      tags: [ Reaction ]
+      summary: Add a reaction to a message in a direct chat
+      description: Add a reaction to a specific message within a direct chat. The authenticated user will be set as the author of the reaction. Only members of the direct chat can add reactions to its messages.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: 'components/parameters/directChat.yaml#/DirectChatIDParameter'
+        - $ref: 'components/parameters/message.yaml#/MessageIDParameter'
+
+      requestBody:
+        $ref: 'components/requestBodies/reaction.yaml#/AddReactionRequest'
+
+      responses:
+        '201':
+          description: Reaction added successfully
+
+        '400':
+          $ref: 'components/responses/error.yaml#/400'
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+        '403':
+          $ref: 'components/responses/error.yaml#/403'
+        '404':
+          $ref: 'components/responses/error.yaml#/404'
+
+  /workspaces/{workspaceId}/direct-chats/{directChatId}/messages/{messageId}/reactions/{reactionId}:
+    delete:
+      operationId: removeReactionFromDirectChatMessage
+      tags: [ Reaction ]
+      summary: Remove a reaction from a message in a direct chat
+      description: Remove an existing reaction from a specific message within a direct chat. Only the author of the reaction or workspace admins can remove reactions.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: 'components/parameters/directChat.yaml#/DirectChatIDParameter'
+        - $ref: 'components/parameters/message.yaml#/MessageIDParameter'
+        - $ref: 'components/parameters/reaction.yaml#/ReactionIDParameter'
+
+      responses:
+        '200':
+          description: Reaction removed successfully
+
+        '400':
+          $ref: 'components/responses/error.yaml#/400'
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+        '403':
+          $ref: 'components/responses/error.yaml#/403'
+        '404':
+          $ref: 'components/responses/error.yaml#/404'
+
+  # ----- Attachment -----
+  /workspaces/{workspaceId}/channels/{channelId}/messages/{messageId}/attachments/{attachmentId}:
+    delete:
+      operationId: deleteAttachmentFromChannelMessage
+      tags: [ Attachment ]
+      summary: Delete an attachment from a message in a channel
+      description: Delete an existing attachment from a specific message within a channel. Only the author of the message or workspace admins can delete attachments.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+        - $ref: 'components/parameters/channel.yaml#/ChannelIDParameter'
+        - $ref: 'components/parameters/message.yaml#/MessageIDParameter'
+        - $ref: 'components/parameters/attachment.yaml#/AttachmentIDParameter'
+
+      responses:
+        '200':
+          description: Attachment deleted successfully
+
+        '400':
+          $ref: 'components/responses/error.yaml#/400'
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+        '403':
+          $ref: 'components/responses/error.yaml#/403'
+        '404':
+          $ref: 'components/responses/error.yaml#/404'
+
+  # ----- User -----
+  /users/me:
+    get:
+      operationId: getCurrentUserProfile
+      tags: [ User ]
+      summary: Get the profile of the currently authenticated user
+      description: Retrieve the profile information of the currently authenticated user, including their name, email, profile picture URL, and the list of workspaces they are a member of.
+      security:
+        - TokenAuth: [ ]
+
+      responses:
+        '200':
+          $ref: 'components/responses/user.yaml#/CurrentUserProfileResponse'
+
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+        '404':
+          $ref: 'components/responses/error.yaml#/404'
+
+    patch:
+      operationId: updateCurrentUserProfile
+      tags: [ User ]
+      summary: Update the profile of the currently authenticated user
+      description: Update the profile information of the currently authenticated user, such as their name and profile picture. The email cannot be updated through this endpoint. To change the email, users must contact support.
+      security:
+        - TokenAuth: [ ]
+
+      requestBody:
+        $ref: 'components/requestBodies/user.yaml#/UpdateCurrentUserProfileRequest'
+
+      responses:
+        '200':
+          description: User profile updated successfully
+
+        '400':
+          $ref: 'components/responses/error.yaml#/400'
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+        '404':
+          $ref: 'components/responses/error.yaml#/404'
+
+    delete:
+      operationId: deleteCurrentUserAccount
+      tags: [ User ]
+      summary: Delete the account of the currently authenticated user
+      description: Permanently delete the account of the currently authenticated user. This action cannot be undone and will remove all user data from the system. Users will be asked to confirm this action before proceeding.
+      security:
+        - TokenAuth: [ ]
+
+      responses:
+        '200':
+          description: User account deleted successfully
+
+        '400':
+          $ref: 'components/responses/error.yaml#/400'
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+          
+  /users/{emailRegex}:
+    get:
+      operationId: getUserProfileByEmail
+      tags: [ User ]
+      summary: Get the profile of a user by email
+      description: Retrieve the profile information of a user by their email address. This endpoint is useful for searching users when adding them to a workspace. Only workspace owners and admins can search for users by email.
+      security:
+        - TokenAuth: [ ]
+
+      parameters:
+        - $ref: 'components/parameters/user.yaml#/UserEmailRegexParameter'
+
+      responses:
+        '200':
+          $ref: 'components/responses/user.yaml#/UsersListResponse'
+
+        '400':
+          $ref: 'components/responses/error.yaml#/400'
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+        '403':
+          $ref: 'components/responses/error.yaml#/403'
+        '404':
+          $ref: 'components/responses/error.yaml#/404'
+          
+  /users/{userId}/workspaces/{workspaceId}:
+    post:
+      operationId: addUserToWorkspace
+      tags: [ User ]
+      summary: Add a user to a workspace
+      description: Add an existing user to a specific workspace. Only workspace owners can add users, and they cannot add themselves.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: 'components/parameters/user.yaml#/UserIDParameter'
+        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+
+      responses:
+        '200':
+          description: User added to workspace successfully
+
+        '400':
+          $ref: 'components/responses/error.yaml#/400'
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+        '403':
+          $ref: 'components/responses/error.yaml#/403'
+        '404':
+          $ref: 'components/responses/error.yaml#/404'
+
+    delete:
+      operationId: removeUserFromWorkspace
+      tags: [ User ]
+      summary: Remove a user from a workspace
+      description: Remove a user from a specific workspace. Only workspace owners can remove users, and they cannot remove themselves.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: 'components/parameters/user.yaml#/UserIDParameter'
+        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+
+      responses:
+        '200':
+          description: User removed from workspace successfully
+
+        '400':
+          $ref: 'components/responses/error.yaml#/400'
+        '401':
+          $ref: 'components/responses/error.yaml#/401'
+        '403':
+          $ref: 'components/responses/error.yaml#/403'
+        '404':
+          $ref: 'components/responses/error.yaml#/404'
+
+  /users/{userId}/workspaces/{workspaceId}/role:
+    patch:
+      operationId: updateUserRoleInWorkspace
+      tags: [ User ]
+      summary: Update a user's role in a workspace
+      description: Update the role of a user within a specific workspace. Only workspace owners can update user roles, and they cannot change their own role.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: 'components/parameters/user.yaml#/UserIDParameter'
+        - $ref: 'components/parameters/workspace.yaml#/WorkspaceIDParameter'
+
+      requestBody:
+        $ref: 'components/requestBodies/user.yaml#/UpdateUserRoleRequest'
+
+      responses:
+        '200':
+          description: User role updated successfully
 
         '400':
           $ref: 'components/responses/error.yaml#/400'

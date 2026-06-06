@@ -1,0 +1,8 @@
+DirectChatIDParameter:
+  name: directChatId
+  in: path
+  description: The ID of the direct chat.
+  required: true
+  schema:
+    type: string
+    format: uuid

@@ -1,0 +1,12 @@
+MessageListResponse:
+  description: A list of messages.
+  content:
+    application/json:
+      schema:
+        type: object
+        properties:
+          messages:
+            type: array
+            items:
+              $ref: '../schemas/message.yaml#/Message'
+            description: List of messages.

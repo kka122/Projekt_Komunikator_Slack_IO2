@@ -13,3 +13,11 @@ TokenRefreshResponse:
       description: Sets a new access_token cookie
       schema:
         type: string
+
+LogoutResponse:
+  description: User logged out successfully
+  headers:
+    Set-Cookie:
+      description: Clears both access_token and refresh_token cookies
+      schema:
+        type: string

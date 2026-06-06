@@ -7,7 +7,6 @@ on:
     paths:
       - '.github/workflows/openapi-generator.yml'
       - 'shared/openapi/**'
-      - 'shared/generators/orval/**'
 
 permissions:
   contents: write
@@ -30,14 +29,7 @@ jobs:
           node-version: '24'
 
       - name: Install Node tools
-        run: npm install -g @redocly/cli orval
-
-      - name: Install local orval (for config resolution)
-        run: npm install
-        working-directory: shared/generators/orval
-
-      - name: Generate Zod + React Query Schemas
-        run: orval --config shared/generators/orval/orval.config.ts
+        run: npm install -g @redocly/cli
 
       - name: Generate Redocly Docs
         run: redocly build-docs shared/openapi/openapi.yaml --output docs/openapi.html
@@ -45,5 +37,5 @@ jobs:
       - name: Commit and push generated files
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
-          commit_message: "chore: update generated schemas"
-          file_pattern: 'docs/openapi.html app/schemas/**/*'
+          commit_message: "chore: Update OpenAPI documentation"
+          file_pattern: 'docs/openapi.html'
