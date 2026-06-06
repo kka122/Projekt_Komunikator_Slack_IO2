@@ -247,7 +247,7 @@ components:
 
     # -----  Reaction -----
     ReactionIDParameter:
-      name: reaction_id
+      name: reactionId
       in: path
       description: The ID of the reaction.
       required: true
@@ -267,7 +267,7 @@ components:
 
     # ----- User -----
     UserIDParameter:
-      name: user_id
+      name: userId
       in: path
       description: The ID of the user.
       required: true
