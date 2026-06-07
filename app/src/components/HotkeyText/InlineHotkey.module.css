@@ -1,0 +1,8 @@
+.inlineHotkey {
+  cursor: pointer;
+  transition: color 0.2s ease-in-out;
+
+  &:hover, &:focus-visible {
+    color: var(--color-primary);
+  }
+}

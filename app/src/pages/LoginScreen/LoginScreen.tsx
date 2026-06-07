@@ -1,8 +1,9 @@
 import {type JSX} from "react";
 import {GoogleLogin} from "@react-oauth/google";
+import AnimatedMain from "../../components/AnimatedMain/AnimatedMain.tsx";
 
 function LoginScreen(): JSX.Element {
-  return <>
+  return <AnimatedMain>
     <GoogleLogin onSuccess={credentialResponse => {
       console.log(credentialResponse)
       fetch("http://localhost:5000/api/auth/google", {
@@ -25,7 +26,7 @@ function LoginScreen(): JSX.Element {
     }} onError={() => {
       console.log("Login Failed")
     }}/>
-  </>
+  </AnimatedMain>
 }
 
 export default LoginScreen

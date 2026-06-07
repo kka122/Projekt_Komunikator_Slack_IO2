@@ -1,18 +1,20 @@
-@import url('https://fonts.googleapis.com/css2?family=Google+Sans+Flex:opsz,wght@6..144,1..1000&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:ital,wght@0,100..800;1,100..800&display=swap');
 
 :root {
   --color-text: #FFF8F0;
   --color-background: #141414;
-  --color-accent: #252525;
-  --color-primary: #EF767A;
-  --color-secondary: #8B2635;
+  --color-primary: #fca311;
 
-  --font-primary: "Google Sans Flex";
+  --font-primary: "JetBrains Mono";
 }
 
 * {
-  margin: 0;
-  padding: 0;
+  position: relative;
+}
+
+*,
+*::before,
+*::after {
   box-sizing: border-box;
 }
 
@@ -21,13 +23,64 @@ html {
 }
 
 body {
-  color: var(--color-text);
+  display: flex;
+  flex-flow: column wrap;
+  justify-content: center;
+  align-items: center;
+
+  min-height: 100vh;
+
+  font-family: var(--font-primary), monospace;
+  font-optical-sizing: auto;
+  font-weight: 400;
+  font-style: normal;
+  font-size: 100%;
+  line-height: 1.6;
+
   background-color: var(--color-background);
-  font-family: var(--font-primary), sans-serif;
-  min-height: 100dvh;
+  color: var(--color-text);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  text-wrap: balance;
+  text-align: center;
+  line-height: 1.2;
+}
+
+h1 {
+  letter-spacing: 0.1em;
+  font-size: 3.375rem;
+
+  color: var(--color-primary);
+}
+
+h2 {
+  font-size: 2.25rem;
+}
+
+h3 {
+  font-size: 1.5rem;
+}
+
+p {
+  font-size: 1rem;
+}
+
+p,
+li,
+figcaption {
+  max-width: 65ch;
+
+  text-wrap: pretty;
+}
+
+img {
+  display: block;
+
+  max-width: 100%;
+  height: auto;
 }
 
 a {
-  color: unset;
-  text-decoration: none;
+  color: var(--color-primary);
 }

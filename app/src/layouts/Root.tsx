@@ -1,9 +1,9 @@
-import {Outlet} from "react-router";
 import {type JSX} from "react";
+import AnimatedOutlet from "../components/AnimatedOutlet/AnimatedOutlet.tsx";
 
 function Root(): JSX.Element {
   return <>
-    <Outlet/>
+    <AnimatedOutlet/>
   </>
 }
 

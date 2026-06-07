@@ -35,7 +35,7 @@ jobs:
         working-directory: shared/generators/orval
         run: npm install
 
-      - name: Generate orval schemas
+      - name: Generate orval api
         working-directory: shared/generators/orval
         run: orval --config orval.config.ts
 
@@ -46,4 +46,4 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore: Update OpenAPI documentation"
-          file_pattern: 'docs/openapi.html app/src/schemas/**/*'
+          file_pattern: 'docs/openapi.html app/src/api/**/*'

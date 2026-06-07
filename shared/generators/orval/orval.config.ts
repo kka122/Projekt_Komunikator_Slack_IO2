@@ -2,13 +2,26 @@ import {defineConfig} from 'orval';
 
 export default defineConfig({
   szponcik: {
-    output: {
-      client: 'zod',
-      mode: 'tags-split',
-      target: '../../../app/src/schemas',
-    },
     input: {
       target: '../../openapi/openapi.yaml',
+    },
+    output: {
+      mode: 'tags-split',
+      client: 'react-query',
+      target: '../../../app/src/api/endpoints',
+      schemas: '../../../app/src/api/models',
+      mock: true,
+    },
+  },
+  szponcikZod: {
+    input: {
+      target: '../../openapi/openapi.yaml',
+    },
+    output: {
+      mode: 'tags-split',
+      client: 'zod',
+      target: '../../../app/src/api/endpoints',
+      fileExtension: '.zod.ts',
     },
   },
 });
