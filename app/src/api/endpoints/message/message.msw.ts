@@ -37,7 +37,7 @@ export const getCreateChannelMessageMockHandler = (overrideResponse?: void | ((i
 }
 
 export const getListChannelMessagesMockHandler = (overrideResponse?: MessageListResponseResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<MessageListResponseResponse> | MessageListResponseResponse), options?: RequestHandlerOptions) => {
-  return http.get('*/workspaces/:workspaceId/channels/:channelId/messages/:page/:pageSize', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+  return http.get('*/workspaces/:workspaceId/channels/:channelId/messages/:pageSize/:page', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
 
 
     return HttpResponse.json(overrideResponse !== undefined
@@ -79,7 +79,7 @@ export const getCreateDirectChatMessageMockHandler = (overrideResponse?: void | 
 }
 
 export const getListDirectChatMessagesMockHandler = (overrideResponse?: MessageListResponseResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<MessageListResponseResponse> | MessageListResponseResponse), options?: RequestHandlerOptions) => {
-  return http.get('*/workspaces/:workspaceId/direct-chats/:directChatId/messages/:page/:pageSize', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+  return http.get('*/workspaces/:workspaceId/direct-chats/:directChatId/messages/:pageSize/:page', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
 
 
     return HttpResponse.json(overrideResponse !== undefined

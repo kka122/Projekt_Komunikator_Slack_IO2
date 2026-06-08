@@ -193,13 +193,13 @@ export type listChannelMessagesResponse = (listChannelMessagesResponseSuccess | 
 
 export const getListChannelMessagesUrl = (workspaceId: string,
     channelId: string,
-    page: number = 1,
-    pageSize: number = 20,) => {
+    pageSize: number = 20,
+    page: number = 1,) => {
 
 
 
 
-  return `/workspaces/${workspaceId}/channels/${channelId}/messages/${page}/${pageSize}`
+  return `/workspaces/${workspaceId}/channels/${channelId}/messages/${pageSize}/${page}`
 }
 
 /**
@@ -208,10 +208,10 @@ export const getListChannelMessagesUrl = (workspaceId: string,
  */
 export const listChannelMessages = async (workspaceId: string,
     channelId: string,
-    page: number = 1,
-    pageSize: number = 20, options?: RequestInit): Promise<listChannelMessagesResponse> => {
+    pageSize: number = 20,
+    page: number = 1, options?: RequestInit): Promise<listChannelMessagesResponse> => {
 
-  const res = await fetch(getListChannelMessagesUrl(workspaceId,channelId,page,pageSize),
+  const res = await fetch(getListChannelMessagesUrl(workspaceId,channelId,pageSize,page),
   {
     ...options,
     method: 'GET'
@@ -233,33 +233,33 @@ export const listChannelMessages = async (workspaceId: string,
 
 export const getListChannelMessagesQueryKey = (workspaceId: string,
     channelId: string,
-    page: number = 1,
-    pageSize: number = 20,) => {
+    pageSize: number = 20,
+    page: number = 1,) => {
     return [
-    `/workspaces/${workspaceId}/channels/${channelId}/messages/${page}/${pageSize}`
+    `/workspaces/${workspaceId}/channels/${channelId}/messages/${pageSize}/${page}`
     ] as const;
     }
 
 
 export const getListChannelMessagesQueryOptions = <TData = Awaited<ReturnType<typeof listChannelMessages>>, TError = N400Response | N401Response | N403Response | N404Response>(workspaceId: string,
     channelId: string,
-    page: number = 1,
-    pageSize: number = 20, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChannelMessages>>, TError, TData>, fetch?: RequestInit}
+    pageSize: number = 20,
+    page: number = 1, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChannelMessages>>, TError, TData>, fetch?: RequestInit}
 ) => {
 
 const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListChannelMessagesQueryKey(workspaceId,channelId,page,pageSize);
+  const queryKey =  queryOptions?.queryKey ?? getListChannelMessagesQueryKey(workspaceId,channelId,pageSize,page);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listChannelMessages>>> = ({ signal }) => listChannelMessages(workspaceId,channelId,page,pageSize, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listChannelMessages>>> = ({ signal }) => listChannelMessages(workspaceId,channelId,pageSize,page, { signal, ...fetchOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: workspaceId !== null && workspaceId !== undefined && channelId !== null && channelId !== undefined && page !== null && page !== undefined && pageSize !== null && pageSize !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listChannelMessages>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: workspaceId !== null && workspaceId !== undefined && channelId !== null && channelId !== undefined && pageSize !== null && pageSize !== undefined && page !== null && page !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listChannelMessages>>, TError, TData> & { queryKey: QueryKey }
 }
 
 export type ListChannelMessagesQueryResult = NonNullable<Awaited<ReturnType<typeof listChannelMessages>>>
@@ -273,12 +273,12 @@ export type ListChannelMessagesQueryError = N400Response | N401Response | N403Re
 export function useListChannelMessages<TData = Awaited<ReturnType<typeof listChannelMessages>>, TError = N400Response | N401Response | N403Response | N404Response>(
  workspaceId: string,
     channelId: string,
-    page: number = 1,
-    pageSize: number = 20, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChannelMessages>>, TError, TData>, fetch?: RequestInit}
+    pageSize: number = 20,
+    page: number = 1, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChannelMessages>>, TError, TData>, fetch?: RequestInit}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getListChannelMessagesQueryOptions(workspaceId,channelId,page,pageSize,options)
+  const queryOptions = getListChannelMessagesQueryOptions(workspaceId,channelId,pageSize,page,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
@@ -678,13 +678,13 @@ export type listDirectChatMessagesResponse = (listDirectChatMessagesResponseSucc
 
 export const getListDirectChatMessagesUrl = (workspaceId: string,
     directChatId: string,
-    page: number = 1,
-    pageSize: number = 20,) => {
+    pageSize: number = 20,
+    page: number = 1,) => {
 
 
 
 
-  return `/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${page}/${pageSize}`
+  return `/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${pageSize}/${page}`
 }
 
 /**
@@ -693,10 +693,10 @@ export const getListDirectChatMessagesUrl = (workspaceId: string,
  */
 export const listDirectChatMessages = async (workspaceId: string,
     directChatId: string,
-    page: number = 1,
-    pageSize: number = 20, options?: RequestInit): Promise<listDirectChatMessagesResponse> => {
+    pageSize: number = 20,
+    page: number = 1, options?: RequestInit): Promise<listDirectChatMessagesResponse> => {
 
-  const res = await fetch(getListDirectChatMessagesUrl(workspaceId,directChatId,page,pageSize),
+  const res = await fetch(getListDirectChatMessagesUrl(workspaceId,directChatId,pageSize,page),
   {
     ...options,
     method: 'GET'
@@ -718,33 +718,33 @@ export const listDirectChatMessages = async (workspaceId: string,
 
 export const getListDirectChatMessagesQueryKey = (workspaceId: string,
     directChatId: string,
-    page: number = 1,
-    pageSize: number = 20,) => {
+    pageSize: number = 20,
+    page: number = 1,) => {
     return [
-    `/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${page}/${pageSize}`
+    `/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${pageSize}/${page}`
     ] as const;
     }
 
 
 export const getListDirectChatMessagesQueryOptions = <TData = Awaited<ReturnType<typeof listDirectChatMessages>>, TError = N400Response | N401Response | N403Response | N404Response>(workspaceId: string,
     directChatId: string,
-    page: number = 1,
-    pageSize: number = 20, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDirectChatMessages>>, TError, TData>, fetch?: RequestInit}
+    pageSize: number = 20,
+    page: number = 1, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDirectChatMessages>>, TError, TData>, fetch?: RequestInit}
 ) => {
 
 const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 
-  const queryKey =  queryOptions?.queryKey ?? getListDirectChatMessagesQueryKey(workspaceId,directChatId,page,pageSize);
+  const queryKey =  queryOptions?.queryKey ?? getListDirectChatMessagesQueryKey(workspaceId,directChatId,pageSize,page);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listDirectChatMessages>>> = ({ signal }) => listDirectChatMessages(workspaceId,directChatId,page,pageSize, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listDirectChatMessages>>> = ({ signal }) => listDirectChatMessages(workspaceId,directChatId,pageSize,page, { signal, ...fetchOptions });
 
 
 
 
 
-   return  { queryKey, queryFn, enabled: workspaceId !== null && workspaceId !== undefined && directChatId !== null && directChatId !== undefined && page !== null && page !== undefined && pageSize !== null && pageSize !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listDirectChatMessages>>, TError, TData> & { queryKey: QueryKey }
+   return  { queryKey, queryFn, enabled: workspaceId !== null && workspaceId !== undefined && directChatId !== null && directChatId !== undefined && pageSize !== null && pageSize !== undefined && page !== null && page !== undefined, ...queryOptions} as UseQueryOptions<Awaited<ReturnType<typeof listDirectChatMessages>>, TError, TData> & { queryKey: QueryKey }
 }
 
 export type ListDirectChatMessagesQueryResult = NonNullable<Awaited<ReturnType<typeof listDirectChatMessages>>>
@@ -758,12 +758,12 @@ export type ListDirectChatMessagesQueryError = N400Response | N401Response | N40
 export function useListDirectChatMessages<TData = Awaited<ReturnType<typeof listDirectChatMessages>>, TError = N400Response | N401Response | N403Response | N404Response>(
  workspaceId: string,
     directChatId: string,
-    page: number = 1,
-    pageSize: number = 20, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDirectChatMessages>>, TError, TData>, fetch?: RequestInit}
+    pageSize: number = 20,
+    page: number = 1, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDirectChatMessages>>, TError, TData>, fetch?: RequestInit}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
-  const queryOptions = getListDirectChatMessagesQueryOptions(workspaceId,directChatId,page,pageSize,options)
+  const queryOptions = getListDirectChatMessagesQueryOptions(workspaceId,directChatId,pageSize,page,options)
 
   const query = useQuery(queryOptions) as  UseQueryResult<TData, TError> & { queryKey: QueryKey };
 
