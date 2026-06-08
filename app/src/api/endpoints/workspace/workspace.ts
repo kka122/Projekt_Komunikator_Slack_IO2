@@ -18,6 +18,13 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
+import axios from 'axios';
+import type {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse
+} from 'axios';
+
 import type {
   AcceptPaymentRequestBody,
   CreatePaymentResponseResponse,
@@ -39,43 +46,14 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 
 
 
-export type createWorkspaceResponse201 = {
-  data: CreatePaymentResponseResponse
-  status: 201
-}
-
-export type createWorkspaceResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type createWorkspaceResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type createWorkspaceResponseSuccess = (createWorkspaceResponse201) & {
-  headers: Headers;
-};
-export type createWorkspaceResponseError = (createWorkspaceResponse400 | createWorkspaceResponse401) & {
-  headers: Headers;
-};
-
-export type createWorkspaceResponse = (createWorkspaceResponseSuccess | createWorkspaceResponseError)
-
-export const getCreateWorkspaceUrl = () => {
-
-
-
-
-  return `/workspaces`
-}
-
 /**
  * Create a new workspace with the provided name and optional logo. The user creating the workspace will be set as the owner. To create workspace client need complete payment using returned Stripe Payment Intent client secret.
  * @summary Create a new workspace
  */
-export const createWorkspace = async (createWorkspaceRequestBody?: CreateWorkspaceRequestBody, options?: RequestInit): Promise<createWorkspaceResponse> => {
+export const createWorkspace = (
+    createWorkspaceRequestBody?: CreateWorkspaceRequestBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<CreatePaymentResponseResponse>> => {
+
     const formData = new FormData();
 if(createWorkspaceRequestBody?.workspaceName !== undefined) {
  formData.append(`workspaceName`, createWorkspaceRequestBody.workspaceName);
@@ -84,35 +62,24 @@ if(createWorkspaceRequestBody?.workspaceLogo !== undefined) {
  formData.append(`workspaceLogo`, createWorkspaceRequestBody.workspaceLogo);
  }
 
-  const res = await fetch(getCreateWorkspaceUrl(),
-  {
-    ...options,
-    method: 'POST'
-    ,
-    body: formData
+    return axios.post(
+      `/workspaces`,
+      formData,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: createWorkspaceResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as createWorkspaceResponse
-}
 
 
 
-
-export const getCreateWorkspaceMutationOptions = <TError = N400Response | N401Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createWorkspace>>, TError,{data?: CreateWorkspaceRequestBody}, TContext>, fetch?: RequestInit}
+export const getCreateWorkspaceMutationOptions = <TError = AxiosError<N400Response | N401Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createWorkspace>>, TError,{data?: CreateWorkspaceRequestBody}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof createWorkspace>>, TError,{data?: CreateWorkspaceRequestBody}, TContext> => {
 
 const mutationKey = ['createWorkspace'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -120,7 +87,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof createWorkspace>>, {data?: CreateWorkspaceRequestBody}> = (props) => {
           const {data} = props ?? {};
 
-          return  createWorkspace(data,fetchOptions)
+          return  createWorkspace(data,axiosOptions)
         }
 
 
@@ -132,13 +99,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type CreateWorkspaceMutationResult = NonNullable<Awaited<ReturnType<typeof createWorkspace>>>
     export type CreateWorkspaceMutationBody = CreateWorkspaceRequestBody | undefined
-    export type CreateWorkspaceMutationError = N400Response | N401Response
+    export type CreateWorkspaceMutationError = AxiosError<N400Response | N401Response>
 
     /**
  * @summary Create a new workspace
  */
-export const useCreateWorkspace = <TError = N400Response | N401Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createWorkspace>>, TError,{data?: CreateWorkspaceRequestBody}, TContext>, fetch?: RequestInit}
+export const useCreateWorkspace = <TError = AxiosError<N400Response | N401Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createWorkspace>>, TError,{data?: CreateWorkspaceRequestBody}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof createWorkspace>>,
         TError,
@@ -147,55 +114,19 @@ export const useCreateWorkspace = <TError = N400Response | N401Response,
       > => {
       return useMutation(getCreateWorkspaceMutationOptions(options));
     }
-    export type listWorkspacesResponse200 = {
-  data: WorkspaceListResponseResponse
-  status: 200
-}
-
-export type listWorkspacesResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type listWorkspacesResponseSuccess = (listWorkspacesResponse200) & {
-  headers: Headers;
-};
-export type listWorkspacesResponseError = (listWorkspacesResponse401) & {
-  headers: Headers;
-};
-
-export type listWorkspacesResponse = (listWorkspacesResponseSuccess | listWorkspacesResponseError)
-
-export const getListWorkspacesUrl = () => {
-
-
-
-
-  return `/workspaces`
-}
-
-/**
+    /**
  * Retrieve a list of all workspaces that the authenticated user is a member of, including their roles within each workspace.
  * @summary List all workspaces the user is a member of
  */
-export const listWorkspaces = async ( options?: RequestInit): Promise<listWorkspacesResponse> => {
-
-  const res = await fetch(getListWorkspacesUrl(),
-  {
-    ...options,
-    method: 'GET'
+export const listWorkspaces = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<WorkspaceListResponseResponse>> => {
 
 
+    return axios.get(
+      `/workspaces`,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: listWorkspacesResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as listWorkspacesResponse
-}
-
 
 
 
@@ -207,16 +138,16 @@ export const getListWorkspacesQueryKey = () => {
     }
 
 
-export const getListWorkspacesQueryOptions = <TData = Awaited<ReturnType<typeof listWorkspaces>>, TError = N401Response>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listWorkspaces>>, TError, TData>, fetch?: RequestInit}
+export const getListWorkspacesQueryOptions = <TData = Awaited<ReturnType<typeof listWorkspaces>>, TError = AxiosError<N401Response>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listWorkspaces>>, TError, TData>, axios?: AxiosRequestConfig}
 ) => {
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getListWorkspacesQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listWorkspaces>>> = ({ signal }) => listWorkspaces({ signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listWorkspaces>>> = ({ signal }) => listWorkspaces({ signal, ...axiosOptions });
 
 
 
@@ -226,15 +157,15 @@ const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 }
 
 export type ListWorkspacesQueryResult = NonNullable<Awaited<ReturnType<typeof listWorkspaces>>>
-export type ListWorkspacesQueryError = N401Response
+export type ListWorkspacesQueryError = AxiosError<N401Response>
 
 
 /**
  * @summary List all workspaces the user is a member of
  */
 
-export function useListWorkspaces<TData = Awaited<ReturnType<typeof listWorkspaces>>, TError = N401Response>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listWorkspaces>>, TError, TData>, fetch?: RequestInit}
+export function useListWorkspaces<TData = Awaited<ReturnType<typeof listWorkspaces>>, TError = AxiosError<N401Response>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listWorkspaces>>, TError, TData>, axios?: AxiosRequestConfig}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
@@ -250,78 +181,33 @@ export function useListWorkspaces<TData = Awaited<ReturnType<typeof listWorkspac
 
 
 
-export type acceptWorkspacePaymentResponse200 = {
-  data: void
-  status: 200
-}
-
-export type acceptWorkspacePaymentResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type acceptWorkspacePaymentResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type acceptWorkspacePaymentResponse402 = {
-  data: N402Response
-  status: 402
-}
-
-export type acceptWorkspacePaymentResponseSuccess = (acceptWorkspacePaymentResponse200) & {
-  headers: Headers;
-};
-export type acceptWorkspacePaymentResponseError = (acceptWorkspacePaymentResponse400 | acceptWorkspacePaymentResponse401 | acceptWorkspacePaymentResponse402) & {
-  headers: Headers;
-};
-
-export type acceptWorkspacePaymentResponse = (acceptWorkspacePaymentResponseSuccess | acceptWorkspacePaymentResponseError)
-
-export const getAcceptWorkspacePaymentUrl = () => {
-
-
-
-
-  return `/workspaces/accept-payment`
-}
-
 /**
  * Confirm the Stripe Payment Intent for workspace creation. This endpoint should be called after the client completes the payment process using the client secret provided in the response of the workspace creation endpoint.
  * @summary Accept payment for workspace creation
  */
-export const acceptWorkspacePayment = async (acceptPaymentRequestBody?: AcceptPaymentRequestBody, options?: RequestInit): Promise<acceptWorkspacePaymentResponse> => {
+export const acceptWorkspacePayment = (
+    acceptPaymentRequestBody?: AcceptPaymentRequestBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
 
-  const res = await fetch(getAcceptWorkspacePaymentUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(acceptPaymentRequestBody)
+
+    return axios.post(
+      `/workspaces/accept-payment`,
+      acceptPaymentRequestBody,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: acceptWorkspacePaymentResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as acceptWorkspacePaymentResponse
-}
 
 
 
-
-export const getAcceptWorkspacePaymentMutationOptions = <TError = N400Response | N401Response | N402Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptWorkspacePayment>>, TError,{data?: AcceptPaymentRequestBody}, TContext>, fetch?: RequestInit}
+export const getAcceptWorkspacePaymentMutationOptions = <TError = AxiosError<N400Response | N401Response | N402Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptWorkspacePayment>>, TError,{data?: AcceptPaymentRequestBody}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof acceptWorkspacePayment>>, TError,{data?: AcceptPaymentRequestBody}, TContext> => {
 
 const mutationKey = ['acceptWorkspacePayment'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -329,7 +215,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof acceptWorkspacePayment>>, {data?: AcceptPaymentRequestBody}> = (props) => {
           const {data} = props ?? {};
 
-          return  acceptWorkspacePayment(data,fetchOptions)
+          return  acceptWorkspacePayment(data,axiosOptions)
         }
 
 
@@ -341,13 +227,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type AcceptWorkspacePaymentMutationResult = NonNullable<Awaited<ReturnType<typeof acceptWorkspacePayment>>>
     export type AcceptWorkspacePaymentMutationBody = AcceptPaymentRequestBody | undefined
-    export type AcceptWorkspacePaymentMutationError = N400Response | N401Response | N402Response
+    export type AcceptWorkspacePaymentMutationError = AxiosError<N400Response | N401Response | N402Response>
 
     /**
  * @summary Accept payment for workspace creation
  */
-export const useAcceptWorkspacePayment = <TError = N400Response | N401Response | N402Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptWorkspacePayment>>, TError,{data?: AcceptPaymentRequestBody}, TContext>, fetch?: RequestInit}
+export const useAcceptWorkspacePayment = <TError = AxiosError<N400Response | N401Response | N402Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof acceptWorkspacePayment>>, TError,{data?: AcceptPaymentRequestBody}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof acceptWorkspacePayment>>,
         TError,
@@ -356,88 +242,38 @@ export const useAcceptWorkspacePayment = <TError = N400Response | N401Response |
       > => {
       return useMutation(getAcceptWorkspacePaymentMutationOptions(options));
     }
-    export type updateWorkspaceLogoResponse200 = {
-  data: void
-  status: 200
-}
-
-export type updateWorkspaceLogoResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type updateWorkspaceLogoResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type updateWorkspaceLogoResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type updateWorkspaceLogoResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type updateWorkspaceLogoResponseSuccess = (updateWorkspaceLogoResponse200) & {
-  headers: Headers;
-};
-export type updateWorkspaceLogoResponseError = (updateWorkspaceLogoResponse400 | updateWorkspaceLogoResponse401 | updateWorkspaceLogoResponse403 | updateWorkspaceLogoResponse404) & {
-  headers: Headers;
-};
-
-export type updateWorkspaceLogoResponse = (updateWorkspaceLogoResponseSuccess | updateWorkspaceLogoResponseError)
-
-export const getUpdateWorkspaceLogoUrl = (workspaceId: string,) => {
-
-
-
-
-  return `/workspaces/${workspaceId}`
-}
-
-/**
+    /**
  * Update the logo of an existing workspace. Only the workspace owner can update the logo.
  * @summary Update workspace logo
  */
-export const updateWorkspaceLogo = async (workspaceId: string,
-    updateWorkspaceLogoRequestBody?: UpdateWorkspaceLogoRequestBody, options?: RequestInit): Promise<updateWorkspaceLogoResponse> => {
+export const updateWorkspaceLogo = (
+    workspaceId: string,
+    updateWorkspaceLogoRequestBody?: UpdateWorkspaceLogoRequestBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+
     const formData = new FormData();
 if(updateWorkspaceLogoRequestBody?.workspaceLogo !== undefined) {
  formData.append(`workspaceLogo`, updateWorkspaceLogoRequestBody.workspaceLogo);
  }
 
-  const res = await fetch(getUpdateWorkspaceLogoUrl(workspaceId),
-  {
-    ...options,
-    method: 'PATCH'
-    ,
-    body: formData
+    return axios.patch(
+      `/workspaces/${workspaceId}`,
+      formData,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: updateWorkspaceLogoResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as updateWorkspaceLogoResponse
-}
 
 
 
-
-export const getUpdateWorkspaceLogoMutationOptions = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWorkspaceLogo>>, TError,{workspaceId: string;data?: UpdateWorkspaceLogoRequestBody}, TContext>, fetch?: RequestInit}
+export const getUpdateWorkspaceLogoMutationOptions = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWorkspaceLogo>>, TError,{workspaceId: string;data?: UpdateWorkspaceLogoRequestBody}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateWorkspaceLogo>>, TError,{workspaceId: string;data?: UpdateWorkspaceLogoRequestBody}, TContext> => {
 
 const mutationKey = ['updateWorkspaceLogo'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -445,7 +281,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateWorkspaceLogo>>, {workspaceId: string;data?: UpdateWorkspaceLogoRequestBody}> = (props) => {
           const {workspaceId,data} = props ?? {};
 
-          return  updateWorkspaceLogo(workspaceId,data,fetchOptions)
+          return  updateWorkspaceLogo(workspaceId,data,axiosOptions)
         }
 
 
@@ -457,13 +293,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type UpdateWorkspaceLogoMutationResult = NonNullable<Awaited<ReturnType<typeof updateWorkspaceLogo>>>
     export type UpdateWorkspaceLogoMutationBody = UpdateWorkspaceLogoRequestBody | undefined
-    export type UpdateWorkspaceLogoMutationError = N400Response | N401Response | N403Response | N404Response
+    export type UpdateWorkspaceLogoMutationError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
     /**
  * @summary Update workspace logo
  */
-export const useUpdateWorkspaceLogo = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWorkspaceLogo>>, TError,{workspaceId: string;data?: UpdateWorkspaceLogoRequestBody}, TContext>, fetch?: RequestInit}
+export const useUpdateWorkspaceLogo = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateWorkspaceLogo>>, TError,{workspaceId: string;data?: UpdateWorkspaceLogoRequestBody}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof updateWorkspaceLogo>>,
         TError,

@@ -18,6 +18,13 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
+import axios from 'axios';
+import type {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse
+} from 'axios';
+
 import type {
   CurrentUserProfileResponseResponse,
   N400Response,
@@ -37,60 +44,19 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 
 
 
-export type getCurrentUserProfileResponse200 = {
-  data: CurrentUserProfileResponseResponse
-  status: 200
-}
-
-export type getCurrentUserProfileResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type getCurrentUserProfileResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type getCurrentUserProfileResponseSuccess = (getCurrentUserProfileResponse200) & {
-  headers: Headers;
-};
-export type getCurrentUserProfileResponseError = (getCurrentUserProfileResponse401 | getCurrentUserProfileResponse404) & {
-  headers: Headers;
-};
-
-export type getCurrentUserProfileResponse = (getCurrentUserProfileResponseSuccess | getCurrentUserProfileResponseError)
-
-export const getGetCurrentUserProfileUrl = () => {
-
-
-
-
-  return `/users/me`
-}
-
 /**
  * Retrieve the profile information of the currently authenticated user, including their name, email, profile picture URL, and the list of workspaces they are a member of.
  * @summary Get the profile of the currently authenticated user
  */
-export const getCurrentUserProfile = async ( options?: RequestInit): Promise<getCurrentUserProfileResponse> => {
-
-  const res = await fetch(getGetCurrentUserProfileUrl(),
-  {
-    ...options,
-    method: 'GET'
+export const getCurrentUserProfile = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<CurrentUserProfileResponseResponse>> => {
 
 
+    return axios.get(
+      `/users/me`,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getCurrentUserProfileResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getCurrentUserProfileResponse
-}
-
 
 
 
@@ -102,16 +68,16 @@ export const getGetCurrentUserProfileQueryKey = () => {
     }
 
 
-export const getGetCurrentUserProfileQueryOptions = <TData = Awaited<ReturnType<typeof getCurrentUserProfile>>, TError = N401Response | N404Response>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCurrentUserProfile>>, TError, TData>, fetch?: RequestInit}
+export const getGetCurrentUserProfileQueryOptions = <TData = Awaited<ReturnType<typeof getCurrentUserProfile>>, TError = AxiosError<N401Response | N404Response>>( options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCurrentUserProfile>>, TError, TData>, axios?: AxiosRequestConfig}
 ) => {
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetCurrentUserProfileQueryKey();
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCurrentUserProfile>>> = ({ signal }) => getCurrentUserProfile({ signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getCurrentUserProfile>>> = ({ signal }) => getCurrentUserProfile({ signal, ...axiosOptions });
 
 
 
@@ -121,15 +87,15 @@ const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 }
 
 export type GetCurrentUserProfileQueryResult = NonNullable<Awaited<ReturnType<typeof getCurrentUserProfile>>>
-export type GetCurrentUserProfileQueryError = N401Response | N404Response
+export type GetCurrentUserProfileQueryError = AxiosError<N401Response | N404Response>
 
 
 /**
  * @summary Get the profile of the currently authenticated user
  */
 
-export function useGetCurrentUserProfile<TData = Awaited<ReturnType<typeof getCurrentUserProfile>>, TError = N401Response | N404Response>(
-  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCurrentUserProfile>>, TError, TData>, fetch?: RequestInit}
+export function useGetCurrentUserProfile<TData = Awaited<ReturnType<typeof getCurrentUserProfile>>, TError = AxiosError<N401Response | N404Response>>(
+  options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getCurrentUserProfile>>, TError, TData>, axios?: AxiosRequestConfig}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
@@ -145,48 +111,14 @@ export function useGetCurrentUserProfile<TData = Awaited<ReturnType<typeof getCu
 
 
 
-export type updateCurrentUserProfileResponse200 = {
-  data: void
-  status: 200
-}
-
-export type updateCurrentUserProfileResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type updateCurrentUserProfileResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type updateCurrentUserProfileResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type updateCurrentUserProfileResponseSuccess = (updateCurrentUserProfileResponse200) & {
-  headers: Headers;
-};
-export type updateCurrentUserProfileResponseError = (updateCurrentUserProfileResponse400 | updateCurrentUserProfileResponse401 | updateCurrentUserProfileResponse404) & {
-  headers: Headers;
-};
-
-export type updateCurrentUserProfileResponse = (updateCurrentUserProfileResponseSuccess | updateCurrentUserProfileResponseError)
-
-export const getUpdateCurrentUserProfileUrl = () => {
-
-
-
-
-  return `/users/me`
-}
-
 /**
  * Update the profile information of the currently authenticated user, such as their name and profile picture. The email cannot be updated through this endpoint. To change the email, users must contact support.
  * @summary Update the profile of the currently authenticated user
  */
-export const updateCurrentUserProfile = async (updateCurrentUserProfileRequestBody: UpdateCurrentUserProfileRequestBody, options?: RequestInit): Promise<updateCurrentUserProfileResponse> => {
+export const updateCurrentUserProfile = (
+    updateCurrentUserProfileRequestBody: UpdateCurrentUserProfileRequestBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+
     const formData = new FormData();
 formData.append(`name`, updateCurrentUserProfileRequestBody.name);
 formData.append(`surname`, updateCurrentUserProfileRequestBody.surname);
@@ -196,35 +128,24 @@ if(updateCurrentUserProfileRequestBody.avatar !== undefined) {
  }
 formData.append(`status`, updateCurrentUserProfileRequestBody.status);
 
-  const res = await fetch(getUpdateCurrentUserProfileUrl(),
-  {
-    ...options,
-    method: 'PATCH'
-    ,
-    body: formData
+    return axios.patch(
+      `/users/me`,
+      formData,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: updateCurrentUserProfileResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as updateCurrentUserProfileResponse
-}
 
 
 
-
-export const getUpdateCurrentUserProfileMutationOptions = <TError = N400Response | N401Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCurrentUserProfile>>, TError,{data: UpdateCurrentUserProfileRequestBody}, TContext>, fetch?: RequestInit}
+export const getUpdateCurrentUserProfileMutationOptions = <TError = AxiosError<N400Response | N401Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCurrentUserProfile>>, TError,{data: UpdateCurrentUserProfileRequestBody}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateCurrentUserProfile>>, TError,{data: UpdateCurrentUserProfileRequestBody}, TContext> => {
 
 const mutationKey = ['updateCurrentUserProfile'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -232,7 +153,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateCurrentUserProfile>>, {data: UpdateCurrentUserProfileRequestBody}> = (props) => {
           const {data} = props ?? {};
 
-          return  updateCurrentUserProfile(data,fetchOptions)
+          return  updateCurrentUserProfile(data,axiosOptions)
         }
 
 
@@ -244,13 +165,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type UpdateCurrentUserProfileMutationResult = NonNullable<Awaited<ReturnType<typeof updateCurrentUserProfile>>>
     export type UpdateCurrentUserProfileMutationBody = UpdateCurrentUserProfileRequestBody
-    export type UpdateCurrentUserProfileMutationError = N400Response | N401Response | N404Response
+    export type UpdateCurrentUserProfileMutationError = AxiosError<N400Response | N401Response | N404Response>
 
     /**
  * @summary Update the profile of the currently authenticated user
  */
-export const useUpdateCurrentUserProfile = <TError = N400Response | N401Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCurrentUserProfile>>, TError,{data: UpdateCurrentUserProfileRequestBody}, TContext>, fetch?: RequestInit}
+export const useUpdateCurrentUserProfile = <TError = AxiosError<N400Response | N401Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateCurrentUserProfile>>, TError,{data: UpdateCurrentUserProfileRequestBody}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof updateCurrentUserProfile>>,
         TError,
@@ -259,73 +180,32 @@ export const useUpdateCurrentUserProfile = <TError = N400Response | N401Response
       > => {
       return useMutation(getUpdateCurrentUserProfileMutationOptions(options));
     }
-    export type deleteCurrentUserAccountResponse200 = {
-  data: void
-  status: 200
-}
-
-export type deleteCurrentUserAccountResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type deleteCurrentUserAccountResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type deleteCurrentUserAccountResponseSuccess = (deleteCurrentUserAccountResponse200) & {
-  headers: Headers;
-};
-export type deleteCurrentUserAccountResponseError = (deleteCurrentUserAccountResponse400 | deleteCurrentUserAccountResponse401) & {
-  headers: Headers;
-};
-
-export type deleteCurrentUserAccountResponse = (deleteCurrentUserAccountResponseSuccess | deleteCurrentUserAccountResponseError)
-
-export const getDeleteCurrentUserAccountUrl = () => {
-
-
-
-
-  return `/users/me`
-}
-
-/**
+    /**
  * Permanently delete the account of the currently authenticated user. This action cannot be undone and will remove all user data from the system. Users will be asked to confirm this action before proceeding.
  * @summary Delete the account of the currently authenticated user
  */
-export const deleteCurrentUserAccount = async ( options?: RequestInit): Promise<deleteCurrentUserAccountResponse> => {
-
-  const res = await fetch(getDeleteCurrentUserAccountUrl(),
-  {
-    ...options,
-    method: 'DELETE'
+export const deleteCurrentUserAccount = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
 
 
+    return axios.delete(
+      `/users/me`,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: deleteCurrentUserAccountResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as deleteCurrentUserAccountResponse
-}
 
 
 
-
-export const getDeleteCurrentUserAccountMutationOptions = <TError = N400Response | N401Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteCurrentUserAccount>>, TError,void, TContext>, fetch?: RequestInit}
+export const getDeleteCurrentUserAccountMutationOptions = <TError = AxiosError<N400Response | N401Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteCurrentUserAccount>>, TError,void, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteCurrentUserAccount>>, TError,void, TContext> => {
 
 const mutationKey = ['deleteCurrentUserAccount'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -333,7 +213,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteCurrentUserAccount>>, void> = () => {
 
 
-          return  deleteCurrentUserAccount(fetchOptions)
+          return  deleteCurrentUserAccount(axiosOptions)
         }
 
 
@@ -345,13 +225,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type DeleteCurrentUserAccountMutationResult = NonNullable<Awaited<ReturnType<typeof deleteCurrentUserAccount>>>
 
-    export type DeleteCurrentUserAccountMutationError = N400Response | N401Response
+    export type DeleteCurrentUserAccountMutationError = AxiosError<N400Response | N401Response>
 
     /**
  * @summary Delete the account of the currently authenticated user
  */
-export const useDeleteCurrentUserAccount = <TError = N400Response | N401Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteCurrentUserAccount>>, TError,void, TContext>, fetch?: RequestInit}
+export const useDeleteCurrentUserAccount = <TError = AxiosError<N400Response | N401Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteCurrentUserAccount>>, TError,void, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof deleteCurrentUserAccount>>,
         TError,
@@ -360,70 +240,19 @@ export const useDeleteCurrentUserAccount = <TError = N400Response | N401Response
       > => {
       return useMutation(getDeleteCurrentUserAccountMutationOptions(options));
     }
-    export type getUserProfileByEmailResponse200 = {
-  data: UsersListResponseResponse
-  status: 200
-}
-
-export type getUserProfileByEmailResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type getUserProfileByEmailResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type getUserProfileByEmailResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type getUserProfileByEmailResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type getUserProfileByEmailResponseSuccess = (getUserProfileByEmailResponse200) & {
-  headers: Headers;
-};
-export type getUserProfileByEmailResponseError = (getUserProfileByEmailResponse400 | getUserProfileByEmailResponse401 | getUserProfileByEmailResponse403 | getUserProfileByEmailResponse404) & {
-  headers: Headers;
-};
-
-export type getUserProfileByEmailResponse = (getUserProfileByEmailResponseSuccess | getUserProfileByEmailResponseError)
-
-export const getGetUserProfileByEmailUrl = (emailRegex: string,) => {
-
-
-
-
-  return `/users/${emailRegex}`
-}
-
-/**
+    /**
  * Retrieve the profile information of a user by their email address. This endpoint is useful for searching users when adding them to a workspace. Only workspace owners and admins can search for users by email.
  * @summary Get the profile of a user by email
  */
-export const getUserProfileByEmail = async (emailRegex: string, options?: RequestInit): Promise<getUserProfileByEmailResponse> => {
-
-  const res = await fetch(getGetUserProfileByEmailUrl(emailRegex),
-  {
-    ...options,
-    method: 'GET'
+export const getUserProfileByEmail = (
+    emailRegex: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<UsersListResponseResponse>> => {
 
 
+    return axios.get(
+      `/users/${emailRegex}`,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: getUserProfileByEmailResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as getUserProfileByEmailResponse
-}
-
 
 
 
@@ -435,16 +264,16 @@ export const getGetUserProfileByEmailQueryKey = (emailRegex: string,) => {
     }
 
 
-export const getGetUserProfileByEmailQueryOptions = <TData = Awaited<ReturnType<typeof getUserProfileByEmail>>, TError = N400Response | N401Response | N403Response | N404Response>(emailRegex: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserProfileByEmail>>, TError, TData>, fetch?: RequestInit}
+export const getGetUserProfileByEmailQueryOptions = <TData = Awaited<ReturnType<typeof getUserProfileByEmail>>, TError = AxiosError<N400Response | N401Response | N403Response | N404Response>>(emailRegex: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserProfileByEmail>>, TError, TData>, axios?: AxiosRequestConfig}
 ) => {
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getGetUserProfileByEmailQueryKey(emailRegex);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserProfileByEmail>>> = ({ signal }) => getUserProfileByEmail(emailRegex, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof getUserProfileByEmail>>> = ({ signal }) => getUserProfileByEmail(emailRegex, { signal, ...axiosOptions });
 
 
 
@@ -454,15 +283,15 @@ const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 }
 
 export type GetUserProfileByEmailQueryResult = NonNullable<Awaited<ReturnType<typeof getUserProfileByEmail>>>
-export type GetUserProfileByEmailQueryError = N400Response | N401Response | N403Response | N404Response
+export type GetUserProfileByEmailQueryError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
 
 /**
  * @summary Get the profile of a user by email
  */
 
-export function useGetUserProfileByEmail<TData = Awaited<ReturnType<typeof getUserProfileByEmail>>, TError = N400Response | N401Response | N403Response | N404Response>(
- emailRegex: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserProfileByEmail>>, TError, TData>, fetch?: RequestInit}
+export function useGetUserProfileByEmail<TData = Awaited<ReturnType<typeof getUserProfileByEmail>>, TError = AxiosError<N400Response | N401Response | N403Response | N404Response>>(
+ emailRegex: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof getUserProfileByEmail>>, TError, TData>, axios?: AxiosRequestConfig}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
@@ -478,85 +307,34 @@ export function useGetUserProfileByEmail<TData = Awaited<ReturnType<typeof getUs
 
 
 
-export type addUserToWorkspaceResponse200 = {
-  data: void
-  status: 200
-}
-
-export type addUserToWorkspaceResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type addUserToWorkspaceResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type addUserToWorkspaceResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type addUserToWorkspaceResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type addUserToWorkspaceResponseSuccess = (addUserToWorkspaceResponse200) & {
-  headers: Headers;
-};
-export type addUserToWorkspaceResponseError = (addUserToWorkspaceResponse400 | addUserToWorkspaceResponse401 | addUserToWorkspaceResponse403 | addUserToWorkspaceResponse404) & {
-  headers: Headers;
-};
-
-export type addUserToWorkspaceResponse = (addUserToWorkspaceResponseSuccess | addUserToWorkspaceResponseError)
-
-export const getAddUserToWorkspaceUrl = (userId: string,
-    workspaceId: string,) => {
-
-
-
-
-  return `/users/${userId}/workspaces/${workspaceId}`
-}
-
 /**
  * Add an existing user to a specific workspace. Only workspace owners can add users, and they cannot add themselves.
  * @summary Add a user to a workspace
  */
-export const addUserToWorkspace = async (userId: string,
-    workspaceId: string, options?: RequestInit): Promise<addUserToWorkspaceResponse> => {
-
-  const res = await fetch(getAddUserToWorkspaceUrl(userId,workspaceId),
-  {
-    ...options,
-    method: 'POST'
+export const addUserToWorkspace = (
+    userId: string,
+    workspaceId: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
 
 
+    return axios.post(
+      `/users/${userId}/workspaces/${workspaceId}`,
+      undefined,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: addUserToWorkspaceResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as addUserToWorkspaceResponse
-}
 
 
 
-
-export const getAddUserToWorkspaceMutationOptions = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addUserToWorkspace>>, TError,{userId: string;workspaceId: string}, TContext>, fetch?: RequestInit}
+export const getAddUserToWorkspaceMutationOptions = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addUserToWorkspace>>, TError,{userId: string;workspaceId: string}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof addUserToWorkspace>>, TError,{userId: string;workspaceId: string}, TContext> => {
 
 const mutationKey = ['addUserToWorkspace'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -564,7 +342,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof addUserToWorkspace>>, {userId: string;workspaceId: string}> = (props) => {
           const {userId,workspaceId} = props ?? {};
 
-          return  addUserToWorkspace(userId,workspaceId,fetchOptions)
+          return  addUserToWorkspace(userId,workspaceId,axiosOptions)
         }
 
 
@@ -576,13 +354,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type AddUserToWorkspaceMutationResult = NonNullable<Awaited<ReturnType<typeof addUserToWorkspace>>>
 
-    export type AddUserToWorkspaceMutationError = N400Response | N401Response | N403Response | N404Response
+    export type AddUserToWorkspaceMutationError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
     /**
  * @summary Add a user to a workspace
  */
-export const useAddUserToWorkspace = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addUserToWorkspace>>, TError,{userId: string;workspaceId: string}, TContext>, fetch?: RequestInit}
+export const useAddUserToWorkspace = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addUserToWorkspace>>, TError,{userId: string;workspaceId: string}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof addUserToWorkspace>>,
         TError,
@@ -591,85 +369,33 @@ export const useAddUserToWorkspace = <TError = N400Response | N401Response | N40
       > => {
       return useMutation(getAddUserToWorkspaceMutationOptions(options));
     }
-    export type removeUserFromWorkspaceResponse200 = {
-  data: void
-  status: 200
-}
-
-export type removeUserFromWorkspaceResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type removeUserFromWorkspaceResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type removeUserFromWorkspaceResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type removeUserFromWorkspaceResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type removeUserFromWorkspaceResponseSuccess = (removeUserFromWorkspaceResponse200) & {
-  headers: Headers;
-};
-export type removeUserFromWorkspaceResponseError = (removeUserFromWorkspaceResponse400 | removeUserFromWorkspaceResponse401 | removeUserFromWorkspaceResponse403 | removeUserFromWorkspaceResponse404) & {
-  headers: Headers;
-};
-
-export type removeUserFromWorkspaceResponse = (removeUserFromWorkspaceResponseSuccess | removeUserFromWorkspaceResponseError)
-
-export const getRemoveUserFromWorkspaceUrl = (userId: string,
-    workspaceId: string,) => {
-
-
-
-
-  return `/users/${userId}/workspaces/${workspaceId}`
-}
-
-/**
+    /**
  * Remove a user from a specific workspace. Only workspace owners can remove users, and they cannot remove themselves.
  * @summary Remove a user from a workspace
  */
-export const removeUserFromWorkspace = async (userId: string,
-    workspaceId: string, options?: RequestInit): Promise<removeUserFromWorkspaceResponse> => {
-
-  const res = await fetch(getRemoveUserFromWorkspaceUrl(userId,workspaceId),
-  {
-    ...options,
-    method: 'DELETE'
+export const removeUserFromWorkspace = (
+    userId: string,
+    workspaceId: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
 
 
+    return axios.delete(
+      `/users/${userId}/workspaces/${workspaceId}`,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: removeUserFromWorkspaceResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as removeUserFromWorkspaceResponse
-}
 
 
 
-
-export const getRemoveUserFromWorkspaceMutationOptions = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeUserFromWorkspace>>, TError,{userId: string;workspaceId: string}, TContext>, fetch?: RequestInit}
+export const getRemoveUserFromWorkspaceMutationOptions = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeUserFromWorkspace>>, TError,{userId: string;workspaceId: string}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof removeUserFromWorkspace>>, TError,{userId: string;workspaceId: string}, TContext> => {
 
 const mutationKey = ['removeUserFromWorkspace'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -677,7 +403,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeUserFromWorkspace>>, {userId: string;workspaceId: string}> = (props) => {
           const {userId,workspaceId} = props ?? {};
 
-          return  removeUserFromWorkspace(userId,workspaceId,fetchOptions)
+          return  removeUserFromWorkspace(userId,workspaceId,axiosOptions)
         }
 
 
@@ -689,13 +415,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type RemoveUserFromWorkspaceMutationResult = NonNullable<Awaited<ReturnType<typeof removeUserFromWorkspace>>>
 
-    export type RemoveUserFromWorkspaceMutationError = N400Response | N401Response | N403Response | N404Response
+    export type RemoveUserFromWorkspaceMutationError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
     /**
  * @summary Remove a user from a workspace
  */
-export const useRemoveUserFromWorkspace = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeUserFromWorkspace>>, TError,{userId: string;workspaceId: string}, TContext>, fetch?: RequestInit}
+export const useRemoveUserFromWorkspace = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeUserFromWorkspace>>, TError,{userId: string;workspaceId: string}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof removeUserFromWorkspace>>,
         TError,
@@ -704,86 +430,35 @@ export const useRemoveUserFromWorkspace = <TError = N400Response | N401Response 
       > => {
       return useMutation(getRemoveUserFromWorkspaceMutationOptions(options));
     }
-    export type updateUserRoleInWorkspaceResponse200 = {
-  data: void
-  status: 200
-}
-
-export type updateUserRoleInWorkspaceResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type updateUserRoleInWorkspaceResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type updateUserRoleInWorkspaceResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type updateUserRoleInWorkspaceResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type updateUserRoleInWorkspaceResponseSuccess = (updateUserRoleInWorkspaceResponse200) & {
-  headers: Headers;
-};
-export type updateUserRoleInWorkspaceResponseError = (updateUserRoleInWorkspaceResponse400 | updateUserRoleInWorkspaceResponse401 | updateUserRoleInWorkspaceResponse403 | updateUserRoleInWorkspaceResponse404) & {
-  headers: Headers;
-};
-
-export type updateUserRoleInWorkspaceResponse = (updateUserRoleInWorkspaceResponseSuccess | updateUserRoleInWorkspaceResponseError)
-
-export const getUpdateUserRoleInWorkspaceUrl = (userId: string,
-    workspaceId: string,) => {
-
-
-
-
-  return `/users/${userId}/workspaces/${workspaceId}/role`
-}
-
-/**
+    /**
  * Update the role of a user within a specific workspace. Only workspace owners can update user roles, and they cannot change their own role.
  * @summary Update a user's role in a workspace
  */
-export const updateUserRoleInWorkspace = async (userId: string,
+export const updateUserRoleInWorkspace = (
+    userId: string,
     workspaceId: string,
-    updateUserRoleRequestBody: UpdateUserRoleRequestBody, options?: RequestInit): Promise<updateUserRoleInWorkspaceResponse> => {
+    updateUserRoleRequestBody: UpdateUserRoleRequestBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
 
-  const res = await fetch(getUpdateUserRoleInWorkspaceUrl(userId,workspaceId),
-  {
-    ...options,
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(updateUserRoleRequestBody)
+
+    return axios.patch(
+      `/users/${userId}/workspaces/${workspaceId}/role`,
+      updateUserRoleRequestBody,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: updateUserRoleInWorkspaceResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as updateUserRoleInWorkspaceResponse
-}
 
 
 
-
-export const getUpdateUserRoleInWorkspaceMutationOptions = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUserRoleInWorkspace>>, TError,{userId: string;workspaceId: string;data: UpdateUserRoleRequestBody}, TContext>, fetch?: RequestInit}
+export const getUpdateUserRoleInWorkspaceMutationOptions = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUserRoleInWorkspace>>, TError,{userId: string;workspaceId: string;data: UpdateUserRoleRequestBody}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateUserRoleInWorkspace>>, TError,{userId: string;workspaceId: string;data: UpdateUserRoleRequestBody}, TContext> => {
 
 const mutationKey = ['updateUserRoleInWorkspace'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -791,7 +466,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateUserRoleInWorkspace>>, {userId: string;workspaceId: string;data: UpdateUserRoleRequestBody}> = (props) => {
           const {userId,workspaceId,data} = props ?? {};
 
-          return  updateUserRoleInWorkspace(userId,workspaceId,data,fetchOptions)
+          return  updateUserRoleInWorkspace(userId,workspaceId,data,axiosOptions)
         }
 
 
@@ -803,13 +478,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type UpdateUserRoleInWorkspaceMutationResult = NonNullable<Awaited<ReturnType<typeof updateUserRoleInWorkspace>>>
     export type UpdateUserRoleInWorkspaceMutationBody = UpdateUserRoleRequestBody
-    export type UpdateUserRoleInWorkspaceMutationError = N400Response | N401Response | N403Response | N404Response
+    export type UpdateUserRoleInWorkspaceMutationError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
     /**
  * @summary Update a user's role in a workspace
  */
-export const useUpdateUserRoleInWorkspace = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUserRoleInWorkspace>>, TError,{userId: string;workspaceId: string;data: UpdateUserRoleRequestBody}, TContext>, fetch?: RequestInit}
+export const useUpdateUserRoleInWorkspace = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateUserRoleInWorkspace>>, TError,{userId: string;workspaceId: string;data: UpdateUserRoleRequestBody}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof updateUserRoleInWorkspace>>,
         TError,

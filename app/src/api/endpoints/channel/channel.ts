@@ -18,6 +18,13 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
+import axios from 'axios';
+import type {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse
+} from 'axios';
+
 import type {
   ChannelListResponseResponse,
   CreateChannelRequestBody,
@@ -36,84 +43,34 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 
 
 
-export type createChannelResponse201 = {
-  data: void
-  status: 201
-}
-
-export type createChannelResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type createChannelResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type createChannelResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type createChannelResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type createChannelResponseSuccess = (createChannelResponse201) & {
-  headers: Headers;
-};
-export type createChannelResponseError = (createChannelResponse400 | createChannelResponse401 | createChannelResponse403 | createChannelResponse404) & {
-  headers: Headers;
-};
-
-export type createChannelResponse = (createChannelResponseSuccess | createChannelResponseError)
-
-export const getCreateChannelUrl = (workspaceId: string,) => {
-
-
-
-
-  return `/workspaces/${workspaceId}/channels`
-}
-
 /**
  * Create a new channel within the specified workspace. The user creating the channel will be added as a member of that channel. Only owners and admins of the workspace can create channels.
  * @summary Create a new channel in a workspace
  */
-export const createChannel = async (workspaceId: string,
-    createChannelRequestBody: CreateChannelRequestBody, options?: RequestInit): Promise<createChannelResponse> => {
+export const createChannel = (
+    workspaceId: string,
+    createChannelRequestBody: CreateChannelRequestBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
 
-  const res = await fetch(getCreateChannelUrl(workspaceId),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(createChannelRequestBody)
+
+    return axios.post(
+      `/workspaces/${workspaceId}/channels`,
+      createChannelRequestBody,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: createChannelResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as createChannelResponse
-}
 
 
 
-
-export const getCreateChannelMutationOptions = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createChannel>>, TError,{workspaceId: string;data: CreateChannelRequestBody}, TContext>, fetch?: RequestInit}
+export const getCreateChannelMutationOptions = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createChannel>>, TError,{workspaceId: string;data: CreateChannelRequestBody}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof createChannel>>, TError,{workspaceId: string;data: CreateChannelRequestBody}, TContext> => {
 
 const mutationKey = ['createChannel'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -121,7 +78,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof createChannel>>, {workspaceId: string;data: CreateChannelRequestBody}> = (props) => {
           const {workspaceId,data} = props ?? {};
 
-          return  createChannel(workspaceId,data,fetchOptions)
+          return  createChannel(workspaceId,data,axiosOptions)
         }
 
 
@@ -133,13 +90,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type CreateChannelMutationResult = NonNullable<Awaited<ReturnType<typeof createChannel>>>
     export type CreateChannelMutationBody = CreateChannelRequestBody
-    export type CreateChannelMutationError = N400Response | N401Response | N403Response | N404Response
+    export type CreateChannelMutationError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
     /**
  * @summary Create a new channel in a workspace
  */
-export const useCreateChannel = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createChannel>>, TError,{workspaceId: string;data: CreateChannelRequestBody}, TContext>, fetch?: RequestInit}
+export const useCreateChannel = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createChannel>>, TError,{workspaceId: string;data: CreateChannelRequestBody}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof createChannel>>,
         TError,
@@ -148,70 +105,19 @@ export const useCreateChannel = <TError = N400Response | N401Response | N403Resp
       > => {
       return useMutation(getCreateChannelMutationOptions(options));
     }
-    export type listChannelsResponse200 = {
-  data: ChannelListResponseResponse
-  status: 200
-}
-
-export type listChannelsResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type listChannelsResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type listChannelsResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type listChannelsResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type listChannelsResponseSuccess = (listChannelsResponse200) & {
-  headers: Headers;
-};
-export type listChannelsResponseError = (listChannelsResponse400 | listChannelsResponse401 | listChannelsResponse403 | listChannelsResponse404) & {
-  headers: Headers;
-};
-
-export type listChannelsResponse = (listChannelsResponseSuccess | listChannelsResponseError)
-
-export const getListChannelsUrl = (workspaceId: string,) => {
-
-
-
-
-  return `/workspaces/${workspaceId}/channels`
-}
-
-/**
+    /**
  * Retrieve a list of all channels within the specified workspace.
  * @summary List all channels in a workspace
  */
-export const listChannels = async (workspaceId: string, options?: RequestInit): Promise<listChannelsResponse> => {
-
-  const res = await fetch(getListChannelsUrl(workspaceId),
-  {
-    ...options,
-    method: 'GET'
+export const listChannels = (
+    workspaceId: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<ChannelListResponseResponse>> => {
 
 
+    return axios.get(
+      `/workspaces/${workspaceId}/channels`,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: listChannelsResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as listChannelsResponse
-}
-
 
 
 
@@ -223,16 +129,16 @@ export const getListChannelsQueryKey = (workspaceId: string,) => {
     }
 
 
-export const getListChannelsQueryOptions = <TData = Awaited<ReturnType<typeof listChannels>>, TError = N400Response | N401Response | N403Response | N404Response>(workspaceId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChannels>>, TError, TData>, fetch?: RequestInit}
+export const getListChannelsQueryOptions = <TData = Awaited<ReturnType<typeof listChannels>>, TError = AxiosError<N400Response | N401Response | N403Response | N404Response>>(workspaceId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChannels>>, TError, TData>, axios?: AxiosRequestConfig}
 ) => {
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getListChannelsQueryKey(workspaceId);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listChannels>>> = ({ signal }) => listChannels(workspaceId, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listChannels>>> = ({ signal }) => listChannels(workspaceId, { signal, ...axiosOptions });
 
 
 
@@ -242,15 +148,15 @@ const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 }
 
 export type ListChannelsQueryResult = NonNullable<Awaited<ReturnType<typeof listChannels>>>
-export type ListChannelsQueryError = N400Response | N401Response | N403Response | N404Response
+export type ListChannelsQueryError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
 
 /**
  * @summary List all channels in a workspace
  */
 
-export function useListChannels<TData = Awaited<ReturnType<typeof listChannels>>, TError = N400Response | N401Response | N403Response | N404Response>(
- workspaceId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChannels>>, TError, TData>, fetch?: RequestInit}
+export function useListChannels<TData = Awaited<ReturnType<typeof listChannels>>, TError = AxiosError<N400Response | N401Response | N403Response | N404Response>>(
+ workspaceId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChannels>>, TError, TData>, axios?: AxiosRequestConfig}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
@@ -266,86 +172,35 @@ export function useListChannels<TData = Awaited<ReturnType<typeof listChannels>>
 
 
 
-export type updateChannelNameResponse200 = {
-  data: void
-  status: 200
-}
-
-export type updateChannelNameResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type updateChannelNameResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type updateChannelNameResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type updateChannelNameResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type updateChannelNameResponseSuccess = (updateChannelNameResponse200) & {
-  headers: Headers;
-};
-export type updateChannelNameResponseError = (updateChannelNameResponse400 | updateChannelNameResponse401 | updateChannelNameResponse403 | updateChannelNameResponse404) & {
-  headers: Headers;
-};
-
-export type updateChannelNameResponse = (updateChannelNameResponseSuccess | updateChannelNameResponseError)
-
-export const getUpdateChannelNameUrl = (workspaceId: string,
-    channelId: string,) => {
-
-
-
-
-  return `/workspaces/${workspaceId}/channels/${channelId}`
-}
-
 /**
  * Update the name of an existing channel within the specified workspace. Only owners and admins of the workspace can update channel names.
  * @summary Update the name of a channel
  */
-export const updateChannelName = async (workspaceId: string,
+export const updateChannelName = (
+    workspaceId: string,
     channelId: string,
-    updateChannelNameRequestBody: UpdateChannelNameRequestBody, options?: RequestInit): Promise<updateChannelNameResponse> => {
+    updateChannelNameRequestBody: UpdateChannelNameRequestBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
 
-  const res = await fetch(getUpdateChannelNameUrl(workspaceId,channelId),
-  {
-    ...options,
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(updateChannelNameRequestBody)
+
+    return axios.patch(
+      `/workspaces/${workspaceId}/channels/${channelId}`,
+      updateChannelNameRequestBody,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: updateChannelNameResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as updateChannelNameResponse
-}
 
 
 
-
-export const getUpdateChannelNameMutationOptions = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChannelName>>, TError,{workspaceId: string;channelId: string;data: UpdateChannelNameRequestBody}, TContext>, fetch?: RequestInit}
+export const getUpdateChannelNameMutationOptions = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChannelName>>, TError,{workspaceId: string;channelId: string;data: UpdateChannelNameRequestBody}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateChannelName>>, TError,{workspaceId: string;channelId: string;data: UpdateChannelNameRequestBody}, TContext> => {
 
 const mutationKey = ['updateChannelName'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -353,7 +208,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateChannelName>>, {workspaceId: string;channelId: string;data: UpdateChannelNameRequestBody}> = (props) => {
           const {workspaceId,channelId,data} = props ?? {};
 
-          return  updateChannelName(workspaceId,channelId,data,fetchOptions)
+          return  updateChannelName(workspaceId,channelId,data,axiosOptions)
         }
 
 
@@ -365,13 +220,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type UpdateChannelNameMutationResult = NonNullable<Awaited<ReturnType<typeof updateChannelName>>>
     export type UpdateChannelNameMutationBody = UpdateChannelNameRequestBody
-    export type UpdateChannelNameMutationError = N400Response | N401Response | N403Response | N404Response
+    export type UpdateChannelNameMutationError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
     /**
  * @summary Update the name of a channel
  */
-export const useUpdateChannelName = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChannelName>>, TError,{workspaceId: string;channelId: string;data: UpdateChannelNameRequestBody}, TContext>, fetch?: RequestInit}
+export const useUpdateChannelName = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChannelName>>, TError,{workspaceId: string;channelId: string;data: UpdateChannelNameRequestBody}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof updateChannelName>>,
         TError,
@@ -380,85 +235,33 @@ export const useUpdateChannelName = <TError = N400Response | N401Response | N403
       > => {
       return useMutation(getUpdateChannelNameMutationOptions(options));
     }
-    export type deleteChannelResponse200 = {
-  data: void
-  status: 200
-}
-
-export type deleteChannelResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type deleteChannelResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type deleteChannelResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type deleteChannelResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type deleteChannelResponseSuccess = (deleteChannelResponse200) & {
-  headers: Headers;
-};
-export type deleteChannelResponseError = (deleteChannelResponse400 | deleteChannelResponse401 | deleteChannelResponse403 | deleteChannelResponse404) & {
-  headers: Headers;
-};
-
-export type deleteChannelResponse = (deleteChannelResponseSuccess | deleteChannelResponseError)
-
-export const getDeleteChannelUrl = (workspaceId: string,
-    channelId: string,) => {
-
-
-
-
-  return `/workspaces/${workspaceId}/channels/${channelId}`
-}
-
-/**
+    /**
  * Delete an existing channel from the specified workspace. Only owners and admins of the workspace can delete channels.
  * @summary Delete a channel from a workspace
  */
-export const deleteChannel = async (workspaceId: string,
-    channelId: string, options?: RequestInit): Promise<deleteChannelResponse> => {
-
-  const res = await fetch(getDeleteChannelUrl(workspaceId,channelId),
-  {
-    ...options,
-    method: 'DELETE'
+export const deleteChannel = (
+    workspaceId: string,
+    channelId: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
 
 
+    return axios.delete(
+      `/workspaces/${workspaceId}/channels/${channelId}`,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: deleteChannelResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as deleteChannelResponse
-}
 
 
 
-
-export const getDeleteChannelMutationOptions = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteChannel>>, TError,{workspaceId: string;channelId: string}, TContext>, fetch?: RequestInit}
+export const getDeleteChannelMutationOptions = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteChannel>>, TError,{workspaceId: string;channelId: string}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteChannel>>, TError,{workspaceId: string;channelId: string}, TContext> => {
 
 const mutationKey = ['deleteChannel'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -466,7 +269,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteChannel>>, {workspaceId: string;channelId: string}> = (props) => {
           const {workspaceId,channelId} = props ?? {};
 
-          return  deleteChannel(workspaceId,channelId,fetchOptions)
+          return  deleteChannel(workspaceId,channelId,axiosOptions)
         }
 
 
@@ -478,13 +281,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type DeleteChannelMutationResult = NonNullable<Awaited<ReturnType<typeof deleteChannel>>>
 
-    export type DeleteChannelMutationError = N400Response | N401Response | N403Response | N404Response
+    export type DeleteChannelMutationError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
     /**
  * @summary Delete a channel from a workspace
  */
-export const useDeleteChannel = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteChannel>>, TError,{workspaceId: string;channelId: string}, TContext>, fetch?: RequestInit}
+export const useDeleteChannel = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteChannel>>, TError,{workspaceId: string;channelId: string}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof deleteChannel>>,
         TError,

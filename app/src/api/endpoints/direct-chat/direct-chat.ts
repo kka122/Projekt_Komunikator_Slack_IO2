@@ -14,6 +14,13 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
+import axios from 'axios';
+import type {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse
+} from 'axios';
+
 import type {
   DirectChatListResponseResponse,
   N400Response,
@@ -30,70 +37,19 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 
 
 
-export type listDirectChatsResponse200 = {
-  data: DirectChatListResponseResponse
-  status: 200
-}
-
-export type listDirectChatsResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type listDirectChatsResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type listDirectChatsResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type listDirectChatsResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type listDirectChatsResponseSuccess = (listDirectChatsResponse200) & {
-  headers: Headers;
-};
-export type listDirectChatsResponseError = (listDirectChatsResponse400 | listDirectChatsResponse401 | listDirectChatsResponse403 | listDirectChatsResponse404) & {
-  headers: Headers;
-};
-
-export type listDirectChatsResponse = (listDirectChatsResponseSuccess | listDirectChatsResponseError)
-
-export const getListDirectChatsUrl = (workspaceId: string,) => {
-
-
-
-
-  return `/workspaces/${workspaceId}/direct-chats`
-}
-
 /**
  * Retrieve a list of all direct chats that the authenticated user is a part of within the specified workspace.
  * @summary List all direct chats in a workspace
  */
-export const listDirectChats = async (workspaceId: string, options?: RequestInit): Promise<listDirectChatsResponse> => {
-
-  const res = await fetch(getListDirectChatsUrl(workspaceId),
-  {
-    ...options,
-    method: 'GET'
+export const listDirectChats = (
+    workspaceId: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<DirectChatListResponseResponse>> => {
 
 
+    return axios.get(
+      `/workspaces/${workspaceId}/direct-chats`,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: listDirectChatsResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as listDirectChatsResponse
-}
-
 
 
 
@@ -105,16 +61,16 @@ export const getListDirectChatsQueryKey = (workspaceId: string,) => {
     }
 
 
-export const getListDirectChatsQueryOptions = <TData = Awaited<ReturnType<typeof listDirectChats>>, TError = N400Response | N401Response | N403Response | N404Response>(workspaceId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDirectChats>>, TError, TData>, fetch?: RequestInit}
+export const getListDirectChatsQueryOptions = <TData = Awaited<ReturnType<typeof listDirectChats>>, TError = AxiosError<N400Response | N401Response | N403Response | N404Response>>(workspaceId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDirectChats>>, TError, TData>, axios?: AxiosRequestConfig}
 ) => {
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getListDirectChatsQueryKey(workspaceId);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listDirectChats>>> = ({ signal }) => listDirectChats(workspaceId, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listDirectChats>>> = ({ signal }) => listDirectChats(workspaceId, { signal, ...axiosOptions });
 
 
 
@@ -124,15 +80,15 @@ const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 }
 
 export type ListDirectChatsQueryResult = NonNullable<Awaited<ReturnType<typeof listDirectChats>>>
-export type ListDirectChatsQueryError = N400Response | N401Response | N403Response | N404Response
+export type ListDirectChatsQueryError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
 
 /**
  * @summary List all direct chats in a workspace
  */
 
-export function useListDirectChats<TData = Awaited<ReturnType<typeof listDirectChats>>, TError = N400Response | N401Response | N403Response | N404Response>(
- workspaceId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDirectChats>>, TError, TData>, fetch?: RequestInit}
+export function useListDirectChats<TData = Awaited<ReturnType<typeof listDirectChats>>, TError = AxiosError<N400Response | N401Response | N403Response | N404Response>>(
+ workspaceId: string, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDirectChats>>, TError, TData>, axios?: AxiosRequestConfig}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 

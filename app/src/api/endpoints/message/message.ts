@@ -18,6 +18,13 @@ import type {
   UseQueryResult
 } from '@tanstack/react-query';
 
+import axios from 'axios';
+import type {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse
+} from 'axios';
+
 import type {
   CreateMessageRequestBody,
   MessageListResponseResponse,
@@ -36,56 +43,16 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 
 
 
-export type createChannelMessageResponse201 = {
-  data: void
-  status: 201
-}
-
-export type createChannelMessageResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type createChannelMessageResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type createChannelMessageResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type createChannelMessageResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type createChannelMessageResponseSuccess = (createChannelMessageResponse201) & {
-  headers: Headers;
-};
-export type createChannelMessageResponseError = (createChannelMessageResponse400 | createChannelMessageResponse401 | createChannelMessageResponse403 | createChannelMessageResponse404) & {
-  headers: Headers;
-};
-
-export type createChannelMessageResponse = (createChannelMessageResponseSuccess | createChannelMessageResponseError)
-
-export const getCreateChannelMessageUrl = (workspaceId: string,
-    channelId: string,) => {
-
-
-
-
-  return `/workspaces/${workspaceId}/channels/${channelId}/messages`
-}
-
 /**
  * Create a new message within the specified channel. The authenticated user will be set as the author of the message. Only members of the channel can create messages.
  * @summary Create a new message in a channel
  */
-export const createChannelMessage = async (workspaceId: string,
+export const createChannelMessage = (
+    workspaceId: string,
     channelId: string,
-    createMessageRequestBody?: CreateMessageRequestBody, options?: RequestInit): Promise<createChannelMessageResponse> => {
+    createMessageRequestBody?: CreateMessageRequestBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+
     const formData = new FormData();
 if(createMessageRequestBody?.content !== undefined) {
  formData.append(`content`, createMessageRequestBody.content);
@@ -94,35 +61,24 @@ if(createMessageRequestBody?.attachments !== undefined) {
  createMessageRequestBody?.attachments.forEach(value => formData.append(`attachments`, value));
  }
 
-  const res = await fetch(getCreateChannelMessageUrl(workspaceId,channelId),
-  {
-    ...options,
-    method: 'POST'
-    ,
-    body: formData
+    return axios.post(
+      `/workspaces/${workspaceId}/channels/${channelId}/messages`,
+      formData,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: createChannelMessageResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as createChannelMessageResponse
-}
 
 
 
-
-export const getCreateChannelMessageMutationOptions = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createChannelMessage>>, TError,{workspaceId: string;channelId: string;data?: CreateMessageRequestBody}, TContext>, fetch?: RequestInit}
+export const getCreateChannelMessageMutationOptions = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createChannelMessage>>, TError,{workspaceId: string;channelId: string;data?: CreateMessageRequestBody}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof createChannelMessage>>, TError,{workspaceId: string;channelId: string;data?: CreateMessageRequestBody}, TContext> => {
 
 const mutationKey = ['createChannelMessage'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -130,7 +86,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof createChannelMessage>>, {workspaceId: string;channelId: string;data?: CreateMessageRequestBody}> = (props) => {
           const {workspaceId,channelId,data} = props ?? {};
 
-          return  createChannelMessage(workspaceId,channelId,data,fetchOptions)
+          return  createChannelMessage(workspaceId,channelId,data,axiosOptions)
         }
 
 
@@ -142,13 +98,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type CreateChannelMessageMutationResult = NonNullable<Awaited<ReturnType<typeof createChannelMessage>>>
     export type CreateChannelMessageMutationBody = CreateMessageRequestBody | undefined
-    export type CreateChannelMessageMutationError = N400Response | N401Response | N403Response | N404Response
+    export type CreateChannelMessageMutationError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
     /**
  * @summary Create a new message in a channel
  */
-export const useCreateChannelMessage = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createChannelMessage>>, TError,{workspaceId: string;channelId: string;data?: CreateMessageRequestBody}, TContext>, fetch?: RequestInit}
+export const useCreateChannelMessage = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createChannelMessage>>, TError,{workspaceId: string;channelId: string;data?: CreateMessageRequestBody}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof createChannelMessage>>,
         TError,
@@ -157,76 +113,22 @@ export const useCreateChannelMessage = <TError = N400Response | N401Response | N
       > => {
       return useMutation(getCreateChannelMessageMutationOptions(options));
     }
-    export type listChannelMessagesResponse200 = {
-  data: MessageListResponseResponse
-  status: 200
-}
-
-export type listChannelMessagesResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type listChannelMessagesResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type listChannelMessagesResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type listChannelMessagesResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type listChannelMessagesResponseSuccess = (listChannelMessagesResponse200) & {
-  headers: Headers;
-};
-export type listChannelMessagesResponseError = (listChannelMessagesResponse400 | listChannelMessagesResponse401 | listChannelMessagesResponse403 | listChannelMessagesResponse404) & {
-  headers: Headers;
-};
-
-export type listChannelMessagesResponse = (listChannelMessagesResponseSuccess | listChannelMessagesResponseError)
-
-export const getListChannelMessagesUrl = (workspaceId: string,
-    channelId: string,
-    pageSize: number = 20,
-    page: number = 1,) => {
-
-
-
-
-  return `/workspaces/${workspaceId}/channels/${channelId}/messages/${pageSize}/${page}`
-}
-
-/**
+    /**
  * Retrieve a paginated list of messages within the specified channel. Only members of the channel can view its messages.
  * @summary List messages in a channel with pagination
  */
-export const listChannelMessages = async (workspaceId: string,
+export const listChannelMessages = (
+    workspaceId: string,
     channelId: string,
     pageSize: number = 20,
-    page: number = 1, options?: RequestInit): Promise<listChannelMessagesResponse> => {
-
-  const res = await fetch(getListChannelMessagesUrl(workspaceId,channelId,pageSize,page),
-  {
-    ...options,
-    method: 'GET'
+    page: number = 1, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<MessageListResponseResponse>> => {
 
 
+    return axios.get(
+      `/workspaces/${workspaceId}/channels/${channelId}/messages/${pageSize}/${page}`,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: listChannelMessagesResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as listChannelMessagesResponse
-}
-
 
 
 
@@ -241,19 +143,19 @@ export const getListChannelMessagesQueryKey = (workspaceId: string,
     }
 
 
-export const getListChannelMessagesQueryOptions = <TData = Awaited<ReturnType<typeof listChannelMessages>>, TError = N400Response | N401Response | N403Response | N404Response>(workspaceId: string,
+export const getListChannelMessagesQueryOptions = <TData = Awaited<ReturnType<typeof listChannelMessages>>, TError = AxiosError<N400Response | N401Response | N403Response | N404Response>>(workspaceId: string,
     channelId: string,
     pageSize: number = 20,
-    page: number = 1, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChannelMessages>>, TError, TData>, fetch?: RequestInit}
+    page: number = 1, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChannelMessages>>, TError, TData>, axios?: AxiosRequestConfig}
 ) => {
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getListChannelMessagesQueryKey(workspaceId,channelId,pageSize,page);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listChannelMessages>>> = ({ signal }) => listChannelMessages(workspaceId,channelId,pageSize,page, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listChannelMessages>>> = ({ signal }) => listChannelMessages(workspaceId,channelId,pageSize,page, { signal, ...axiosOptions });
 
 
 
@@ -263,18 +165,18 @@ const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 }
 
 export type ListChannelMessagesQueryResult = NonNullable<Awaited<ReturnType<typeof listChannelMessages>>>
-export type ListChannelMessagesQueryError = N400Response | N401Response | N403Response | N404Response
+export type ListChannelMessagesQueryError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
 
 /**
  * @summary List messages in a channel with pagination
  */
 
-export function useListChannelMessages<TData = Awaited<ReturnType<typeof listChannelMessages>>, TError = N400Response | N401Response | N403Response | N404Response>(
+export function useListChannelMessages<TData = Awaited<ReturnType<typeof listChannelMessages>>, TError = AxiosError<N400Response | N401Response | N403Response | N404Response>>(
  workspaceId: string,
     channelId: string,
     pageSize: number = 20,
-    page: number = 1, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChannelMessages>>, TError, TData>, fetch?: RequestInit}
+    page: number = 1, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listChannelMessages>>, TError, TData>, axios?: AxiosRequestConfig}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
@@ -290,88 +192,36 @@ export function useListChannelMessages<TData = Awaited<ReturnType<typeof listCha
 
 
 
-export type updateChannelMessageResponse200 = {
-  data: void
-  status: 200
-}
-
-export type updateChannelMessageResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type updateChannelMessageResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type updateChannelMessageResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type updateChannelMessageResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type updateChannelMessageResponseSuccess = (updateChannelMessageResponse200) & {
-  headers: Headers;
-};
-export type updateChannelMessageResponseError = (updateChannelMessageResponse400 | updateChannelMessageResponse401 | updateChannelMessageResponse403 | updateChannelMessageResponse404) & {
-  headers: Headers;
-};
-
-export type updateChannelMessageResponse = (updateChannelMessageResponseSuccess | updateChannelMessageResponseError)
-
-export const getUpdateChannelMessageUrl = (workspaceId: string,
-    channelId: string,
-    messageId: string,) => {
-
-
-
-
-  return `/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}`
-}
-
 /**
  * Update the content of an existing message within the specified channel. Only the author of the message can update it.
  * @summary Update a message in a channel
  */
-export const updateChannelMessage = async (workspaceId: string,
+export const updateChannelMessage = (
+    workspaceId: string,
     channelId: string,
     messageId: string,
-    updateMessageRequestBody?: UpdateMessageRequestBody, options?: RequestInit): Promise<updateChannelMessageResponse> => {
+    updateMessageRequestBody?: UpdateMessageRequestBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
 
-  const res = await fetch(getUpdateChannelMessageUrl(workspaceId,channelId,messageId),
-  {
-    ...options,
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(updateMessageRequestBody)
+
+    return axios.patch(
+      `/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}`,
+      updateMessageRequestBody,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: updateChannelMessageResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as updateChannelMessageResponse
-}
 
 
 
-
-export const getUpdateChannelMessageMutationOptions = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string;data?: UpdateMessageRequestBody}, TContext>, fetch?: RequestInit}
+export const getUpdateChannelMessageMutationOptions = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string;data?: UpdateMessageRequestBody}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string;data?: UpdateMessageRequestBody}, TContext> => {
 
 const mutationKey = ['updateChannelMessage'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -379,7 +229,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateChannelMessage>>, {workspaceId: string;channelId: string;messageId: string;data?: UpdateMessageRequestBody}> = (props) => {
           const {workspaceId,channelId,messageId,data} = props ?? {};
 
-          return  updateChannelMessage(workspaceId,channelId,messageId,data,fetchOptions)
+          return  updateChannelMessage(workspaceId,channelId,messageId,data,axiosOptions)
         }
 
 
@@ -391,13 +241,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type UpdateChannelMessageMutationResult = NonNullable<Awaited<ReturnType<typeof updateChannelMessage>>>
     export type UpdateChannelMessageMutationBody = UpdateMessageRequestBody | undefined
-    export type UpdateChannelMessageMutationError = N400Response | N401Response | N403Response | N404Response
+    export type UpdateChannelMessageMutationError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
     /**
  * @summary Update a message in a channel
  */
-export const useUpdateChannelMessage = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string;data?: UpdateMessageRequestBody}, TContext>, fetch?: RequestInit}
+export const useUpdateChannelMessage = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string;data?: UpdateMessageRequestBody}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof updateChannelMessage>>,
         TError,
@@ -406,87 +256,34 @@ export const useUpdateChannelMessage = <TError = N400Response | N401Response | N
       > => {
       return useMutation(getUpdateChannelMessageMutationOptions(options));
     }
-    export type deleteChannelMessageResponse200 = {
-  data: void
-  status: 200
-}
-
-export type deleteChannelMessageResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type deleteChannelMessageResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type deleteChannelMessageResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type deleteChannelMessageResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type deleteChannelMessageResponseSuccess = (deleteChannelMessageResponse200) & {
-  headers: Headers;
-};
-export type deleteChannelMessageResponseError = (deleteChannelMessageResponse400 | deleteChannelMessageResponse401 | deleteChannelMessageResponse403 | deleteChannelMessageResponse404) & {
-  headers: Headers;
-};
-
-export type deleteChannelMessageResponse = (deleteChannelMessageResponseSuccess | deleteChannelMessageResponseError)
-
-export const getDeleteChannelMessageUrl = (workspaceId: string,
-    channelId: string,
-    messageId: string,) => {
-
-
-
-
-  return `/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}`
-}
-
-/**
+    /**
  * Delete an existing message from the specified channel. Only the author of the message or workspace admins can delete messages.
  * @summary Delete a message from a channel
  */
-export const deleteChannelMessage = async (workspaceId: string,
+export const deleteChannelMessage = (
+    workspaceId: string,
     channelId: string,
-    messageId: string, options?: RequestInit): Promise<deleteChannelMessageResponse> => {
-
-  const res = await fetch(getDeleteChannelMessageUrl(workspaceId,channelId,messageId),
-  {
-    ...options,
-    method: 'DELETE'
+    messageId: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
 
 
+    return axios.delete(
+      `/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}`,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: deleteChannelMessageResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as deleteChannelMessageResponse
-}
 
 
 
-
-export const getDeleteChannelMessageMutationOptions = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string}, TContext>, fetch?: RequestInit}
+export const getDeleteChannelMessageMutationOptions = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string}, TContext> => {
 
 const mutationKey = ['deleteChannelMessage'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -494,7 +291,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteChannelMessage>>, {workspaceId: string;channelId: string;messageId: string}> = (props) => {
           const {workspaceId,channelId,messageId} = props ?? {};
 
-          return  deleteChannelMessage(workspaceId,channelId,messageId,fetchOptions)
+          return  deleteChannelMessage(workspaceId,channelId,messageId,axiosOptions)
         }
 
 
@@ -506,13 +303,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type DeleteChannelMessageMutationResult = NonNullable<Awaited<ReturnType<typeof deleteChannelMessage>>>
 
-    export type DeleteChannelMessageMutationError = N400Response | N401Response | N403Response | N404Response
+    export type DeleteChannelMessageMutationError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
     /**
  * @summary Delete a message from a channel
  */
-export const useDeleteChannelMessage = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string}, TContext>, fetch?: RequestInit}
+export const useDeleteChannelMessage = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof deleteChannelMessage>>,
         TError,
@@ -521,56 +318,16 @@ export const useDeleteChannelMessage = <TError = N400Response | N401Response | N
       > => {
       return useMutation(getDeleteChannelMessageMutationOptions(options));
     }
-    export type createDirectChatMessageResponse201 = {
-  data: void
-  status: 201
-}
-
-export type createDirectChatMessageResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type createDirectChatMessageResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type createDirectChatMessageResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type createDirectChatMessageResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type createDirectChatMessageResponseSuccess = (createDirectChatMessageResponse201) & {
-  headers: Headers;
-};
-export type createDirectChatMessageResponseError = (createDirectChatMessageResponse400 | createDirectChatMessageResponse401 | createDirectChatMessageResponse403 | createDirectChatMessageResponse404) & {
-  headers: Headers;
-};
-
-export type createDirectChatMessageResponse = (createDirectChatMessageResponseSuccess | createDirectChatMessageResponseError)
-
-export const getCreateDirectChatMessageUrl = (workspaceId: string,
-    directChatId: string,) => {
-
-
-
-
-  return `/workspaces/${workspaceId}/direct-chats/${directChatId}/messages`
-}
-
-/**
+    /**
  * Create a new message within the specified direct chat. The authenticated user will be set as the author of the message. Only members of the direct chat can create messages.
  * @summary Create a new message in a direct chat
  */
-export const createDirectChatMessage = async (workspaceId: string,
+export const createDirectChatMessage = (
+    workspaceId: string,
     directChatId: string,
-    createMessageRequestBody?: CreateMessageRequestBody, options?: RequestInit): Promise<createDirectChatMessageResponse> => {
+    createMessageRequestBody?: CreateMessageRequestBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+
     const formData = new FormData();
 if(createMessageRequestBody?.content !== undefined) {
  formData.append(`content`, createMessageRequestBody.content);
@@ -579,35 +336,24 @@ if(createMessageRequestBody?.attachments !== undefined) {
  createMessageRequestBody?.attachments.forEach(value => formData.append(`attachments`, value));
  }
 
-  const res = await fetch(getCreateDirectChatMessageUrl(workspaceId,directChatId),
-  {
-    ...options,
-    method: 'POST'
-    ,
-    body: formData
+    return axios.post(
+      `/workspaces/${workspaceId}/direct-chats/${directChatId}/messages`,
+      formData,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: createDirectChatMessageResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as createDirectChatMessageResponse
-}
 
 
 
-
-export const getCreateDirectChatMessageMutationOptions = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;data?: CreateMessageRequestBody}, TContext>, fetch?: RequestInit}
+export const getCreateDirectChatMessageMutationOptions = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;data?: CreateMessageRequestBody}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof createDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;data?: CreateMessageRequestBody}, TContext> => {
 
 const mutationKey = ['createDirectChatMessage'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -615,7 +361,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof createDirectChatMessage>>, {workspaceId: string;directChatId: string;data?: CreateMessageRequestBody}> = (props) => {
           const {workspaceId,directChatId,data} = props ?? {};
 
-          return  createDirectChatMessage(workspaceId,directChatId,data,fetchOptions)
+          return  createDirectChatMessage(workspaceId,directChatId,data,axiosOptions)
         }
 
 
@@ -627,13 +373,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type CreateDirectChatMessageMutationResult = NonNullable<Awaited<ReturnType<typeof createDirectChatMessage>>>
     export type CreateDirectChatMessageMutationBody = CreateMessageRequestBody | undefined
-    export type CreateDirectChatMessageMutationError = N400Response | N401Response | N403Response | N404Response
+    export type CreateDirectChatMessageMutationError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
     /**
  * @summary Create a new message in a direct chat
  */
-export const useCreateDirectChatMessage = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;data?: CreateMessageRequestBody}, TContext>, fetch?: RequestInit}
+export const useCreateDirectChatMessage = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof createDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;data?: CreateMessageRequestBody}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof createDirectChatMessage>>,
         TError,
@@ -642,76 +388,22 @@ export const useCreateDirectChatMessage = <TError = N400Response | N401Response 
       > => {
       return useMutation(getCreateDirectChatMessageMutationOptions(options));
     }
-    export type listDirectChatMessagesResponse200 = {
-  data: MessageListResponseResponse
-  status: 200
-}
-
-export type listDirectChatMessagesResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type listDirectChatMessagesResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type listDirectChatMessagesResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type listDirectChatMessagesResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type listDirectChatMessagesResponseSuccess = (listDirectChatMessagesResponse200) & {
-  headers: Headers;
-};
-export type listDirectChatMessagesResponseError = (listDirectChatMessagesResponse400 | listDirectChatMessagesResponse401 | listDirectChatMessagesResponse403 | listDirectChatMessagesResponse404) & {
-  headers: Headers;
-};
-
-export type listDirectChatMessagesResponse = (listDirectChatMessagesResponseSuccess | listDirectChatMessagesResponseError)
-
-export const getListDirectChatMessagesUrl = (workspaceId: string,
-    directChatId: string,
-    pageSize: number = 20,
-    page: number = 1,) => {
-
-
-
-
-  return `/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${pageSize}/${page}`
-}
-
-/**
+    /**
  * Retrieve a paginated list of messages within the specified direct chat. Only members of the direct chat can view its messages.
  * @summary List messages in a direct chat with pagination
  */
-export const listDirectChatMessages = async (workspaceId: string,
+export const listDirectChatMessages = (
+    workspaceId: string,
     directChatId: string,
     pageSize: number = 20,
-    page: number = 1, options?: RequestInit): Promise<listDirectChatMessagesResponse> => {
-
-  const res = await fetch(getListDirectChatMessagesUrl(workspaceId,directChatId,pageSize,page),
-  {
-    ...options,
-    method: 'GET'
+    page: number = 1, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<MessageListResponseResponse>> => {
 
 
+    return axios.get(
+      `/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${pageSize}/${page}`,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: listDirectChatMessagesResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as listDirectChatMessagesResponse
-}
-
 
 
 
@@ -726,19 +418,19 @@ export const getListDirectChatMessagesQueryKey = (workspaceId: string,
     }
 
 
-export const getListDirectChatMessagesQueryOptions = <TData = Awaited<ReturnType<typeof listDirectChatMessages>>, TError = N400Response | N401Response | N403Response | N404Response>(workspaceId: string,
+export const getListDirectChatMessagesQueryOptions = <TData = Awaited<ReturnType<typeof listDirectChatMessages>>, TError = AxiosError<N400Response | N401Response | N403Response | N404Response>>(workspaceId: string,
     directChatId: string,
     pageSize: number = 20,
-    page: number = 1, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDirectChatMessages>>, TError, TData>, fetch?: RequestInit}
+    page: number = 1, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDirectChatMessages>>, TError, TData>, axios?: AxiosRequestConfig}
 ) => {
 
-const {query: queryOptions, fetch: fetchOptions} = options ?? {};
+const {query: queryOptions, axios: axiosOptions} = options ?? {};
 
   const queryKey =  queryOptions?.queryKey ?? getListDirectChatMessagesQueryKey(workspaceId,directChatId,pageSize,page);
 
 
 
-    const queryFn: QueryFunction<Awaited<ReturnType<typeof listDirectChatMessages>>> = ({ signal }) => listDirectChatMessages(workspaceId,directChatId,pageSize,page, { signal, ...fetchOptions });
+    const queryFn: QueryFunction<Awaited<ReturnType<typeof listDirectChatMessages>>> = ({ signal }) => listDirectChatMessages(workspaceId,directChatId,pageSize,page, { signal, ...axiosOptions });
 
 
 
@@ -748,18 +440,18 @@ const {query: queryOptions, fetch: fetchOptions} = options ?? {};
 }
 
 export type ListDirectChatMessagesQueryResult = NonNullable<Awaited<ReturnType<typeof listDirectChatMessages>>>
-export type ListDirectChatMessagesQueryError = N400Response | N401Response | N403Response | N404Response
+export type ListDirectChatMessagesQueryError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
 
 /**
  * @summary List messages in a direct chat with pagination
  */
 
-export function useListDirectChatMessages<TData = Awaited<ReturnType<typeof listDirectChatMessages>>, TError = N400Response | N401Response | N403Response | N404Response>(
+export function useListDirectChatMessages<TData = Awaited<ReturnType<typeof listDirectChatMessages>>, TError = AxiosError<N400Response | N401Response | N403Response | N404Response>>(
  workspaceId: string,
     directChatId: string,
     pageSize: number = 20,
-    page: number = 1, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDirectChatMessages>>, TError, TData>, fetch?: RequestInit}
+    page: number = 1, options?: { query?:UseQueryOptions<Awaited<ReturnType<typeof listDirectChatMessages>>, TError, TData>, axios?: AxiosRequestConfig}
 
  ):  UseQueryResult<TData, TError> & { queryKey: QueryKey } {
 
@@ -775,88 +467,36 @@ export function useListDirectChatMessages<TData = Awaited<ReturnType<typeof list
 
 
 
-export type updateDirectChatMessageResponse200 = {
-  data: void
-  status: 200
-}
-
-export type updateDirectChatMessageResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type updateDirectChatMessageResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type updateDirectChatMessageResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type updateDirectChatMessageResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type updateDirectChatMessageResponseSuccess = (updateDirectChatMessageResponse200) & {
-  headers: Headers;
-};
-export type updateDirectChatMessageResponseError = (updateDirectChatMessageResponse400 | updateDirectChatMessageResponse401 | updateDirectChatMessageResponse403 | updateDirectChatMessageResponse404) & {
-  headers: Headers;
-};
-
-export type updateDirectChatMessageResponse = (updateDirectChatMessageResponseSuccess | updateDirectChatMessageResponseError)
-
-export const getUpdateDirectChatMessageUrl = (workspaceId: string,
-    directChatId: string,
-    messageId: string,) => {
-
-
-
-
-  return `/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${messageId}`
-}
-
 /**
  * Update the content of an existing message within the specified direct chat. Only the author of the message can update it.
  * @summary Update a message in a direct chat
  */
-export const updateDirectChatMessage = async (workspaceId: string,
+export const updateDirectChatMessage = (
+    workspaceId: string,
     directChatId: string,
     messageId: string,
-    updateMessageRequestBody?: UpdateMessageRequestBody, options?: RequestInit): Promise<updateDirectChatMessageResponse> => {
+    updateMessageRequestBody?: UpdateMessageRequestBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
 
-  const res = await fetch(getUpdateDirectChatMessageUrl(workspaceId,directChatId,messageId),
-  {
-    ...options,
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(updateMessageRequestBody)
+
+    return axios.patch(
+      `/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${messageId}`,
+      updateMessageRequestBody,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: updateDirectChatMessageResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as updateDirectChatMessageResponse
-}
 
 
 
-
-export const getUpdateDirectChatMessageMutationOptions = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string;data?: UpdateMessageRequestBody}, TContext>, fetch?: RequestInit}
+export const getUpdateDirectChatMessageMutationOptions = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string;data?: UpdateMessageRequestBody}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof updateDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string;data?: UpdateMessageRequestBody}, TContext> => {
 
 const mutationKey = ['updateDirectChatMessage'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -864,7 +504,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof updateDirectChatMessage>>, {workspaceId: string;directChatId: string;messageId: string;data?: UpdateMessageRequestBody}> = (props) => {
           const {workspaceId,directChatId,messageId,data} = props ?? {};
 
-          return  updateDirectChatMessage(workspaceId,directChatId,messageId,data,fetchOptions)
+          return  updateDirectChatMessage(workspaceId,directChatId,messageId,data,axiosOptions)
         }
 
 
@@ -876,13 +516,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type UpdateDirectChatMessageMutationResult = NonNullable<Awaited<ReturnType<typeof updateDirectChatMessage>>>
     export type UpdateDirectChatMessageMutationBody = UpdateMessageRequestBody | undefined
-    export type UpdateDirectChatMessageMutationError = N400Response | N401Response | N403Response | N404Response
+    export type UpdateDirectChatMessageMutationError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
     /**
  * @summary Update a message in a direct chat
  */
-export const useUpdateDirectChatMessage = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string;data?: UpdateMessageRequestBody}, TContext>, fetch?: RequestInit}
+export const useUpdateDirectChatMessage = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof updateDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string;data?: UpdateMessageRequestBody}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof updateDirectChatMessage>>,
         TError,
@@ -891,87 +531,34 @@ export const useUpdateDirectChatMessage = <TError = N400Response | N401Response 
       > => {
       return useMutation(getUpdateDirectChatMessageMutationOptions(options));
     }
-    export type deleteDirectChatMessageResponse200 = {
-  data: void
-  status: 200
-}
-
-export type deleteDirectChatMessageResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type deleteDirectChatMessageResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type deleteDirectChatMessageResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type deleteDirectChatMessageResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type deleteDirectChatMessageResponseSuccess = (deleteDirectChatMessageResponse200) & {
-  headers: Headers;
-};
-export type deleteDirectChatMessageResponseError = (deleteDirectChatMessageResponse400 | deleteDirectChatMessageResponse401 | deleteDirectChatMessageResponse403 | deleteDirectChatMessageResponse404) & {
-  headers: Headers;
-};
-
-export type deleteDirectChatMessageResponse = (deleteDirectChatMessageResponseSuccess | deleteDirectChatMessageResponseError)
-
-export const getDeleteDirectChatMessageUrl = (workspaceId: string,
-    directChatId: string,
-    messageId: string,) => {
-
-
-
-
-  return `/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${messageId}`
-}
-
-/**
+    /**
  * Delete an existing message from the specified direct chat. Only the author of the message or workspace admins can delete messages.
  * @summary Delete a message from a direct chat
  */
-export const deleteDirectChatMessage = async (workspaceId: string,
+export const deleteDirectChatMessage = (
+    workspaceId: string,
     directChatId: string,
-    messageId: string, options?: RequestInit): Promise<deleteDirectChatMessageResponse> => {
-
-  const res = await fetch(getDeleteDirectChatMessageUrl(workspaceId,directChatId,messageId),
-  {
-    ...options,
-    method: 'DELETE'
+    messageId: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
 
 
+    return axios.delete(
+      `/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${messageId}`,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: deleteDirectChatMessageResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as deleteDirectChatMessageResponse
-}
 
 
 
-
-export const getDeleteDirectChatMessageMutationOptions = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string}, TContext>, fetch?: RequestInit}
+export const getDeleteDirectChatMessageMutationOptions = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof deleteDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string}, TContext> => {
 
 const mutationKey = ['deleteDirectChatMessage'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -979,7 +566,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteDirectChatMessage>>, {workspaceId: string;directChatId: string;messageId: string}> = (props) => {
           const {workspaceId,directChatId,messageId} = props ?? {};
 
-          return  deleteDirectChatMessage(workspaceId,directChatId,messageId,fetchOptions)
+          return  deleteDirectChatMessage(workspaceId,directChatId,messageId,axiosOptions)
         }
 
 
@@ -991,13 +578,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type DeleteDirectChatMessageMutationResult = NonNullable<Awaited<ReturnType<typeof deleteDirectChatMessage>>>
 
-    export type DeleteDirectChatMessageMutationError = N400Response | N401Response | N403Response | N404Response
+    export type DeleteDirectChatMessageMutationError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
     /**
  * @summary Delete a message from a direct chat
  */
-export const useDeleteDirectChatMessage = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string}, TContext>, fetch?: RequestInit}
+export const useDeleteDirectChatMessage = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof deleteDirectChatMessage>>,
         TError,

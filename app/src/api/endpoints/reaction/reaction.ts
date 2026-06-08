@@ -13,6 +13,13 @@ import type {
   UseMutationResult
 } from '@tanstack/react-query';
 
+import axios from 'axios';
+import type {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse
+} from 'axios';
+
 import type {
   AddReactionRequestBody,
   N400Response,
@@ -29,88 +36,36 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 
 
 
-export type addReactionToChannelMessageResponse201 = {
-  data: void
-  status: 201
-}
-
-export type addReactionToChannelMessageResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type addReactionToChannelMessageResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type addReactionToChannelMessageResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type addReactionToChannelMessageResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type addReactionToChannelMessageResponseSuccess = (addReactionToChannelMessageResponse201) & {
-  headers: Headers;
-};
-export type addReactionToChannelMessageResponseError = (addReactionToChannelMessageResponse400 | addReactionToChannelMessageResponse401 | addReactionToChannelMessageResponse403 | addReactionToChannelMessageResponse404) & {
-  headers: Headers;
-};
-
-export type addReactionToChannelMessageResponse = (addReactionToChannelMessageResponseSuccess | addReactionToChannelMessageResponseError)
-
-export const getAddReactionToChannelMessageUrl = (workspaceId: string,
-    channelId: string,
-    messageId: string,) => {
-
-
-
-
-  return `/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}/reactions`
-}
-
 /**
  * Add a reaction to a specific message within a channel. The authenticated user will be set as the author of the reaction. Only members of the channel can add reactions to its messages.
  * @summary Add a reaction to a message in a channel
  */
-export const addReactionToChannelMessage = async (workspaceId: string,
+export const addReactionToChannelMessage = (
+    workspaceId: string,
     channelId: string,
     messageId: string,
-    addReactionRequestBody: AddReactionRequestBody, options?: RequestInit): Promise<addReactionToChannelMessageResponse> => {
+    addReactionRequestBody: AddReactionRequestBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
 
-  const res = await fetch(getAddReactionToChannelMessageUrl(workspaceId,channelId,messageId),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(addReactionRequestBody)
+
+    return axios.post(
+      `/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}/reactions`,
+      addReactionRequestBody,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: addReactionToChannelMessageResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as addReactionToChannelMessageResponse
-}
 
 
 
-
-export const getAddReactionToChannelMessageMutationOptions = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addReactionToChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string;data: AddReactionRequestBody}, TContext>, fetch?: RequestInit}
+export const getAddReactionToChannelMessageMutationOptions = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addReactionToChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string;data: AddReactionRequestBody}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof addReactionToChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string;data: AddReactionRequestBody}, TContext> => {
 
 const mutationKey = ['addReactionToChannelMessage'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -118,7 +73,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof addReactionToChannelMessage>>, {workspaceId: string;channelId: string;messageId: string;data: AddReactionRequestBody}> = (props) => {
           const {workspaceId,channelId,messageId,data} = props ?? {};
 
-          return  addReactionToChannelMessage(workspaceId,channelId,messageId,data,fetchOptions)
+          return  addReactionToChannelMessage(workspaceId,channelId,messageId,data,axiosOptions)
         }
 
 
@@ -130,13 +85,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type AddReactionToChannelMessageMutationResult = NonNullable<Awaited<ReturnType<typeof addReactionToChannelMessage>>>
     export type AddReactionToChannelMessageMutationBody = AddReactionRequestBody
-    export type AddReactionToChannelMessageMutationError = N400Response | N401Response | N403Response | N404Response
+    export type AddReactionToChannelMessageMutationError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
     /**
  * @summary Add a reaction to a message in a channel
  */
-export const useAddReactionToChannelMessage = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addReactionToChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string;data: AddReactionRequestBody}, TContext>, fetch?: RequestInit}
+export const useAddReactionToChannelMessage = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addReactionToChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string;data: AddReactionRequestBody}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof addReactionToChannelMessage>>,
         TError,
@@ -145,89 +100,35 @@ export const useAddReactionToChannelMessage = <TError = N400Response | N401Respo
       > => {
       return useMutation(getAddReactionToChannelMessageMutationOptions(options));
     }
-    export type removeReactionFromChannelMessageResponse200 = {
-  data: void
-  status: 200
-}
-
-export type removeReactionFromChannelMessageResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type removeReactionFromChannelMessageResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type removeReactionFromChannelMessageResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type removeReactionFromChannelMessageResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type removeReactionFromChannelMessageResponseSuccess = (removeReactionFromChannelMessageResponse200) & {
-  headers: Headers;
-};
-export type removeReactionFromChannelMessageResponseError = (removeReactionFromChannelMessageResponse400 | removeReactionFromChannelMessageResponse401 | removeReactionFromChannelMessageResponse403 | removeReactionFromChannelMessageResponse404) & {
-  headers: Headers;
-};
-
-export type removeReactionFromChannelMessageResponse = (removeReactionFromChannelMessageResponseSuccess | removeReactionFromChannelMessageResponseError)
-
-export const getRemoveReactionFromChannelMessageUrl = (workspaceId: string,
-    channelId: string,
-    messageId: string,
-    reactionId: string,) => {
-
-
-
-
-  return `/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}/reactions/${reactionId}`
-}
-
-/**
+    /**
  * Remove an existing reaction from a specific message within a channel. Only the author of the reaction or workspace admins can remove reactions.
  * @summary Remove a reaction from a message in a channel
  */
-export const removeReactionFromChannelMessage = async (workspaceId: string,
+export const removeReactionFromChannelMessage = (
+    workspaceId: string,
     channelId: string,
     messageId: string,
-    reactionId: string, options?: RequestInit): Promise<removeReactionFromChannelMessageResponse> => {
-
-  const res = await fetch(getRemoveReactionFromChannelMessageUrl(workspaceId,channelId,messageId,reactionId),
-  {
-    ...options,
-    method: 'DELETE'
+    reactionId: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
 
 
+    return axios.delete(
+      `/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}/reactions/${reactionId}`,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: removeReactionFromChannelMessageResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as removeReactionFromChannelMessageResponse
-}
 
 
 
-
-export const getRemoveReactionFromChannelMessageMutationOptions = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeReactionFromChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string;reactionId: string}, TContext>, fetch?: RequestInit}
+export const getRemoveReactionFromChannelMessageMutationOptions = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeReactionFromChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string;reactionId: string}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof removeReactionFromChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string;reactionId: string}, TContext> => {
 
 const mutationKey = ['removeReactionFromChannelMessage'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -235,7 +136,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeReactionFromChannelMessage>>, {workspaceId: string;channelId: string;messageId: string;reactionId: string}> = (props) => {
           const {workspaceId,channelId,messageId,reactionId} = props ?? {};
 
-          return  removeReactionFromChannelMessage(workspaceId,channelId,messageId,reactionId,fetchOptions)
+          return  removeReactionFromChannelMessage(workspaceId,channelId,messageId,reactionId,axiosOptions)
         }
 
 
@@ -247,13 +148,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type RemoveReactionFromChannelMessageMutationResult = NonNullable<Awaited<ReturnType<typeof removeReactionFromChannelMessage>>>
 
-    export type RemoveReactionFromChannelMessageMutationError = N400Response | N401Response | N403Response | N404Response
+    export type RemoveReactionFromChannelMessageMutationError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
     /**
  * @summary Remove a reaction from a message in a channel
  */
-export const useRemoveReactionFromChannelMessage = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeReactionFromChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string;reactionId: string}, TContext>, fetch?: RequestInit}
+export const useRemoveReactionFromChannelMessage = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeReactionFromChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string;reactionId: string}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof removeReactionFromChannelMessage>>,
         TError,
@@ -262,88 +163,36 @@ export const useRemoveReactionFromChannelMessage = <TError = N400Response | N401
       > => {
       return useMutation(getRemoveReactionFromChannelMessageMutationOptions(options));
     }
-    export type addReactionToDirectChatMessageResponse201 = {
-  data: void
-  status: 201
-}
-
-export type addReactionToDirectChatMessageResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type addReactionToDirectChatMessageResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type addReactionToDirectChatMessageResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type addReactionToDirectChatMessageResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type addReactionToDirectChatMessageResponseSuccess = (addReactionToDirectChatMessageResponse201) & {
-  headers: Headers;
-};
-export type addReactionToDirectChatMessageResponseError = (addReactionToDirectChatMessageResponse400 | addReactionToDirectChatMessageResponse401 | addReactionToDirectChatMessageResponse403 | addReactionToDirectChatMessageResponse404) & {
-  headers: Headers;
-};
-
-export type addReactionToDirectChatMessageResponse = (addReactionToDirectChatMessageResponseSuccess | addReactionToDirectChatMessageResponseError)
-
-export const getAddReactionToDirectChatMessageUrl = (workspaceId: string,
-    directChatId: string,
-    messageId: string,) => {
-
-
-
-
-  return `/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${messageId}/reactions`
-}
-
-/**
+    /**
  * Add a reaction to a specific message within a direct chat. The authenticated user will be set as the author of the reaction. Only members of the direct chat can add reactions to its messages.
  * @summary Add a reaction to a message in a direct chat
  */
-export const addReactionToDirectChatMessage = async (workspaceId: string,
+export const addReactionToDirectChatMessage = (
+    workspaceId: string,
     directChatId: string,
     messageId: string,
-    addReactionRequestBody: AddReactionRequestBody, options?: RequestInit): Promise<addReactionToDirectChatMessageResponse> => {
+    addReactionRequestBody: AddReactionRequestBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
 
-  const res = await fetch(getAddReactionToDirectChatMessageUrl(workspaceId,directChatId,messageId),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(addReactionRequestBody)
+
+    return axios.post(
+      `/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${messageId}/reactions`,
+      addReactionRequestBody,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: addReactionToDirectChatMessageResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as addReactionToDirectChatMessageResponse
-}
 
 
 
-
-export const getAddReactionToDirectChatMessageMutationOptions = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addReactionToDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string;data: AddReactionRequestBody}, TContext>, fetch?: RequestInit}
+export const getAddReactionToDirectChatMessageMutationOptions = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addReactionToDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string;data: AddReactionRequestBody}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof addReactionToDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string;data: AddReactionRequestBody}, TContext> => {
 
 const mutationKey = ['addReactionToDirectChatMessage'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -351,7 +200,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof addReactionToDirectChatMessage>>, {workspaceId: string;directChatId: string;messageId: string;data: AddReactionRequestBody}> = (props) => {
           const {workspaceId,directChatId,messageId,data} = props ?? {};
 
-          return  addReactionToDirectChatMessage(workspaceId,directChatId,messageId,data,fetchOptions)
+          return  addReactionToDirectChatMessage(workspaceId,directChatId,messageId,data,axiosOptions)
         }
 
 
@@ -363,13 +212,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type AddReactionToDirectChatMessageMutationResult = NonNullable<Awaited<ReturnType<typeof addReactionToDirectChatMessage>>>
     export type AddReactionToDirectChatMessageMutationBody = AddReactionRequestBody
-    export type AddReactionToDirectChatMessageMutationError = N400Response | N401Response | N403Response | N404Response
+    export type AddReactionToDirectChatMessageMutationError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
     /**
  * @summary Add a reaction to a message in a direct chat
  */
-export const useAddReactionToDirectChatMessage = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addReactionToDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string;data: AddReactionRequestBody}, TContext>, fetch?: RequestInit}
+export const useAddReactionToDirectChatMessage = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof addReactionToDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string;data: AddReactionRequestBody}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof addReactionToDirectChatMessage>>,
         TError,
@@ -378,89 +227,35 @@ export const useAddReactionToDirectChatMessage = <TError = N400Response | N401Re
       > => {
       return useMutation(getAddReactionToDirectChatMessageMutationOptions(options));
     }
-    export type removeReactionFromDirectChatMessageResponse200 = {
-  data: void
-  status: 200
-}
-
-export type removeReactionFromDirectChatMessageResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type removeReactionFromDirectChatMessageResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type removeReactionFromDirectChatMessageResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type removeReactionFromDirectChatMessageResponse404 = {
-  data: N404Response
-  status: 404
-}
-
-export type removeReactionFromDirectChatMessageResponseSuccess = (removeReactionFromDirectChatMessageResponse200) & {
-  headers: Headers;
-};
-export type removeReactionFromDirectChatMessageResponseError = (removeReactionFromDirectChatMessageResponse400 | removeReactionFromDirectChatMessageResponse401 | removeReactionFromDirectChatMessageResponse403 | removeReactionFromDirectChatMessageResponse404) & {
-  headers: Headers;
-};
-
-export type removeReactionFromDirectChatMessageResponse = (removeReactionFromDirectChatMessageResponseSuccess | removeReactionFromDirectChatMessageResponseError)
-
-export const getRemoveReactionFromDirectChatMessageUrl = (workspaceId: string,
-    directChatId: string,
-    messageId: string,
-    reactionId: string,) => {
-
-
-
-
-  return `/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${messageId}/reactions/${reactionId}`
-}
-
-/**
+    /**
  * Remove an existing reaction from a specific message within a direct chat. Only the author of the reaction or workspace admins can remove reactions.
  * @summary Remove a reaction from a message in a direct chat
  */
-export const removeReactionFromDirectChatMessage = async (workspaceId: string,
+export const removeReactionFromDirectChatMessage = (
+    workspaceId: string,
     directChatId: string,
     messageId: string,
-    reactionId: string, options?: RequestInit): Promise<removeReactionFromDirectChatMessageResponse> => {
-
-  const res = await fetch(getRemoveReactionFromDirectChatMessageUrl(workspaceId,directChatId,messageId,reactionId),
-  {
-    ...options,
-    method: 'DELETE'
+    reactionId: string, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
 
 
+    return axios.delete(
+      `/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${messageId}/reactions/${reactionId}`,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: removeReactionFromDirectChatMessageResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as removeReactionFromDirectChatMessageResponse
-}
 
 
 
-
-export const getRemoveReactionFromDirectChatMessageMutationOptions = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeReactionFromDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string;reactionId: string}, TContext>, fetch?: RequestInit}
+export const getRemoveReactionFromDirectChatMessageMutationOptions = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeReactionFromDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string;reactionId: string}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof removeReactionFromDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string;reactionId: string}, TContext> => {
 
 const mutationKey = ['removeReactionFromDirectChatMessage'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -468,7 +263,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof removeReactionFromDirectChatMessage>>, {workspaceId: string;directChatId: string;messageId: string;reactionId: string}> = (props) => {
           const {workspaceId,directChatId,messageId,reactionId} = props ?? {};
 
-          return  removeReactionFromDirectChatMessage(workspaceId,directChatId,messageId,reactionId,fetchOptions)
+          return  removeReactionFromDirectChatMessage(workspaceId,directChatId,messageId,reactionId,axiosOptions)
         }
 
 
@@ -480,13 +275,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type RemoveReactionFromDirectChatMessageMutationResult = NonNullable<Awaited<ReturnType<typeof removeReactionFromDirectChatMessage>>>
 
-    export type RemoveReactionFromDirectChatMessageMutationError = N400Response | N401Response | N403Response | N404Response
+    export type RemoveReactionFromDirectChatMessageMutationError = AxiosError<N400Response | N401Response | N403Response | N404Response>
 
     /**
  * @summary Remove a reaction from a message in a direct chat
  */
-export const useRemoveReactionFromDirectChatMessage = <TError = N400Response | N401Response | N403Response | N404Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeReactionFromDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string;reactionId: string}, TContext>, fetch?: RequestInit}
+export const useRemoveReactionFromDirectChatMessage = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof removeReactionFromDirectChatMessage>>, TError,{workspaceId: string;directChatId: string;messageId: string;reactionId: string}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof removeReactionFromDirectChatMessage>>,
         TError,

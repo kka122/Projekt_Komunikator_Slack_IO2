@@ -13,6 +13,13 @@ import type {
   UseMutationResult
 } from '@tanstack/react-query';
 
+import axios from 'axios';
+import type {
+  AxiosError,
+  AxiosRequestConfig,
+  AxiosResponse
+} from 'axios';
+
 import type {
   GoogleAuthRequestBody,
   LoginRequestBody,
@@ -34,43 +41,14 @@ type AwaitedInput<T> = PromiseLike<T> | T;
 
 
 
-export type registerUserResponse201 = {
-  data: void
-  status: 201
-}
-
-export type registerUserResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type registerUserResponse409 = {
-  data: N409Response
-  status: 409
-}
-
-export type registerUserResponseSuccess = (registerUserResponse201) & {
-  headers: Headers;
-};
-export type registerUserResponseError = (registerUserResponse400 | registerUserResponse409) & {
-  headers: Headers;
-};
-
-export type registerUserResponse = (registerUserResponseSuccess | registerUserResponseError)
-
-export const getRegisterUserUrl = () => {
-
-
-
-
-  return `/auth/register`
-}
-
 /**
  * Create a new user account with the provided information. The profile picture is optional and can be uploaded as part of the registration process.
  * @summary Register a new user
  */
-export const registerUser = async (registerRequestBody: RegisterRequestBody, options?: RequestInit): Promise<registerUserResponse> => {
+export const registerUser = (
+    registerRequestBody: RegisterRequestBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<void>> => {
+
     const formData = new FormData();
 formData.append(`name`, registerRequestBody.name);
 formData.append(`surname`, registerRequestBody.surname);
@@ -80,35 +58,24 @@ if(registerRequestBody.avatar !== undefined) {
  formData.append(`avatar`, registerRequestBody.avatar);
  }
 
-  const res = await fetch(getRegisterUserUrl(),
-  {
-    ...options,
-    method: 'POST'
-    ,
-    body: formData
+    return axios.post(
+      `/auth/register`,
+      formData,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: registerUserResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as registerUserResponse
-}
 
 
 
-
-export const getRegisterUserMutationOptions = <TError = N400Response | N409Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerUser>>, TError,{data: RegisterRequestBody}, TContext>, fetch?: RequestInit}
+export const getRegisterUserMutationOptions = <TError = AxiosError<N400Response | N409Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerUser>>, TError,{data: RegisterRequestBody}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof registerUser>>, TError,{data: RegisterRequestBody}, TContext> => {
 
 const mutationKey = ['registerUser'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -116,7 +83,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof registerUser>>, {data: RegisterRequestBody}> = (props) => {
           const {data} = props ?? {};
 
-          return  registerUser(data,fetchOptions)
+          return  registerUser(data,axiosOptions)
         }
 
 
@@ -128,13 +95,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type RegisterUserMutationResult = NonNullable<Awaited<ReturnType<typeof registerUser>>>
     export type RegisterUserMutationBody = RegisterRequestBody
-    export type RegisterUserMutationError = N400Response | N409Response
+    export type RegisterUserMutationError = AxiosError<N400Response | N409Response>
 
     /**
  * @summary Register a new user
  */
-export const useRegisterUser = <TError = N400Response | N409Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerUser>>, TError,{data: RegisterRequestBody}, TContext>, fetch?: RequestInit}
+export const useRegisterUser = <TError = AxiosError<N400Response | N409Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerUser>>, TError,{data: RegisterRequestBody}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof registerUser>>,
         TError,
@@ -143,73 +110,33 @@ export const useRegisterUser = <TError = N400Response | N409Response,
       > => {
       return useMutation(getRegisterUserMutationOptions(options));
     }
-    export type loginUserResponse200 = {
-  data: LoginResponseResponse
-  status: 200
-}
-
-export type loginUserResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type loginUserResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type loginUserResponseSuccess = (loginUserResponse200) & {
-  headers: Headers;
-};
-export type loginUserResponseError = (loginUserResponse400 | loginUserResponse401) & {
-  headers: Headers;
-};
-
-export type loginUserResponse = (loginUserResponseSuccess | loginUserResponseError)
-
-export const getLoginUserUrl = () => {
-
-
-
-
-  return `/auth/login`
-}
-
-/**
+    /**
  * Authenticate a user with their email and password. On successful authentication, sets both access_token and refresh_token cookies for session management.
  * @summary Log in a user and obtain an authentication token
  */
-export const loginUser = async (loginRequestBody: LoginRequestBody, options?: RequestInit): Promise<loginUserResponse> => {
+export const loginUser = (
+    loginRequestBody: LoginRequestBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<LoginResponseResponse>> => {
 
-  const res = await fetch(getLoginUserUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(loginRequestBody)
+
+    return axios.post(
+      `/auth/login`,
+      loginRequestBody,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: loginUserResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as loginUserResponse
-}
 
 
 
-
-export const getLoginUserMutationOptions = <TError = N400Response | N401Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginUser>>, TError,{data: LoginRequestBody}, TContext>, fetch?: RequestInit}
+export const getLoginUserMutationOptions = <TError = AxiosError<N400Response | N401Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginUser>>, TError,{data: LoginRequestBody}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof loginUser>>, TError,{data: LoginRequestBody}, TContext> => {
 
 const mutationKey = ['loginUser'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -217,7 +144,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof loginUser>>, {data: LoginRequestBody}> = (props) => {
           const {data} = props ?? {};
 
-          return  loginUser(data,fetchOptions)
+          return  loginUser(data,axiosOptions)
         }
 
 
@@ -229,13 +156,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type LoginUserMutationResult = NonNullable<Awaited<ReturnType<typeof loginUser>>>
     export type LoginUserMutationBody = LoginRequestBody
-    export type LoginUserMutationError = N400Response | N401Response
+    export type LoginUserMutationError = AxiosError<N400Response | N401Response>
 
     /**
  * @summary Log in a user and obtain an authentication token
  */
-export const useLoginUser = <TError = N400Response | N401Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginUser>>, TError,{data: LoginRequestBody}, TContext>, fetch?: RequestInit}
+export const useLoginUser = <TError = AxiosError<N400Response | N401Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginUser>>, TError,{data: LoginRequestBody}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof loginUser>>,
         TError,
@@ -244,73 +171,33 @@ export const useLoginUser = <TError = N400Response | N401Response,
       > => {
       return useMutation(getLoginUserMutationOptions(options));
     }
-    export type googleAuthResponse200 = {
-  data: LoginResponseResponse
-  status: 200
-}
-
-export type googleAuthResponse400 = {
-  data: N400Response
-  status: 400
-}
-
-export type googleAuthResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type googleAuthResponseSuccess = (googleAuthResponse200) & {
-  headers: Headers;
-};
-export type googleAuthResponseError = (googleAuthResponse400 | googleAuthResponse401) & {
-  headers: Headers;
-};
-
-export type googleAuthResponse = (googleAuthResponseSuccess | googleAuthResponseError)
-
-export const getGoogleAuthUrl = () => {
-
-
-
-
-  return `/auth/google`
-}
-
-/**
+    /**
  * Authenticate a user with a Google OAuth token. On successful authentication, sets both access_token and refresh_token cookies for session management.
  * @summary Authenticate a user using Google OAuth token
  */
-export const googleAuth = async (googleAuthRequestBody: GoogleAuthRequestBody, options?: RequestInit): Promise<googleAuthResponse> => {
+export const googleAuth = (
+    googleAuthRequestBody: GoogleAuthRequestBody, options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<LoginResponseResponse>> => {
 
-  const res = await fetch(getGoogleAuthUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(googleAuthRequestBody)
+
+    return axios.post(
+      `/auth/google`,
+      googleAuthRequestBody,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: googleAuthResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as googleAuthResponse
-}
 
 
 
-
-export const getGoogleAuthMutationOptions = <TError = N400Response | N401Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof googleAuth>>, TError,{data: GoogleAuthRequestBody}, TContext>, fetch?: RequestInit}
+export const getGoogleAuthMutationOptions = <TError = AxiosError<N400Response | N401Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof googleAuth>>, TError,{data: GoogleAuthRequestBody}, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof googleAuth>>, TError,{data: GoogleAuthRequestBody}, TContext> => {
 
 const mutationKey = ['googleAuth'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -318,7 +205,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof googleAuth>>, {data: GoogleAuthRequestBody}> = (props) => {
           const {data} = props ?? {};
 
-          return  googleAuth(data,fetchOptions)
+          return  googleAuth(data,axiosOptions)
         }
 
 
@@ -330,13 +217,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type GoogleAuthMutationResult = NonNullable<Awaited<ReturnType<typeof googleAuth>>>
     export type GoogleAuthMutationBody = GoogleAuthRequestBody
-    export type GoogleAuthMutationError = N400Response | N401Response
+    export type GoogleAuthMutationError = AxiosError<N400Response | N401Response>
 
     /**
  * @summary Authenticate a user using Google OAuth token
  */
-export const useGoogleAuth = <TError = N400Response | N401Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof googleAuth>>, TError,{data: GoogleAuthRequestBody}, TContext>, fetch?: RequestInit}
+export const useGoogleAuth = <TError = AxiosError<N400Response | N401Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof googleAuth>>, TError,{data: GoogleAuthRequestBody}, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof googleAuth>>,
         TError,
@@ -345,73 +232,33 @@ export const useGoogleAuth = <TError = N400Response | N401Response,
       > => {
       return useMutation(getGoogleAuthMutationOptions(options));
     }
-    export type refreshTokenResponse200 = {
-  data: TokenRefreshResponseResponse
-  status: 200
-}
-
-export type refreshTokenResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type refreshTokenResponse403 = {
-  data: N403Response
-  status: 403
-}
-
-export type refreshTokenResponseSuccess = (refreshTokenResponse200) & {
-  headers: Headers;
-};
-export type refreshTokenResponseError = (refreshTokenResponse401 | refreshTokenResponse403) & {
-  headers: Headers;
-};
-
-export type refreshTokenResponse = (refreshTokenResponseSuccess | refreshTokenResponseError)
-
-export const getRefreshTokenUrl = () => {
-
-
-
-
-  return `/auth/refresh`
-}
-
-/**
+    /**
  * Use the refresh token to obtain a new access token. This endpoint requires a valid refresh_token cookie and will set a new access_token cookie on success.
  * @summary Refresh the authentication token using the refresh token
  */
-export const refreshToken = async ( options?: RequestInit): Promise<refreshTokenResponse> => {
-
-  const res = await fetch(getRefreshTokenUrl(),
-  {
-    ...options,
-    method: 'POST'
+export const refreshToken = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<TokenRefreshResponseResponse>> => {
 
 
+    return axios.post(
+      `/auth/refresh`,
+      undefined,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: refreshTokenResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as refreshTokenResponse
-}
 
 
 
-
-export const getRefreshTokenMutationOptions = <TError = N401Response | N403Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshToken>>, TError,void, TContext>, fetch?: RequestInit}
+export const getRefreshTokenMutationOptions = <TError = AxiosError<N401Response | N403Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshToken>>, TError,void, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof refreshToken>>, TError,void, TContext> => {
 
 const mutationKey = ['refreshToken'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -419,7 +266,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof refreshToken>>, void> = () => {
 
 
-          return  refreshToken(fetchOptions)
+          return  refreshToken(axiosOptions)
         }
 
 
@@ -431,13 +278,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type RefreshTokenMutationResult = NonNullable<Awaited<ReturnType<typeof refreshToken>>>
 
-    export type RefreshTokenMutationError = N401Response | N403Response
+    export type RefreshTokenMutationError = AxiosError<N401Response | N403Response>
 
     /**
  * @summary Refresh the authentication token using the refresh token
  */
-export const useRefreshToken = <TError = N401Response | N403Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshToken>>, TError,void, TContext>, fetch?: RequestInit}
+export const useRefreshToken = <TError = AxiosError<N401Response | N403Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshToken>>, TError,void, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof refreshToken>>,
         TError,
@@ -446,68 +293,33 @@ export const useRefreshToken = <TError = N401Response | N403Response,
       > => {
       return useMutation(getRefreshTokenMutationOptions(options));
     }
-    export type logoutUserResponse200 = {
-  data: LogoutResponseResponse
-  status: 200
-}
-
-export type logoutUserResponse401 = {
-  data: N401Response
-  status: 401
-}
-
-export type logoutUserResponseSuccess = (logoutUserResponse200) & {
-  headers: Headers;
-};
-export type logoutUserResponseError = (logoutUserResponse401) & {
-  headers: Headers;
-};
-
-export type logoutUserResponse = (logoutUserResponseSuccess | logoutUserResponseError)
-
-export const getLogoutUserUrl = () => {
-
-
-
-
-  return `/auth/logout`
-}
-
-/**
+    /**
  * Log out the currently authenticated user by clearing the access_token and refresh_token cookies.
  * @summary Log out the authenticated user
  */
-export const logoutUser = async ( options?: RequestInit): Promise<logoutUserResponse> => {
-
-  const res = await fetch(getLogoutUserUrl(),
-  {
-    ...options,
-    method: 'POST'
+export const logoutUser = (
+     options?: AxiosRequestConfig
+ ): Promise<AxiosResponse<LogoutResponseResponse>> => {
 
 
+    return axios.post(
+      `/auth/logout`,
+      undefined,options
+    );
   }
-)
-
-
-  const body = [204, 205, 304].includes(res.status) ? null : await res.text();
-
-  const data: logoutUserResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as logoutUserResponse
-}
 
 
 
-
-export const getLogoutUserMutationOptions = <TError = N401Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutUser>>, TError,void, TContext>, fetch?: RequestInit}
+export const getLogoutUserMutationOptions = <TError = AxiosError<N401Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutUser>>, TError,void, TContext>, axios?: AxiosRequestConfig}
 ): UseMutationOptions<Awaited<ReturnType<typeof logoutUser>>, TError,void, TContext> => {
 
 const mutationKey = ['logoutUser'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+const {mutation: mutationOptions, axios: axiosOptions} = options ?
       options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+      : {mutation: { mutationKey, }, axios: undefined};
 
 
 
@@ -515,7 +327,7 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
       const mutationFn: MutationFunction<Awaited<ReturnType<typeof logoutUser>>, void> = () => {
 
 
-          return  logoutUser(fetchOptions)
+          return  logoutUser(axiosOptions)
         }
 
 
@@ -527,13 +339,13 @@ const {mutation: mutationOptions, fetch: fetchOptions} = options ?
 
     export type LogoutUserMutationResult = NonNullable<Awaited<ReturnType<typeof logoutUser>>>
 
-    export type LogoutUserMutationError = N401Response
+    export type LogoutUserMutationError = AxiosError<N401Response>
 
     /**
  * @summary Log out the authenticated user
  */
-export const useLogoutUser = <TError = N401Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutUser>>, TError,void, TContext>, fetch?: RequestInit}
+export const useLogoutUser = <TError = AxiosError<N401Response>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutUser>>, TError,void, TContext>, axios?: AxiosRequestConfig}
  ): UseMutationResult<
         Awaited<ReturnType<typeof logoutUser>>,
         TError,
