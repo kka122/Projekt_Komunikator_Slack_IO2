@@ -10,6 +10,9 @@ export default defineConfig({
       client: 'react-query',
       target: '../../../app/src/api/endpoints',
       schemas: '../../../app/src/api/models',
+      httpClient: 'axios',
+      clean: true,
+      formatter: 'prettier',
       mock: true,
       override: {
         operations: {
