@@ -41,6 +41,7 @@ export default defineConfig({
       client: 'zod',
       target: '../../../app/src/api/endpoints',
       fileExtension: '.zod.ts',
+      formatter: 'prettier',
     },
   },
 });
