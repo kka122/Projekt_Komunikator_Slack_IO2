@@ -2,10 +2,16 @@ import {type JSX} from "react";
 import {useGoogleLogin} from "@react-oauth/google";
 import styles from './GoogleAuth.module.css'
 import InlineHotkey from "../HotkeyText/InlineHotkey.tsx";
+// import type {GoogleAuthRequestBody} from "../../api/models";
 
 function GoogleAuth(): JSX.Element {
   const login = useGoogleLogin({
     onSuccess: (tokenResponse) => {
+      console.log(tokenResponse);
+      // const requestBody: GoogleAuthRequestBody = {
+      //   token: tokenResponse.access_token,
+      // }
+      // const requestBodyParsed =
     },
   })
 

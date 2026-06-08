@@ -21,10 +21,12 @@ JWT_SECRET_KEY=[your_jwt_secret_key]
 To run the application in production mode, use the following command:
 
 ```bash
-docker compose -f compose.yml up --build -d
+docker compose up --build -d
 ```
 
 App will be available at http://localhost:8080/.
+
+Generated documentation will be available at http://localhost:8081/.
 
 ### Development
 
@@ -79,7 +81,7 @@ App will be available at http://localhost:5173/.
 ### API specification:
 
 - [OpenAPI](https://www.openapis.org/)
-- [AsyncAPI](https://www.asyncapi.com/)
+- [Orval](https://orval.dev/)
 
 ### Database:
 

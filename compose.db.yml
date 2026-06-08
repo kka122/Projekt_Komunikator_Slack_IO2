@@ -32,7 +32,7 @@ services:
       KAFKA_CLUSTERS_0_NAME: local
       KAFKA_CLUSTERS_0_BOOTSTRAPSERVERS: kafka:9092
     ports:
-      - "9090:8080"
+      - "9093:8080"
     depends_on:
       kafka:
         condition: service_healthy
@@ -59,8 +59,6 @@ services:
     image: swaggerapi/swagger-ui
     environment:
       SWAGGER_JSON: /openapi/openapi.yaml
-    volumes:
-      - ./shared/openapi:/openapi
     ports:
       - "5001:8080"
 

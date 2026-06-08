@@ -5,9 +5,7 @@ on:
     branches:
       - main
     paths:
-      - 'app/**'
-  pull_request:
-    paths:
+      - '.github/workflows/app-tests.yml'
       - 'app/**'
 
 permissions:

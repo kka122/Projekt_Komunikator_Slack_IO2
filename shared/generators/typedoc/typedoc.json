@@ -1,0 +1,16 @@
+{
+  "entryPoints": [
+    "../../../app/src/**/*.ts",
+    "../../../app/src/**/*.tsx"
+  ],
+  "out": "../../../docs/tsdoc",
+  "tsconfig": "../../../app/tsconfig.app.json",
+  "exclude": [
+    "**/node_modules/**",
+    "**/dist/**",
+    "**/src/api/**",
+    "**/tests/**",
+    "**/*.test.ts",
+    "**/*.test.tsx"
+  ]
+}

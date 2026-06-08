@@ -1,3 +1,5 @@
+name: szponcik
+
 include:
   - compose.db.yml
 
@@ -33,3 +35,11 @@ services:
       - "8080:8080"
     depends_on:
       - backend
+
+  docs:
+    container_name: docs
+    build:
+      context: docs
+      dockerfile: Dockerfile
+    ports:
+      - "8081:80"
