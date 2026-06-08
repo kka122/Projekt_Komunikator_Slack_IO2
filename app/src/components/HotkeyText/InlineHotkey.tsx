@@ -5,15 +5,39 @@ import styles from './InlineHotkey.module.css'
 interface InlineHotkeyProps extends HTMLProps<HTMLSpanElement> {
   hotkeyFunction: () => void;
   hotkeyKey: Hotkey;
+  letterIndex?: number;
+  children: string;
 }
 
-function InlineHotkey({hotkeyFunction, hotkeyKey, ...props}: InlineHotkeyProps): JSX.Element {
+function InlineHotkey({
+                        hotkeyFunction,
+                        hotkeyKey,
+                        letterIndex = 0,
+                        children,
+                        ...props
+                      }: InlineHotkeyProps): JSX.Element {
   useHotkey(hotkeyKey, hotkeyFunction);
 
-  return <span onClick={hotkeyFunction} className={styles.inlineHotkey} tabIndex={0} {...props}>
+  let indexCount = 0;
+  let start = '';
+  let end = '';
+  children.split('').forEach((letter, index) => {
+    if (letter.toLowerCase() === hotkeyKey.toLowerCase()) {
+      indexCount++;
+
+      if (indexCount === letterIndex + 1) {
+        start = children.substring(0, index);
+        end = children.substring(index + 1);
+      }
+    }
+  })
+
+  return <span onClick={hotkeyFunction} className={styles.inlineHotkey} {...props}>
+    {start}
     <span className={'primary'}>[</span>
     {hotkeyKey}
     <span className={'primary'}>]</span>
+    {end}
   </span>
 }
 

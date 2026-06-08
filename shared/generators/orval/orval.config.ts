@@ -11,6 +11,22 @@ export default defineConfig({
       target: '../../../app/src/api/endpoints',
       schemas: '../../../app/src/api/models',
       mock: true,
+      override: {
+        operations: {
+          listChannelMessages: {
+            query: {
+              useInfinite: true,
+              useInfiniteQueryParam: 'page'
+            }
+          },
+          listDirectChatMessages: {
+            query: {
+              useInfinite: true,
+              useInfiniteQueryParam: 'page'
+            }
+          }
+        }
+      }
     },
   },
   szponcikZod: {

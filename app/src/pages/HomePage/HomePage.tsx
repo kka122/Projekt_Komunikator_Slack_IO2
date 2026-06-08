@@ -2,6 +2,7 @@ import type {JSX} from "react";
 import AnimatedMain from "../../components/AnimatedMain/AnimatedMain.tsx";
 import {useNavigate} from "react-router";
 import InlineHotkey from "../../components/HotkeyText/InlineHotkey.tsx";
+import styles from './HomePage.module.css'
 
 function HomePage(): JSX.Element {
   const navigate = useNavigate();
@@ -14,18 +15,14 @@ function HomePage(): JSX.Element {
     navigate("/auth/register");
   }
 
-  return <AnimatedMain>
-    <h1>Szponcik</h1>
-    <h2>Komunikator dla prawdziwych nerdów!</h2>
-    <ul>
+  return <AnimatedMain className={styles.homePage}>
+    <h1><span className={'primary'}>Szponcik</span>, komunikator dla prawdziwych nerdów</h1>
+    <ul className={'large'}>
       <li>
-        <InlineHotkey hotkeyFunction={goToLoginPage} hotkeyKey={"Z"}/>
-        aloguj
+        <InlineHotkey hotkeyFunction={goToLoginPage} hotkeyKey={"Z"}>Zaloguj</InlineHotkey>
       </li>
       <li>
-        Za
-        <InlineHotkey hotkeyFunction={goToRegisterPage} hotkeyKey={"R"}/>
-        ejestruj
+        <InlineHotkey hotkeyFunction={goToRegisterPage} hotkeyKey={"R"}>Zarejestruj</InlineHotkey>
       </li>
     </ul>
   </AnimatedMain>

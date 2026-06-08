@@ -1023,7 +1023,7 @@ paths:
         '404':
           $ref: '#/components/responses/404'
 
-  /workspaces/{workspaceId}/channels/{channelId}/messages/{page}/{pageSize}:
+  /workspaces/{workspaceId}/channels/{channelId}/messages/{pageSize}/{page}:
     get:
       operationId: listChannelMessages
       tags: [ Message ]
@@ -1132,7 +1132,7 @@ paths:
         '404':
           $ref: '#/components/responses/404'
 
-  /workspaces/{workspaceId}/direct-chats/{directChatId}/messages/{page}/{pageSize}:
+  /workspaces/{workspaceId}/direct-chats/{directChatId}/messages/{pageSize}/{page}:
     get:
       operationId: listDirectChatMessages
       tags: [ Message ]

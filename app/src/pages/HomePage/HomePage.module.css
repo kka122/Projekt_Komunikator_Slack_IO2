@@ -1,0 +1,17 @@
+.homePage {
+  h1 {
+    max-width: 30ch;
+  }
+
+  ul {
+    width: clamp(20rem, 100%, 25rem);
+
+    display: flex;
+    flex-flow: row wrap;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0;
+
+    list-style: none;
+  }
+}

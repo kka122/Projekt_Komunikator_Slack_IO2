@@ -42,24 +42,26 @@ body {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  text-wrap: balance;
+  text-wrap: pretty;
   text-align: center;
   line-height: 1.2;
 }
 
 h1 {
   letter-spacing: 0.1em;
-  font-size: 3.375rem;
-
-  color: var(--color-primary);
+  font-size: 2.441rem;
 }
 
 h2 {
-  font-size: 2.25rem;
+  font-size: 1.953rem;
 }
 
 h3 {
-  font-size: 1.5rem;
+  font-size: 1.563rem;
+}
+
+.large {
+  font-size: 1.25rem;
 }
 
 p {

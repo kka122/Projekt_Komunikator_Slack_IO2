@@ -1,14 +1,16 @@
 import './App.css'
 import {RouterProvider} from "react-router/dom";
-import {createBrowserRouter} from "react-router";
+import {createBrowserRouter, Navigate} from "react-router";
 import Root from "./layouts/Root.tsx";
-import LoginScreen from "./pages/LoginScreen/LoginScreen.tsx";
 import HomePage from "./pages/HomePage/HomePage.tsx";
+import LoginPage from "./pages/LoginPage/LoginPage.tsx";
+import RegisterPage from "./pages/RegisterPage/RegisterPage.tsx";
 
 const router = createBrowserRouter([
   {
     path: "/",
     Component: Root,
+    errorElement: <Navigate to={"/"}/>,
     children: [
       {
         index: true,
@@ -19,11 +21,11 @@ const router = createBrowserRouter([
         children: [
           {
             path: "login",
-            Component: LoginScreen
+            Component: LoginPage
           },
           {
             path: "register",
-            Component: () => <div>Register</div>
+            Component: RegisterPage
           },
         ]
       }

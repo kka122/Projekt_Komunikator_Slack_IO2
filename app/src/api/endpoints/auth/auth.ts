@@ -29,9 +29,7 @@ import type {
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
-      type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
-
-
+type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 
 export type registerUserResponse201 = {
@@ -61,8 +59,6 @@ export type registerUserResponse = (registerUserResponseSuccess | registerUserRe
 export const getRegisterUserUrl = () => {
 
 
-
-
   return `/auth/register`
 }
 
@@ -71,79 +67,84 @@ export const getRegisterUserUrl = () => {
  * @summary Register a new user
  */
 export const registerUser = async (registerRequestBody: RegisterRequestBody, options?: RequestInit): Promise<registerUserResponse> => {
-    const formData = new FormData();
-formData.append(`name`, registerRequestBody.name);
-formData.append(`surname`, registerRequestBody.surname);
-formData.append(`email`, registerRequestBody.email);
-formData.append(`password`, registerRequestBody.password);
-if(registerRequestBody.avatar !== undefined) {
- formData.append(`avatar`, registerRequestBody.avatar);
- }
+  const formData = new FormData();
+  formData.append(`name`, registerRequestBody.name);
+  formData.append(`surname`, registerRequestBody.surname);
+  formData.append(`email`, registerRequestBody.email);
+  formData.append(`password`, registerRequestBody.password);
+  if (registerRequestBody.avatar !== undefined) {
+    formData.append(`avatar`, registerRequestBody.avatar);
+  }
 
   const res = await fetch(getRegisterUserUrl(),
-  {
-    ...options,
-    method: 'POST'
-    ,
-    body: formData
-  }
-)
+    {
+      ...options,
+      method: 'POST'
+      ,
+      body: formData
+    }
+  )
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
   const data: registerUserResponse['data'] = body ? JSON.parse(body) : undefined
-  return { data, status: res.status, headers: res.headers } as registerUserResponse
+  return {data, status: res.status, headers: res.headers} as registerUserResponse
 }
 
 
-
-
 export const getRegisterUserMutationOptions = <TError = N400Response | N409Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerUser>>, TError,{data: RegisterRequestBody}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof registerUser>>, TError,{data: RegisterRequestBody}, TContext> => {
+  TContext = unknown>(options?: {
+                        mutation?: UseMutationOptions<Awaited<ReturnType<typeof registerUser>>, TError, {
+                          data: RegisterRequestBody
+                        }, TContext>,
+                        fetch?: RequestInit
+                      }
+): UseMutationOptions<Awaited<ReturnType<typeof registerUser>>, TError, { data: RegisterRequestBody }, TContext> => {
 
-const mutationKey = ['registerUser'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+  const mutationKey = ['registerUser'];
+  const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+    options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+    : {mutation: {mutationKey,}, fetch: undefined};
 
 
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof registerUser>>, {
+    data: RegisterRequestBody
+  }> = (props) => {
+    const {data} = props ?? {};
+
+    return registerUser(data, fetchOptions)
+  }
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof registerUser>>, {data: RegisterRequestBody}> = (props) => {
-          const {data} = props ?? {};
+  return {mutationFn, ...mutationOptions}
+}
 
-          return  registerUser(data,fetchOptions)
-        }
+export type RegisterUserMutationResult = NonNullable<Awaited<ReturnType<typeof registerUser>>>
+export type RegisterUserMutationBody = RegisterRequestBody
+export type RegisterUserMutationError = N400Response | N409Response
 
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type RegisterUserMutationResult = NonNullable<Awaited<ReturnType<typeof registerUser>>>
-    export type RegisterUserMutationBody = RegisterRequestBody
-    export type RegisterUserMutationError = N400Response | N409Response
-
-    /**
+/**
  * @summary Register a new user
  */
 export const useRegisterUser = <TError = N400Response | N409Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof registerUser>>, TError,{data: RegisterRequestBody}, TContext>, fetch?: RequestInit}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof registerUser>>,
-        TError,
-        {data: RegisterRequestBody},
-        TContext
-      > => {
-      return useMutation(getRegisterUserMutationOptions(options));
-    }
-    export type loginUserResponse200 = {
+  TContext = unknown>(options?: {
+                        mutation?: UseMutationOptions<Awaited<ReturnType<typeof registerUser>>, TError, {
+                          data: RegisterRequestBody
+                        }, TContext>,
+                        fetch?: RequestInit
+                      }
+): UseMutationResult<
+  Awaited<ReturnType<typeof registerUser>>,
+  TError,
+  { data: RegisterRequestBody },
+  TContext
+> => {
+  return useMutation(getRegisterUserMutationOptions(options));
+}
+export type loginUserResponse200 = {
   data: LoginResponseResponse
   status: 200
 }
@@ -170,8 +171,6 @@ export type loginUserResponse = (loginUserResponseSuccess | loginUserResponseErr
 export const getLoginUserUrl = () => {
 
 
-
-
   return `/auth/login`
 }
 
@@ -182,69 +181,68 @@ export const getLoginUserUrl = () => {
 export const loginUser = async (loginRequestBody: LoginRequestBody, options?: RequestInit): Promise<loginUserResponse> => {
 
   const res = await fetch(getLoginUserUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(loginRequestBody)
-  }
-)
+    {
+      ...options,
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', ...options?.headers},
+      body: JSON.stringify(loginRequestBody)
+    }
+  )
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
   const data: loginUserResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as loginUserResponse
+  return {data, status: res.status, headers: res.headers} as loginUserResponse
 }
 
 
-
-
 export const getLoginUserMutationOptions = <TError = N400Response | N401Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginUser>>, TError,{data: LoginRequestBody}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof loginUser>>, TError,{data: LoginRequestBody}, TContext> => {
+  TContext = unknown>(options?: {
+                        mutation?: UseMutationOptions<Awaited<ReturnType<typeof loginUser>>, TError, { data: LoginRequestBody }, TContext>,
+                        fetch?: RequestInit
+                      }
+): UseMutationOptions<Awaited<ReturnType<typeof loginUser>>, TError, { data: LoginRequestBody }, TContext> => {
 
-const mutationKey = ['loginUser'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+  const mutationKey = ['loginUser'];
+  const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+    options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+    : {mutation: {mutationKey,}, fetch: undefined};
 
 
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof loginUser>>, { data: LoginRequestBody }> = (props) => {
+    const {data} = props ?? {};
+
+    return loginUser(data, fetchOptions)
+  }
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof loginUser>>, {data: LoginRequestBody}> = (props) => {
-          const {data} = props ?? {};
+  return {mutationFn, ...mutationOptions}
+}
 
-          return  loginUser(data,fetchOptions)
-        }
+export type LoginUserMutationResult = NonNullable<Awaited<ReturnType<typeof loginUser>>>
+export type LoginUserMutationBody = LoginRequestBody
+export type LoginUserMutationError = N400Response | N401Response
 
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type LoginUserMutationResult = NonNullable<Awaited<ReturnType<typeof loginUser>>>
-    export type LoginUserMutationBody = LoginRequestBody
-    export type LoginUserMutationError = N400Response | N401Response
-
-    /**
+/**
  * @summary Log in a user and obtain an authentication token
  */
 export const useLoginUser = <TError = N400Response | N401Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof loginUser>>, TError,{data: LoginRequestBody}, TContext>, fetch?: RequestInit}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof loginUser>>,
-        TError,
-        {data: LoginRequestBody},
-        TContext
-      > => {
-      return useMutation(getLoginUserMutationOptions(options));
-    }
-    export type googleAuthResponse200 = {
+  TContext = unknown>(options?: {
+                        mutation?: UseMutationOptions<Awaited<ReturnType<typeof loginUser>>, TError, { data: LoginRequestBody }, TContext>,
+                        fetch?: RequestInit
+                      }
+): UseMutationResult<
+  Awaited<ReturnType<typeof loginUser>>,
+  TError,
+  { data: LoginRequestBody },
+  TContext
+> => {
+  return useMutation(getLoginUserMutationOptions(options));
+}
+export type googleAuthResponse200 = {
   data: LoginResponseResponse
   status: 200
 }
@@ -271,8 +269,6 @@ export type googleAuthResponse = (googleAuthResponseSuccess | googleAuthResponse
 export const getGoogleAuthUrl = () => {
 
 
-
-
   return `/auth/google`
 }
 
@@ -283,69 +279,74 @@ export const getGoogleAuthUrl = () => {
 export const googleAuth = async (googleAuthRequestBody: GoogleAuthRequestBody, options?: RequestInit): Promise<googleAuthResponse> => {
 
   const res = await fetch(getGoogleAuthUrl(),
-  {
-    ...options,
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', ...options?.headers },
-    body: JSON.stringify(googleAuthRequestBody)
-  }
-)
+    {
+      ...options,
+      method: 'POST',
+      headers: {'Content-Type': 'application/json', ...options?.headers},
+      body: JSON.stringify(googleAuthRequestBody)
+    }
+  )
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
   const data: googleAuthResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as googleAuthResponse
+  return {data, status: res.status, headers: res.headers} as googleAuthResponse
 }
 
 
-
-
 export const getGoogleAuthMutationOptions = <TError = N400Response | N401Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof googleAuth>>, TError,{data: GoogleAuthRequestBody}, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof googleAuth>>, TError,{data: GoogleAuthRequestBody}, TContext> => {
+  TContext = unknown>(options?: {
+                        mutation?: UseMutationOptions<Awaited<ReturnType<typeof googleAuth>>, TError, {
+                          data: GoogleAuthRequestBody
+                        }, TContext>,
+                        fetch?: RequestInit
+                      }
+): UseMutationOptions<Awaited<ReturnType<typeof googleAuth>>, TError, { data: GoogleAuthRequestBody }, TContext> => {
 
-const mutationKey = ['googleAuth'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+  const mutationKey = ['googleAuth'];
+  const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+    options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+    : {mutation: {mutationKey,}, fetch: undefined};
 
 
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof googleAuth>>, {
+    data: GoogleAuthRequestBody
+  }> = (props) => {
+    const {data} = props ?? {};
+
+    return googleAuth(data, fetchOptions)
+  }
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof googleAuth>>, {data: GoogleAuthRequestBody}> = (props) => {
-          const {data} = props ?? {};
+  return {mutationFn, ...mutationOptions}
+}
 
-          return  googleAuth(data,fetchOptions)
-        }
+export type GoogleAuthMutationResult = NonNullable<Awaited<ReturnType<typeof googleAuth>>>
+export type GoogleAuthMutationBody = GoogleAuthRequestBody
+export type GoogleAuthMutationError = N400Response | N401Response
 
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type GoogleAuthMutationResult = NonNullable<Awaited<ReturnType<typeof googleAuth>>>
-    export type GoogleAuthMutationBody = GoogleAuthRequestBody
-    export type GoogleAuthMutationError = N400Response | N401Response
-
-    /**
+/**
  * @summary Authenticate a user using Google OAuth token
  */
 export const useGoogleAuth = <TError = N400Response | N401Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof googleAuth>>, TError,{data: GoogleAuthRequestBody}, TContext>, fetch?: RequestInit}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof googleAuth>>,
-        TError,
-        {data: GoogleAuthRequestBody},
-        TContext
-      > => {
-      return useMutation(getGoogleAuthMutationOptions(options));
-    }
-    export type refreshTokenResponse200 = {
+  TContext = unknown>(options?: {
+                        mutation?: UseMutationOptions<Awaited<ReturnType<typeof googleAuth>>, TError, {
+                          data: GoogleAuthRequestBody
+                        }, TContext>,
+                        fetch?: RequestInit
+                      }
+): UseMutationResult<
+  Awaited<ReturnType<typeof googleAuth>>,
+  TError,
+  { data: GoogleAuthRequestBody },
+  TContext
+> => {
+  return useMutation(getGoogleAuthMutationOptions(options));
+}
+export type refreshTokenResponse200 = {
   data: TokenRefreshResponseResponse
   status: 200
 }
@@ -372,8 +373,6 @@ export type refreshTokenResponse = (refreshTokenResponseSuccess | refreshTokenRe
 export const getRefreshTokenUrl = () => {
 
 
-
-
   return `/auth/refresh`
 }
 
@@ -381,72 +380,71 @@ export const getRefreshTokenUrl = () => {
  * Use the refresh token to obtain a new access token. This endpoint requires a valid refresh_token cookie and will set a new access_token cookie on success.
  * @summary Refresh the authentication token using the refresh token
  */
-export const refreshToken = async ( options?: RequestInit): Promise<refreshTokenResponse> => {
+export const refreshToken = async (options?: RequestInit): Promise<refreshTokenResponse> => {
 
   const res = await fetch(getRefreshTokenUrl(),
-  {
-    ...options,
-    method: 'POST'
+    {
+      ...options,
+      method: 'POST'
 
 
-  }
-)
+    }
+  )
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
   const data: refreshTokenResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as refreshTokenResponse
+  return {data, status: res.status, headers: res.headers} as refreshTokenResponse
 }
 
 
-
-
 export const getRefreshTokenMutationOptions = <TError = N401Response | N403Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshToken>>, TError,void, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof refreshToken>>, TError,void, TContext> => {
+  TContext = unknown>(options?: {
+                        mutation?: UseMutationOptions<Awaited<ReturnType<typeof refreshToken>>, TError, void, TContext>,
+                        fetch?: RequestInit
+                      }
+): UseMutationOptions<Awaited<ReturnType<typeof refreshToken>>, TError, void, TContext> => {
 
-const mutationKey = ['refreshToken'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+  const mutationKey = ['refreshToken'];
+  const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+    options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+    : {mutation: {mutationKey,}, fetch: undefined};
 
 
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof refreshToken>>, void> = () => {
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof refreshToken>>, void> = () => {
+    return refreshToken(fetchOptions)
+  }
 
 
-          return  refreshToken(fetchOptions)
-        }
+  return {mutationFn, ...mutationOptions}
+}
 
+export type RefreshTokenMutationResult = NonNullable<Awaited<ReturnType<typeof refreshToken>>>
 
+export type RefreshTokenMutationError = N401Response | N403Response
 
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type RefreshTokenMutationResult = NonNullable<Awaited<ReturnType<typeof refreshToken>>>
-
-    export type RefreshTokenMutationError = N401Response | N403Response
-
-    /**
+/**
  * @summary Refresh the authentication token using the refresh token
  */
 export const useRefreshToken = <TError = N401Response | N403Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof refreshToken>>, TError,void, TContext>, fetch?: RequestInit}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof refreshToken>>,
-        TError,
-        void,
-        TContext
-      > => {
-      return useMutation(getRefreshTokenMutationOptions(options));
-    }
-    export type logoutUserResponse200 = {
+  TContext = unknown>(options?: {
+                        mutation?: UseMutationOptions<Awaited<ReturnType<typeof refreshToken>>, TError, void, TContext>,
+                        fetch?: RequestInit
+                      }
+): UseMutationResult<
+  Awaited<ReturnType<typeof refreshToken>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getRefreshTokenMutationOptions(options));
+}
+export type logoutUserResponse200 = {
   data: LogoutResponseResponse
   status: 200
 }
@@ -468,8 +466,6 @@ export type logoutUserResponse = (logoutUserResponseSuccess | logoutUserResponse
 export const getLogoutUserUrl = () => {
 
 
-
-
   return `/auth/logout`
 }
 
@@ -477,68 +473,67 @@ export const getLogoutUserUrl = () => {
  * Log out the currently authenticated user by clearing the access_token and refresh_token cookies.
  * @summary Log out the authenticated user
  */
-export const logoutUser = async ( options?: RequestInit): Promise<logoutUserResponse> => {
+export const logoutUser = async (options?: RequestInit): Promise<logoutUserResponse> => {
 
   const res = await fetch(getLogoutUserUrl(),
-  {
-    ...options,
-    method: 'POST'
+    {
+      ...options,
+      method: 'POST'
 
 
-  }
-)
+    }
+  )
 
 
   const body = [204, 205, 304].includes(res.status) ? null : await res.text();
 
   const data: logoutUserResponse['data'] = body ? JSON.parse(body) : {}
-  return { data, status: res.status, headers: res.headers } as logoutUserResponse
+  return {data, status: res.status, headers: res.headers} as logoutUserResponse
 }
 
 
-
-
 export const getLogoutUserMutationOptions = <TError = N401Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutUser>>, TError,void, TContext>, fetch?: RequestInit}
-): UseMutationOptions<Awaited<ReturnType<typeof logoutUser>>, TError,void, TContext> => {
+  TContext = unknown>(options?: {
+                        mutation?: UseMutationOptions<Awaited<ReturnType<typeof logoutUser>>, TError, void, TContext>,
+                        fetch?: RequestInit
+                      }
+): UseMutationOptions<Awaited<ReturnType<typeof logoutUser>>, TError, void, TContext> => {
 
-const mutationKey = ['logoutUser'];
-const {mutation: mutationOptions, fetch: fetchOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+  const mutationKey = ['logoutUser'];
+  const {mutation: mutationOptions, fetch: fetchOptions} = options ?
+    options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
       options
       : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, fetch: undefined};
+    : {mutation: {mutationKey,}, fetch: undefined};
 
 
+  const mutationFn: MutationFunction<Awaited<ReturnType<typeof logoutUser>>, void> = () => {
 
 
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof logoutUser>>, void> = () => {
+    return logoutUser(fetchOptions)
+  }
 
 
-          return  logoutUser(fetchOptions)
-        }
+  return {mutationFn, ...mutationOptions}
+}
 
+export type LogoutUserMutationResult = NonNullable<Awaited<ReturnType<typeof logoutUser>>>
 
+export type LogoutUserMutationError = N401Response
 
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type LogoutUserMutationResult = NonNullable<Awaited<ReturnType<typeof logoutUser>>>
-
-    export type LogoutUserMutationError = N401Response
-
-    /**
+/**
  * @summary Log out the authenticated user
  */
 export const useLogoutUser = <TError = N401Response,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof logoutUser>>, TError,void, TContext>, fetch?: RequestInit}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof logoutUser>>,
-        TError,
-        void,
-        TContext
-      > => {
-      return useMutation(getLogoutUserMutationOptions(options));
-    }
+  TContext = unknown>(options?: {
+                        mutation?: UseMutationOptions<Awaited<ReturnType<typeof logoutUser>>, TError, void, TContext>,
+                        fetch?: RequestInit
+                      }
+): UseMutationResult<
+  Awaited<ReturnType<typeof logoutUser>>,
+  TError,
+  void,
+  TContext
+> => {
+  return useMutation(getLogoutUserMutationOptions(options));
+}
