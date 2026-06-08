@@ -10,7 +10,7 @@
     "**/dist/**",
     "**/src/api/**",
     "**/tests/**",
-    "*.test.ts",
-    "*.test.tsx"
+    "**/*.test.ts",
+    "**/*.test.tsx"
   ]
 }
