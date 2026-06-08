@@ -54,7 +54,7 @@ export const createChannel = (
 
 
     return axios.post(
-      `http://localhost:5000/workspaces/${workspaceId}/channels`,
+      `http://localhost:5000/api/workspaces/${workspaceId}/channels`,
       createChannelRequestBody,options
     );
   }
@@ -115,7 +115,7 @@ export const listChannels = (
 
 
     return axios.get(
-      `http://localhost:5000/workspaces/${workspaceId}/channels`,options
+      `http://localhost:5000/api/workspaces/${workspaceId}/channels`,options
     );
   }
 
@@ -124,7 +124,7 @@ export const listChannels = (
 
 export const getListChannelsQueryKey = (workspaceId: string,) => {
     return [
-    `http://localhost:5000/workspaces/${workspaceId}/channels`
+    `http://localhost:5000/api/workspaces/${workspaceId}/channels`
     ] as const;
     }
 
@@ -184,7 +184,7 @@ export const updateChannelName = (
 
 
     return axios.patch(
-      `http://localhost:5000/workspaces/${workspaceId}/channels/${channelId}`,
+      `http://localhost:5000/api/workspaces/${workspaceId}/channels/${channelId}`,
       updateChannelNameRequestBody,options
     );
   }
@@ -246,7 +246,7 @@ export const deleteChannel = (
 
 
     return axios.delete(
-      `http://localhost:5000/workspaces/${workspaceId}/channels/${channelId}`,options
+      `http://localhost:5000/api/workspaces/${workspaceId}/channels/${channelId}`,options
     );
   }
 

@@ -62,7 +62,7 @@ if(createMessageRequestBody?.attachments !== undefined) {
  }
 
     return axios.post(
-      `http://localhost:5000/workspaces/${workspaceId}/channels/${channelId}/messages`,
+      `http://localhost:5000/api/workspaces/${workspaceId}/channels/${channelId}/messages`,
       formData,options
     );
   }
@@ -126,7 +126,7 @@ export const listChannelMessages = (
 
 
     return axios.get(
-      `http://localhost:5000/workspaces/${workspaceId}/channels/${channelId}/messages/${pageSize}/${page}`,options
+      `http://localhost:5000/api/workspaces/${workspaceId}/channels/${channelId}/messages/${pageSize}/${page}`,options
     );
   }
 
@@ -138,7 +138,7 @@ export const getListChannelMessagesQueryKey = (workspaceId: string,
     pageSize: number = 20,
     page: number = 1,) => {
     return [
-    `http://localhost:5000/workspaces/${workspaceId}/channels/${channelId}/messages/${pageSize}/${page}`
+    `http://localhost:5000/api/workspaces/${workspaceId}/channels/${channelId}/messages/${pageSize}/${page}`
     ] as const;
     }
 
@@ -205,7 +205,7 @@ export const updateChannelMessage = (
 
 
     return axios.patch(
-      `http://localhost:5000/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}`,
+      `http://localhost:5000/api/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}`,
       updateMessageRequestBody,options
     );
   }
@@ -268,7 +268,7 @@ export const deleteChannelMessage = (
 
 
     return axios.delete(
-      `http://localhost:5000/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}`,options
+      `http://localhost:5000/api/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}`,options
     );
   }
 
@@ -337,7 +337,7 @@ if(createMessageRequestBody?.attachments !== undefined) {
  }
 
     return axios.post(
-      `http://localhost:5000/workspaces/${workspaceId}/direct-chats/${directChatId}/messages`,
+      `http://localhost:5000/api/workspaces/${workspaceId}/direct-chats/${directChatId}/messages`,
       formData,options
     );
   }
@@ -401,7 +401,7 @@ export const listDirectChatMessages = (
 
 
     return axios.get(
-      `http://localhost:5000/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${pageSize}/${page}`,options
+      `http://localhost:5000/api/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${pageSize}/${page}`,options
     );
   }
 
@@ -413,7 +413,7 @@ export const getListDirectChatMessagesQueryKey = (workspaceId: string,
     pageSize: number = 20,
     page: number = 1,) => {
     return [
-    `http://localhost:5000/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${pageSize}/${page}`
+    `http://localhost:5000/api/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${pageSize}/${page}`
     ] as const;
     }
 
@@ -480,7 +480,7 @@ export const updateDirectChatMessage = (
 
 
     return axios.patch(
-      `http://localhost:5000/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${messageId}`,
+      `http://localhost:5000/api/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${messageId}`,
       updateMessageRequestBody,options
     );
   }
@@ -543,7 +543,7 @@ export const deleteDirectChatMessage = (
 
 
     return axios.delete(
-      `http://localhost:5000/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${messageId}`,options
+      `http://localhost:5000/api/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${messageId}`,options
     );
   }
 

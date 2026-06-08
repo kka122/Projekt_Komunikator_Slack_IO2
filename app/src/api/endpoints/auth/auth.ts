@@ -59,7 +59,7 @@ if(registerRequestBody.avatar !== undefined) {
  }
 
     return axios.post(
-      `http://localhost:5000/auth/register`,
+      `http://localhost:5000/api/auth/register`,
       formData,options
     );
   }
@@ -120,7 +120,7 @@ export const loginUser = (
 
 
     return axios.post(
-      `http://localhost:5000/auth/login`,
+      `http://localhost:5000/api/auth/login`,
       loginRequestBody,options
     );
   }
@@ -181,7 +181,7 @@ export const googleAuth = (
 
 
     return axios.post(
-      `http://localhost:5000/auth/google`,
+      `http://localhost:5000/api/auth/google`,
       googleAuthRequestBody,options
     );
   }
@@ -242,7 +242,7 @@ export const refreshToken = (
 
 
     return axios.post(
-      `http://localhost:5000/auth/refresh`,
+      `http://localhost:5000/api/auth/refresh`,
       undefined,options
     );
   }
@@ -303,7 +303,7 @@ export const logoutUser = (
 
 
     return axios.post(
-      `http://localhost:5000/auth/logout`,
+      `http://localhost:5000/api/auth/logout`,
       undefined,options
     );
   }

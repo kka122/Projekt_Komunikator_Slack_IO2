@@ -54,7 +54,7 @@ export const getCurrentUserProfile = (
 
 
     return axios.get(
-      `http://localhost:5000/users/me`,options
+      `http://localhost:5000/api/users/me`,options
     );
   }
 
@@ -63,7 +63,7 @@ export const getCurrentUserProfile = (
 
 export const getGetCurrentUserProfileQueryKey = () => {
     return [
-    `http://localhost:5000/users/me`
+    `http://localhost:5000/api/users/me`
     ] as const;
     }
 
@@ -129,7 +129,7 @@ if(updateCurrentUserProfileRequestBody.avatar !== undefined) {
 formData.append(`status`, updateCurrentUserProfileRequestBody.status);
 
     return axios.patch(
-      `http://localhost:5000/users/me`,
+      `http://localhost:5000/api/users/me`,
       formData,options
     );
   }
@@ -190,7 +190,7 @@ export const deleteCurrentUserAccount = (
 
 
     return axios.delete(
-      `http://localhost:5000/users/me`,options
+      `http://localhost:5000/api/users/me`,options
     );
   }
 
@@ -250,7 +250,7 @@ export const getUserProfileByEmail = (
 
 
     return axios.get(
-      `http://localhost:5000/users/${emailRegex}`,options
+      `http://localhost:5000/api/users/${emailRegex}`,options
     );
   }
 
@@ -259,7 +259,7 @@ export const getUserProfileByEmail = (
 
 export const getGetUserProfileByEmailQueryKey = (emailRegex: string,) => {
     return [
-    `http://localhost:5000/users/${emailRegex}`
+    `http://localhost:5000/api/users/${emailRegex}`
     ] as const;
     }
 
@@ -318,7 +318,7 @@ export const addUserToWorkspace = (
 
 
     return axios.post(
-      `http://localhost:5000/users/${userId}/workspaces/${workspaceId}`,
+      `http://localhost:5000/api/users/${userId}/workspaces/${workspaceId}`,
       undefined,options
     );
   }
@@ -380,7 +380,7 @@ export const removeUserFromWorkspace = (
 
 
     return axios.delete(
-      `http://localhost:5000/users/${userId}/workspaces/${workspaceId}`,options
+      `http://localhost:5000/api/users/${userId}/workspaces/${workspaceId}`,options
     );
   }
 
@@ -442,7 +442,7 @@ export const updateUserRoleInWorkspace = (
 
 
     return axios.patch(
-      `http://localhost:5000/users/${userId}/workspaces/${workspaceId}/role`,
+      `http://localhost:5000/api/users/${userId}/workspaces/${workspaceId}/role`,
       updateUserRoleRequestBody,options
     );
   }

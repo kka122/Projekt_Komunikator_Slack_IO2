@@ -63,7 +63,7 @@ if(createWorkspaceRequestBody?.workspaceLogo !== undefined) {
  }
 
     return axios.post(
-      `http://localhost:5000/workspaces`,
+      `http://localhost:5000/api/workspaces`,
       formData,options
     );
   }
@@ -124,7 +124,7 @@ export const listWorkspaces = (
 
 
     return axios.get(
-      `http://localhost:5000/workspaces`,options
+      `http://localhost:5000/api/workspaces`,options
     );
   }
 
@@ -133,7 +133,7 @@ export const listWorkspaces = (
 
 export const getListWorkspacesQueryKey = () => {
     return [
-    `http://localhost:5000/workspaces`
+    `http://localhost:5000/api/workspaces`
     ] as const;
     }
 
@@ -191,7 +191,7 @@ export const acceptWorkspacePayment = (
 
 
     return axios.post(
-      `http://localhost:5000/workspaces/accept-payment`,
+      `http://localhost:5000/api/workspaces/accept-payment`,
       acceptPaymentRequestBody,options
     );
   }
@@ -257,7 +257,7 @@ if(updateWorkspaceLogoRequestBody?.workspaceLogo !== undefined) {
  }
 
     return axios.patch(
-      `http://localhost:5000/workspaces/${workspaceId}`,
+      `http://localhost:5000/api/workspaces/${workspaceId}`,
       formData,options
     );
   }

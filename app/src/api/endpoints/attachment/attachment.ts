@@ -48,7 +48,7 @@ export const deleteAttachmentFromChannelMessage = (
 
 
     return axios.delete(
-      `http://localhost:5000/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}/attachments/${attachmentId}`,options
+      `http://localhost:5000/api/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}/attachments/${attachmentId}`,options
     );
   }
 

@@ -47,7 +47,7 @@ export const listDirectChats = (
 
 
     return axios.get(
-      `http://localhost:5000/workspaces/${workspaceId}/direct-chats`,options
+      `http://localhost:5000/api/workspaces/${workspaceId}/direct-chats`,options
     );
   }
 
@@ -56,7 +56,7 @@ export const listDirectChats = (
 
 export const getListDirectChatsQueryKey = (workspaceId: string,) => {
     return [
-    `http://localhost:5000/workspaces/${workspaceId}/direct-chats`
+    `http://localhost:5000/api/workspaces/${workspaceId}/direct-chats`
     ] as const;
     }
 

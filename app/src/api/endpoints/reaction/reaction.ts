@@ -49,7 +49,7 @@ export const addReactionToChannelMessage = (
 
 
     return axios.post(
-      `http://localhost:5000/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}/reactions`,
+      `http://localhost:5000/api/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}/reactions`,
       addReactionRequestBody,options
     );
   }
@@ -113,7 +113,7 @@ export const removeReactionFromChannelMessage = (
 
 
     return axios.delete(
-      `http://localhost:5000/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}/reactions/${reactionId}`,options
+      `http://localhost:5000/api/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}/reactions/${reactionId}`,options
     );
   }
 
@@ -176,7 +176,7 @@ export const addReactionToDirectChatMessage = (
 
 
     return axios.post(
-      `http://localhost:5000/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${messageId}/reactions`,
+      `http://localhost:5000/api/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${messageId}/reactions`,
       addReactionRequestBody,options
     );
   }
@@ -240,7 +240,7 @@ export const removeReactionFromDirectChatMessage = (
 
 
     return axios.delete(
-      `http://localhost:5000/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${messageId}/reactions/${reactionId}`,options
+      `http://localhost:5000/api/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${messageId}/reactions/${reactionId}`,options
     );
   }
 
