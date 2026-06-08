@@ -33,6 +33,10 @@ jobs:
       - name: Install TypeDoc
         run: npm install -g typedoc
 
+      - name: Install local app dependencies
+        working-directory: app
+        run: npm install
+
       - name: Generate TypeDoc documentation
         run: typedoc --options shared/generators/typedoc/typedoc.json
 
