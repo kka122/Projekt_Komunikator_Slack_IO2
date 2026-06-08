@@ -11,7 +11,7 @@ export default defineConfig({
       target: '../../../app/src/api/endpoints',
       schemas: '../../../app/src/api/models',
       httpClient: 'axios',
-      baseUrl: 'http://localhost:5000',
+      baseUrl: 'http://localhost:5000/api',
       clean: true,
       formatter: 'prettier',
       mock: true,
