@@ -4,7 +4,7 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import type { Workspace } from './workspace';
+import type { Workspace } from "./workspace";
 
 export type WorkspaceListResponseResponse = {
   workspaces: Workspace[];

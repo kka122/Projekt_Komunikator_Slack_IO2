@@ -4,7 +4,7 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import type { UserStatus } from './userStatus';
+import type { UserStatus } from "./userStatus";
 
 export interface User {
   /** Unique identifier for the user */

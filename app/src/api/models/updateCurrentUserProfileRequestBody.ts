@@ -4,7 +4,7 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import type { UpdateCurrentUserProfileRequestBodyStatus } from './updateCurrentUserProfileRequestBodyStatus';
+import type { UpdateCurrentUserProfileRequestBodyStatus } from "./updateCurrentUserProfileRequestBodyStatus";
 
 export type UpdateCurrentUserProfileRequestBody = {
   /** The user's name. */

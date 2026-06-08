@@ -30,7 +30,7 @@ jobs:
           node-version: '24'
 
       - name: Install Node tools
-        run: npm install -g @redocly/cli orval
+        run: npm install -g @redocly/cli orval prettier
 
       - name: Install orval for schema directory
         working-directory: shared/generators/orval

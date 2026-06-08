@@ -4,37 +4,67 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import {
-  faker
-} from '@faker-js/faker';
+import { faker } from "@faker-js/faker";
 
-import {
-  HttpResponse,
-  http
-} from 'msw';
-import type {
-  RequestHandlerOptions
-} from 'msw';
+import { HttpResponse, http } from "msw";
+import type { RequestHandlerOptions } from "msw";
 
-import type {
-  DirectChatListResponseResponse
-} from '../../models';
+import type { DirectChatListResponseResponse } from "../../models";
 
+export const getListDirectChatsResponseMock = (
+  overrideResponse: Partial<
+    Extract<DirectChatListResponseResponse, object>
+  > = {},
+): DirectChatListResponseResponse => ({
+  directChats: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => ({
+    id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    participant: {
+      id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      surname: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      email: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      avatarUrl: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      status: faker.helpers.arrayElement([
+        "online",
+        "meeting",
+        "vacation",
+        "notDisturb",
+        "workAtHome",
+        "freeTime",
+        "offline",
+      ] as const),
+    },
+    newMessagesCount: faker.number.int(),
+  })),
+  ...overrideResponse,
+});
 
-export const getListDirectChatsResponseMock = (overrideResponse: Partial<Extract<DirectChatListResponseResponse, object>> = {}): DirectChatListResponseResponse => ({directChats: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.alpha({length: {min: 10, max: 20}}), participant: {id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), surname: faker.string.alpha({length: {min: 10, max: 20}}), email: faker.string.alpha({length: {min: 10, max: 20}}), avatarUrl: faker.string.alpha({length: {min: 10, max: 20}}), status: faker.helpers.arrayElement(['online','meeting','vacation','notDisturb','workAtHome','freeTime','offline'] as const)}, newMessagesCount: faker.number.int()})), ...overrideResponse})
-
-
-export const getListDirectChatsMockHandler = (overrideResponse?: DirectChatListResponseResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<DirectChatListResponseResponse> | DirectChatListResponseResponse), options?: RequestHandlerOptions) => {
-  return http.get('*/workspaces/:workspaceId/direct-chats', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-
-
-    return HttpResponse.json(overrideResponse !== undefined
-    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getListDirectChatsResponseMock(),
-      { status: 200
-      })
-  }, options)
-}
-export const getDirectChatMock = () => [
-  getListDirectChatsMockHandler()
-]
+export const getListDirectChatsMockHandler = (
+  overrideResponse?:
+    | DirectChatListResponseResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) =>
+        | Promise<DirectChatListResponseResponse>
+        | DirectChatListResponseResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    "*/workspaces/:workspaceId/direct-chats",
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getListDirectChatsResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+export const getDirectChatMock = () => [getListDirectChatsMockHandler()];

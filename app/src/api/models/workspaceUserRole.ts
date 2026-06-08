@@ -8,11 +8,11 @@
 /**
  * The role of the authenticated user within the workspace
  */
-export type WorkspaceUserRole = typeof WorkspaceUserRole[keyof typeof WorkspaceUserRole];
-
+export type WorkspaceUserRole =
+  (typeof WorkspaceUserRole)[keyof typeof WorkspaceUserRole];
 
 export const WorkspaceUserRole = {
-  owner: 'owner',
-  admin: 'admin',
-  member: 'member',
+  owner: "owner",
+  admin: "admin",
+  member: "member",
 } as const;

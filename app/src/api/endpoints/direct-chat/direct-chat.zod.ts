@@ -4,29 +4,41 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import * as zod from 'zod';
-
+import * as zod from "zod";
 
 /**
  * Retrieve a list of all direct chats that the authenticated user is a part of within the specified workspace.
  * @summary List all direct chats in a workspace
  */
 export const ListDirectChatsParams = zod.object({
-  "workspaceId": zod.string().uuid().describe('The ID of the workspace.')
-})
+  workspaceId: zod.string().uuid().describe("The ID of the workspace."),
+});
 
 export const ListDirectChatsResponse = zod.object({
-  "directChats": zod.array(zod.object({
-  "id": zod.string().describe('Unique identifier for the direct chat'),
-  "participant": zod.object({
-  "id": zod.string().describe('Unique identifier for the user'),
-  "name": zod.string().describe('Name of the user'),
-  "surname": zod.string().describe('Surname of the user'),
-  "email": zod.string().describe('Email address of the user'),
-  "avatarUrl": zod.string().describe('URL of the user\'s avatar image'),
-  "status": zod.enum(['online', 'meeting', 'vacation', 'notDisturb', 'workAtHome', 'freeTime', 'offline'])
-}).describe('The other participant in the direct chat'),
-  "newMessagesCount": zod.number().describe('Number of new messages in the direct chat')
-}))
-})
-
+  directChats: zod.array(
+    zod.object({
+      id: zod.string().describe("Unique identifier for the direct chat"),
+      participant: zod
+        .object({
+          id: zod.string().describe("Unique identifier for the user"),
+          name: zod.string().describe("Name of the user"),
+          surname: zod.string().describe("Surname of the user"),
+          email: zod.string().describe("Email address of the user"),
+          avatarUrl: zod.string().describe("URL of the user's avatar image"),
+          status: zod.enum([
+            "online",
+            "meeting",
+            "vacation",
+            "notDisturb",
+            "workAtHome",
+            "freeTime",
+            "offline",
+          ]),
+        })
+        .describe("The other participant in the direct chat"),
+      newMessagesCount: zod
+        .number()
+        .describe("Number of new messages in the direct chat"),
+    }),
+  ),
+});

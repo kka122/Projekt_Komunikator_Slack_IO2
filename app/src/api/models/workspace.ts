@@ -4,9 +4,9 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import type { Channel } from './channel';
-import type { User } from './user';
-import type { WorkspaceUserRole } from './workspaceUserRole';
+import type { Channel } from "./channel";
+import type { User } from "./user";
+import type { WorkspaceUserRole } from "./workspaceUserRole";
 
 export interface Workspace {
   id: string;

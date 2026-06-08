@@ -8,15 +8,15 @@
 /**
  * The user's current status.
  */
-export type UpdateCurrentUserProfileRequestBodyStatus = typeof UpdateCurrentUserProfileRequestBodyStatus[keyof typeof UpdateCurrentUserProfileRequestBodyStatus];
-
+export type UpdateCurrentUserProfileRequestBodyStatus =
+  (typeof UpdateCurrentUserProfileRequestBodyStatus)[keyof typeof UpdateCurrentUserProfileRequestBodyStatus];
 
 export const UpdateCurrentUserProfileRequestBodyStatus = {
-  online: 'online',
-  meeting: 'meeting',
-  vacation: 'vacation',
-  notDisturb: 'notDisturb',
-  workAtHome: 'workAtHome',
-  freeTime: 'freeTime',
-  offline: 'offline',
+  online: "online",
+  meeting: "meeting",
+  vacation: "vacation",
+  notDisturb: "notDisturb",
+  workAtHome: "workAtHome",
+  freeTime: "freeTime",
+  offline: "offline",
 } as const;

@@ -4,97 +4,128 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import * as zod from 'zod';
-
+import * as zod from "zod";
 
 /**
  * Retrieve the profile information of the currently authenticated user, including their name, email, profile picture URL, and the list of workspaces they are a member of.
  * @summary Get the profile of the currently authenticated user
  */
 export const GetCurrentUserProfileResponse = zod.object({
-  "user": zod.object({
-  "id": zod.string().describe('Unique identifier for the user'),
-  "name": zod.string().describe('Name of the user'),
-  "surname": zod.string().describe('Surname of the user'),
-  "email": zod.string().describe('Email address of the user'),
-  "avatarUrl": zod.string().describe('URL of the user\'s avatar image'),
-  "status": zod.enum(['online', 'meeting', 'vacation', 'notDisturb', 'workAtHome', 'freeTime', 'offline'])
-}).describe('The current user\'s profile information.')
-})
+  user: zod
+    .object({
+      id: zod.string().describe("Unique identifier for the user"),
+      name: zod.string().describe("Name of the user"),
+      surname: zod.string().describe("Surname of the user"),
+      email: zod.string().describe("Email address of the user"),
+      avatarUrl: zod.string().describe("URL of the user's avatar image"),
+      status: zod.enum([
+        "online",
+        "meeting",
+        "vacation",
+        "notDisturb",
+        "workAtHome",
+        "freeTime",
+        "offline",
+      ]),
+    })
+    .describe("The current user's profile information."),
+});
 
 /**
  * Update the profile information of the currently authenticated user, such as their name and profile picture. The email cannot be updated through this endpoint. To change the email, users must contact support.
  * @summary Update the profile of the currently authenticated user
  */
 export const UpdateCurrentUserProfileBody = zod.object({
-  "name": zod.string().describe('The user\'s name.'),
-  "surname": zod.string().describe('The user\'s surname.'),
-  "email": zod.string().describe('The user\'s email address.'),
-  "avatar": zod.instanceof(File).optional().describe('The user\'s avatar image file.'),
-  "status": zod.enum(['online', 'meeting', 'vacation', 'notDisturb', 'workAtHome', 'freeTime', 'offline']).describe('The user\'s current status.')
-})
+  name: zod.string().describe("The user's name."),
+  surname: zod.string().describe("The user's surname."),
+  email: zod.string().describe("The user's email address."),
+  avatar: zod
+    .instanceof(File)
+    .optional()
+    .describe("The user's avatar image file."),
+  status: zod
+    .enum([
+      "online",
+      "meeting",
+      "vacation",
+      "notDisturb",
+      "workAtHome",
+      "freeTime",
+      "offline",
+    ])
+    .describe("The user's current status."),
+});
 
-export const UpdateCurrentUserProfileResponse = zod.unknown()
+export const UpdateCurrentUserProfileResponse = zod.unknown();
 
 /**
  * Permanently delete the account of the currently authenticated user. This action cannot be undone and will remove all user data from the system. Users will be asked to confirm this action before proceeding.
  * @summary Delete the account of the currently authenticated user
  */
-export const DeleteCurrentUserAccountResponse = zod.unknown()
+export const DeleteCurrentUserAccountResponse = zod.unknown();
 
 /**
  * Retrieve the profile information of a user by their email address. This endpoint is useful for searching users when adding them to a workspace. Only workspace owners and admins can search for users by email.
  * @summary Get the profile of a user by email
  */
 export const GetUserProfileByEmailParams = zod.object({
-  "emailRegex": zod.string().describe('The email regex of the user.')
-})
+  emailRegex: zod.string().describe("The email regex of the user."),
+});
 
 export const GetUserProfileByEmailResponse = zod.object({
-  "users": zod.array(zod.object({
-  "id": zod.string().describe('Unique identifier for the user'),
-  "name": zod.string().describe('Name of the user'),
-  "surname": zod.string().describe('Surname of the user'),
-  "email": zod.string().describe('Email address of the user'),
-  "avatarUrl": zod.string().describe('URL of the user\'s avatar image'),
-  "status": zod.enum(['online', 'meeting', 'vacation', 'notDisturb', 'workAtHome', 'freeTime', 'offline'])
-}))
-})
+  users: zod.array(
+    zod.object({
+      id: zod.string().describe("Unique identifier for the user"),
+      name: zod.string().describe("Name of the user"),
+      surname: zod.string().describe("Surname of the user"),
+      email: zod.string().describe("Email address of the user"),
+      avatarUrl: zod.string().describe("URL of the user's avatar image"),
+      status: zod.enum([
+        "online",
+        "meeting",
+        "vacation",
+        "notDisturb",
+        "workAtHome",
+        "freeTime",
+        "offline",
+      ]),
+    }),
+  ),
+});
 
 /**
  * Add an existing user to a specific workspace. Only workspace owners can add users, and they cannot add themselves.
  * @summary Add a user to a workspace
  */
 export const AddUserToWorkspaceParams = zod.object({
-  "userId": zod.string().uuid().describe('The ID of the user.'),
-  "workspaceId": zod.string().uuid().describe('The ID of the workspace.')
-})
+  userId: zod.string().uuid().describe("The ID of the user."),
+  workspaceId: zod.string().uuid().describe("The ID of the workspace."),
+});
 
-export const AddUserToWorkspaceResponse = zod.unknown()
+export const AddUserToWorkspaceResponse = zod.unknown();
 
 /**
  * Remove a user from a specific workspace. Only workspace owners can remove users, and they cannot remove themselves.
  * @summary Remove a user from a workspace
  */
 export const RemoveUserFromWorkspaceParams = zod.object({
-  "userId": zod.string().uuid().describe('The ID of the user.'),
-  "workspaceId": zod.string().uuid().describe('The ID of the workspace.')
-})
+  userId: zod.string().uuid().describe("The ID of the user."),
+  workspaceId: zod.string().uuid().describe("The ID of the workspace."),
+});
 
-export const RemoveUserFromWorkspaceResponse = zod.unknown()
+export const RemoveUserFromWorkspaceResponse = zod.unknown();
 
 /**
  * Update the role of a user within a specific workspace. Only workspace owners can update user roles, and they cannot change their own role.
  * @summary Update a user's role in a workspace
  */
 export const UpdateUserRoleInWorkspaceParams = zod.object({
-  "userId": zod.string().uuid().describe('The ID of the user.'),
-  "workspaceId": zod.string().uuid().describe('The ID of the workspace.')
-})
+  userId: zod.string().uuid().describe("The ID of the user."),
+  workspaceId: zod.string().uuid().describe("The ID of the workspace."),
+});
 
 export const UpdateUserRoleInWorkspaceBody = zod.object({
-  "role": zod.enum(['admin', 'member']).describe('The new role for the user.')
-})
+  role: zod.enum(["admin", "member"]).describe("The new role for the user."),
+});
 
-export const UpdateUserRoleInWorkspaceResponse = zod.unknown()
-
+export const UpdateUserRoleInWorkspaceResponse = zod.unknown();

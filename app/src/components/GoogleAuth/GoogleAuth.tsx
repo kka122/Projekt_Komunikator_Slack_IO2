@@ -6,7 +6,6 @@ import InlineHotkey from "../HotkeyText/InlineHotkey.tsx";
 function GoogleAuth(): JSX.Element {
   const login = useGoogleLogin({
     onSuccess: (tokenResponse) => {
-      const authRequest:
     },
   })
 

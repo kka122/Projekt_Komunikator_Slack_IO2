@@ -8,10 +8,10 @@
 /**
  * The new role for the user.
  */
-export type UpdateUserRoleRequestBodyRole = typeof UpdateUserRoleRequestBodyRole[keyof typeof UpdateUserRoleRequestBodyRole];
-
+export type UpdateUserRoleRequestBodyRole =
+  (typeof UpdateUserRoleRequestBodyRole)[keyof typeof UpdateUserRoleRequestBodyRole];
 
 export const UpdateUserRoleRequestBodyRole = {
-  admin: 'admin',
-  member: 'member',
+  admin: "admin",
+  member: "member",
 } as const;

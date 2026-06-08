@@ -4,14 +4,20 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import {
-  faker
-} from '@faker-js/faker';
+import { faker } from "@faker-js/faker";
 
-import type {
-  ChannelListResponseResponse
-} from '../../models';
+import type { ChannelListResponseResponse } from "../../models";
 
-
-export const getListChannelsResponseMock = (overrideResponse: Partial<Extract<ChannelListResponseResponse, object>> = {}): ChannelListResponseResponse => ({channels: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), newMessagesCount: faker.number.int()})), ...overrideResponse})
-
+export const getListChannelsResponseMock = (
+  overrideResponse: Partial<Extract<ChannelListResponseResponse, object>> = {},
+): ChannelListResponseResponse => ({
+  channels: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => ({
+    id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    newMessagesCount: faker.number.int(),
+  })),
+  ...overrideResponse,
+});

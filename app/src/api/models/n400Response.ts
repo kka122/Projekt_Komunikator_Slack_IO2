@@ -4,7 +4,7 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import type { ErrorSchema } from './errorSchema';
+import type { ErrorSchema } from "./errorSchema";
 
 /**
  * Bad Request - The request could not be understood or was missing required parameters

@@ -15,22 +15,6 @@ export default defineConfig({
       clean: true,
       formatter: 'prettier',
       mock: true,
-      override: {
-        operations: {
-          listChannelMessages: {
-            query: {
-              useInfinite: true,
-              useInfiniteQueryParam: 'page'
-            }
-          },
-          listDirectChatMessages: {
-            query: {
-              useInfinite: true,
-              useInfiniteQueryParam: 'page'
-            }
-          }
-        }
-      }
     },
   },
   szponcikZod: {

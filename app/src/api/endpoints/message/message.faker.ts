@@ -4,16 +4,144 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import {
-  faker
-} from '@faker-js/faker';
+import { faker } from "@faker-js/faker";
 
-import type {
-  MessageListResponseResponse
-} from '../../models';
+import type { MessageListResponseResponse } from "../../models";
 
+export const getListChannelMessagesResponseMock = (
+  overrideResponse: Partial<Extract<MessageListResponseResponse, object>> = {},
+): MessageListResponseResponse => ({
+  messages: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => ({
+    id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    content: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    sender: {
+      id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      surname: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      email: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      avatarUrl: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      status: faker.helpers.arrayElement([
+        "online",
+        "meeting",
+        "vacation",
+        "notDisturb",
+        "workAtHome",
+        "freeTime",
+        "offline",
+      ] as const),
+    },
+    timestamp: faker.date.past().toISOString().slice(0, 19) + "Z",
+    attachments: faker.helpers.arrayElement([
+      Array.from(
+        { length: faker.number.int({ min: 1, max: 10 }) },
+        (_, i) => i + 1,
+      ).map(() => ({
+        id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        filename: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        url: faker.internet.url(),
+        size: faker.number.int(),
+      })),
+      undefined,
+    ]),
+    reactions: faker.helpers.arrayElement([
+      Array.from(
+        { length: faker.number.int({ min: 1, max: 10 }) },
+        (_, i) => i + 1,
+      ).map(() => ({
+        id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        emoji: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        user: {
+          id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          surname: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          email: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          avatarUrl: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          status: faker.helpers.arrayElement([
+            "online",
+            "meeting",
+            "vacation",
+            "notDisturb",
+            "workAtHome",
+            "freeTime",
+            "offline",
+          ] as const),
+        },
+      })),
+      undefined,
+    ]),
+    isEdited: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+  })),
+  ...overrideResponse,
+});
 
-export const getListChannelMessagesResponseMock = (overrideResponse: Partial<Extract<MessageListResponseResponse, object>> = {}): MessageListResponseResponse => ({messages: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.alpha({length: {min: 10, max: 20}}), content: faker.string.alpha({length: {min: 10, max: 20}}), sender: {id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), surname: faker.string.alpha({length: {min: 10, max: 20}}), email: faker.string.alpha({length: {min: 10, max: 20}}), avatarUrl: faker.string.alpha({length: {min: 10, max: 20}}), status: faker.helpers.arrayElement(['online','meeting','vacation','notDisturb','workAtHome','freeTime','offline'] as const)}, timestamp: faker.date.past().toISOString().slice(0, 19) + 'Z', attachments: faker.helpers.arrayElement([Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.alpha({length: {min: 10, max: 20}}), filename: faker.string.alpha({length: {min: 10, max: 20}}), url: faker.internet.url(), size: faker.number.int()})), undefined]), reactions: faker.helpers.arrayElement([Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.alpha({length: {min: 10, max: 20}}), emoji: faker.string.alpha({length: {min: 10, max: 20}}), user: {id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), surname: faker.string.alpha({length: {min: 10, max: 20}}), email: faker.string.alpha({length: {min: 10, max: 20}}), avatarUrl: faker.string.alpha({length: {min: 10, max: 20}}), status: faker.helpers.arrayElement(['online','meeting','vacation','notDisturb','workAtHome','freeTime','offline'] as const)}})), undefined]), isEdited: faker.helpers.arrayElement([faker.datatype.boolean(), undefined])})), ...overrideResponse})
-
-export const getListDirectChatMessagesResponseMock = (overrideResponse: Partial<Extract<MessageListResponseResponse, object>> = {}): MessageListResponseResponse => ({messages: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.alpha({length: {min: 10, max: 20}}), content: faker.string.alpha({length: {min: 10, max: 20}}), sender: {id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), surname: faker.string.alpha({length: {min: 10, max: 20}}), email: faker.string.alpha({length: {min: 10, max: 20}}), avatarUrl: faker.string.alpha({length: {min: 10, max: 20}}), status: faker.helpers.arrayElement(['online','meeting','vacation','notDisturb','workAtHome','freeTime','offline'] as const)}, timestamp: faker.date.past().toISOString().slice(0, 19) + 'Z', attachments: faker.helpers.arrayElement([Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.alpha({length: {min: 10, max: 20}}), filename: faker.string.alpha({length: {min: 10, max: 20}}), url: faker.internet.url(), size: faker.number.int()})), undefined]), reactions: faker.helpers.arrayElement([Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.alpha({length: {min: 10, max: 20}}), emoji: faker.string.alpha({length: {min: 10, max: 20}}), user: {id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), surname: faker.string.alpha({length: {min: 10, max: 20}}), email: faker.string.alpha({length: {min: 10, max: 20}}), avatarUrl: faker.string.alpha({length: {min: 10, max: 20}}), status: faker.helpers.arrayElement(['online','meeting','vacation','notDisturb','workAtHome','freeTime','offline'] as const)}})), undefined]), isEdited: faker.helpers.arrayElement([faker.datatype.boolean(), undefined])})), ...overrideResponse})
-
+export const getListDirectChatMessagesResponseMock = (
+  overrideResponse: Partial<Extract<MessageListResponseResponse, object>> = {},
+): MessageListResponseResponse => ({
+  messages: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => ({
+    id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    content: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    sender: {
+      id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      surname: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      email: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      avatarUrl: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      status: faker.helpers.arrayElement([
+        "online",
+        "meeting",
+        "vacation",
+        "notDisturb",
+        "workAtHome",
+        "freeTime",
+        "offline",
+      ] as const),
+    },
+    timestamp: faker.date.past().toISOString().slice(0, 19) + "Z",
+    attachments: faker.helpers.arrayElement([
+      Array.from(
+        { length: faker.number.int({ min: 1, max: 10 }) },
+        (_, i) => i + 1,
+      ).map(() => ({
+        id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        filename: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        url: faker.internet.url(),
+        size: faker.number.int(),
+      })),
+      undefined,
+    ]),
+    reactions: faker.helpers.arrayElement([
+      Array.from(
+        { length: faker.number.int({ min: 1, max: 10 }) },
+        (_, i) => i + 1,
+      ).map(() => ({
+        id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        emoji: faker.string.alpha({ length: { min: 10, max: 20 } }),
+        user: {
+          id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          surname: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          email: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          avatarUrl: faker.string.alpha({ length: { min: 10, max: 20 } }),
+          status: faker.helpers.arrayElement([
+            "online",
+            "meeting",
+            "vacation",
+            "notDisturb",
+            "workAtHome",
+            "freeTime",
+            "offline",
+          ] as const),
+        },
+      })),
+      undefined,
+    ]),
+    isEdited: faker.helpers.arrayElement([faker.datatype.boolean(), undefined]),
+  })),
+  ...overrideResponse,
+});

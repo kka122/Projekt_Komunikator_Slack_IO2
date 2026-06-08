@@ -4,97 +4,146 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import {
-  useMutation
-} from '@tanstack/react-query';
+import { useMutation } from "@tanstack/react-query";
 import type {
   MutationFunction,
   UseMutationOptions,
-  UseMutationResult
-} from '@tanstack/react-query';
+  UseMutationResult,
+} from "@tanstack/react-query";
 
-import axios from 'axios';
-import type {
-  AxiosError,
-  AxiosRequestConfig,
-  AxiosResponse
-} from 'axios';
+import axios from "axios";
+import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 
 import type {
   N400Response,
   N401Response,
   N403Response,
-  N404Response
-} from '../../models';
-
+  N404Response,
+} from "../../models";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
 
-      type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
-
-
-
+type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 
 /**
  * Delete an existing attachment from a specific message within a channel. Only the author of the message or workspace admins can delete attachments.
  * @summary Delete an attachment from a message in a channel
  */
 export const deleteAttachmentFromChannelMessage = (
-    workspaceId: string,
-    channelId: string,
-    messageId: string,
-    attachmentId: string, options?: AxiosRequestConfig
- ): Promise<AxiosResponse<void>> => {
+  workspaceId: string,
+  channelId: string,
+  messageId: string,
+  attachmentId: string,
+  options?: AxiosRequestConfig,
+): Promise<AxiosResponse<void>> => {
+  return axios.delete(
+    `http://localhost:5000/api/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}/attachments/${attachmentId}`,
+    options,
+  );
+};
 
+export const getDeleteAttachmentFromChannelMessageMutationOptions = <
+  TError = AxiosError<
+    N400Response | N401Response | N403Response | N404Response
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteAttachmentFromChannelMessage>>,
+    TError,
+    {
+      workspaceId: string;
+      channelId: string;
+      messageId: string;
+      attachmentId: string;
+    },
+    TContext
+  >;
+  axios?: AxiosRequestConfig;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteAttachmentFromChannelMessage>>,
+  TError,
+  {
+    workspaceId: string;
+    channelId: string;
+    messageId: string;
+    attachmentId: string;
+  },
+  TContext
+> => {
+  const mutationKey = ["deleteAttachmentFromChannelMessage"];
+  const { mutation: mutationOptions, axios: axiosOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, axios: undefined };
 
-    return axios.delete(
-      `http://localhost:5000/api/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}/attachments/${attachmentId}`,options
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteAttachmentFromChannelMessage>>,
+    {
+      workspaceId: string;
+      channelId: string;
+      messageId: string;
+      attachmentId: string;
+    }
+  > = (props) => {
+    const { workspaceId, channelId, messageId, attachmentId } = props ?? {};
+
+    return deleteAttachmentFromChannelMessage(
+      workspaceId,
+      channelId,
+      messageId,
+      attachmentId,
+      axiosOptions,
     );
-  }
+  };
 
+  return { mutationFn, ...mutationOptions };
+};
 
+export type DeleteAttachmentFromChannelMessageMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteAttachmentFromChannelMessage>>
+>;
 
-export const getDeleteAttachmentFromChannelMessageMutationOptions = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAttachmentFromChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string;attachmentId: string}, TContext>, axios?: AxiosRequestConfig}
-): UseMutationOptions<Awaited<ReturnType<typeof deleteAttachmentFromChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string;attachmentId: string}, TContext> => {
+export type DeleteAttachmentFromChannelMessageMutationError = AxiosError<
+  N400Response | N401Response | N403Response | N404Response
+>;
 
-const mutationKey = ['deleteAttachmentFromChannelMessage'];
-const {mutation: mutationOptions, axios: axiosOptions} = options ?
-      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
-      options
-      : {...options, mutation: {...options.mutation, mutationKey}}
-      : {mutation: { mutationKey, }, axios: undefined};
-
-
-
-
-      const mutationFn: MutationFunction<Awaited<ReturnType<typeof deleteAttachmentFromChannelMessage>>, {workspaceId: string;channelId: string;messageId: string;attachmentId: string}> = (props) => {
-          const {workspaceId,channelId,messageId,attachmentId} = props ?? {};
-
-          return  deleteAttachmentFromChannelMessage(workspaceId,channelId,messageId,attachmentId,axiosOptions)
-        }
-
-
-
-
-
-
-  return  { mutationFn, ...mutationOptions }}
-
-    export type DeleteAttachmentFromChannelMessageMutationResult = NonNullable<Awaited<ReturnType<typeof deleteAttachmentFromChannelMessage>>>
-
-    export type DeleteAttachmentFromChannelMessageMutationError = AxiosError<N400Response | N401Response | N403Response | N404Response>
-
-    /**
+/**
  * @summary Delete an attachment from a message in a channel
  */
-export const useDeleteAttachmentFromChannelMessage = <TError = AxiosError<N400Response | N401Response | N403Response | N404Response>,
-    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof deleteAttachmentFromChannelMessage>>, TError,{workspaceId: string;channelId: string;messageId: string;attachmentId: string}, TContext>, axios?: AxiosRequestConfig}
- ): UseMutationResult<
-        Awaited<ReturnType<typeof deleteAttachmentFromChannelMessage>>,
-        TError,
-        {workspaceId: string;channelId: string;messageId: string;attachmentId: string},
-        TContext
-      > => {
-      return useMutation(getDeleteAttachmentFromChannelMessageMutationOptions(options));
-    }
+export const useDeleteAttachmentFromChannelMessage = <
+  TError = AxiosError<
+    N400Response | N401Response | N403Response | N404Response
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteAttachmentFromChannelMessage>>,
+    TError,
+    {
+      workspaceId: string;
+      channelId: string;
+      messageId: string;
+      attachmentId: string;
+    },
+    TContext
+  >;
+  axios?: AxiosRequestConfig;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteAttachmentFromChannelMessage>>,
+  TError,
+  {
+    workspaceId: string;
+    channelId: string;
+    messageId: string;
+    attachmentId: string;
+  },
+  TContext
+> => {
+  return useMutation(
+    getDeleteAttachmentFromChannelMessageMutationOptions(options),
+  );
+};

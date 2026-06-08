@@ -4,7 +4,7 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import type { Message } from './message';
+import type { Message } from "./message";
 
 export type MessageListResponseResponse = {
   /** List of messages. */

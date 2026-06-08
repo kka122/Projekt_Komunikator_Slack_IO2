@@ -4,17 +4,58 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import {
-  faker
-} from '@faker-js/faker';
+import { faker } from "@faker-js/faker";
 
 import type {
   CurrentUserProfileResponseResponse,
-  UsersListResponseResponse
-} from '../../models';
+  UsersListResponseResponse,
+} from "../../models";
 
+export const getGetCurrentUserProfileResponseMock = (
+  overrideResponse: Partial<
+    Extract<CurrentUserProfileResponseResponse, object>
+  > = {},
+): CurrentUserProfileResponseResponse => ({
+  user: {
+    id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    surname: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    email: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    avatarUrl: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    status: faker.helpers.arrayElement([
+      "online",
+      "meeting",
+      "vacation",
+      "notDisturb",
+      "workAtHome",
+      "freeTime",
+      "offline",
+    ] as const),
+  },
+  ...overrideResponse,
+});
 
-export const getGetCurrentUserProfileResponseMock = (overrideResponse: Partial<Extract<CurrentUserProfileResponseResponse, object>> = {}): CurrentUserProfileResponseResponse => ({user: {id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), surname: faker.string.alpha({length: {min: 10, max: 20}}), email: faker.string.alpha({length: {min: 10, max: 20}}), avatarUrl: faker.string.alpha({length: {min: 10, max: 20}}), status: faker.helpers.arrayElement(['online','meeting','vacation','notDisturb','workAtHome','freeTime','offline'] as const)}, ...overrideResponse})
-
-export const getGetUserProfileByEmailResponseMock = (overrideResponse: Partial<Extract<UsersListResponseResponse, object>> = {}): UsersListResponseResponse => ({users: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), surname: faker.string.alpha({length: {min: 10, max: 20}}), email: faker.string.alpha({length: {min: 10, max: 20}}), avatarUrl: faker.string.alpha({length: {min: 10, max: 20}}), status: faker.helpers.arrayElement(['online','meeting','vacation','notDisturb','workAtHome','freeTime','offline'] as const)})), ...overrideResponse})
-
+export const getGetUserProfileByEmailResponseMock = (
+  overrideResponse: Partial<Extract<UsersListResponseResponse, object>> = {},
+): UsersListResponseResponse => ({
+  users: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => ({
+    id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    surname: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    email: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    avatarUrl: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    status: faker.helpers.arrayElement([
+      "online",
+      "meeting",
+      "vacation",
+      "notDisturb",
+      "workAtHome",
+      "freeTime",
+      "offline",
+    ] as const),
+  })),
+  ...overrideResponse,
+});

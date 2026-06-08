@@ -4,9 +4,9 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import type { Attachment } from './attachment';
-import type { Reaction } from './reaction';
-import type { User } from './user';
+import type { Attachment } from "./attachment";
+import type { Reaction } from "./reaction";
+import type { User } from "./user";
 
 export interface Message {
   /** Unique identifier for the message. */

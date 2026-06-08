@@ -4,7 +4,7 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import type { ErrorSchema } from './errorSchema';
+import type { ErrorSchema } from "./errorSchema";
 
 /**
  * Not Found - The requested resource was not found

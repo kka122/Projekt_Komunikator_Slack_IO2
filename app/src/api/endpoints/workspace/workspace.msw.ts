@@ -4,75 +4,165 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import {
-  faker
-} from '@faker-js/faker';
+import { faker } from "@faker-js/faker";
 
-import {
-  HttpResponse,
-  http
-} from 'msw';
-import type {
-  RequestHandlerOptions
-} from 'msw';
+import { HttpResponse, http } from "msw";
+import type { RequestHandlerOptions } from "msw";
 
 import type {
   CreatePaymentResponseResponse,
-  WorkspaceListResponseResponse
-} from '../../models';
+  WorkspaceListResponseResponse,
+} from "../../models";
 
+export const getCreateWorkspaceResponseMock = (
+  overrideResponse: Partial<
+    Extract<CreatePaymentResponseResponse, object>
+  > = {},
+): CreatePaymentResponseResponse => ({
+  clientSecret: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  ...overrideResponse,
+});
 
-export const getCreateWorkspaceResponseMock = (overrideResponse: Partial<Extract<CreatePaymentResponseResponse, object>> = {}): CreatePaymentResponseResponse => ({clientSecret: faker.string.alpha({length: {min: 10, max: 20}}), ...overrideResponse})
+export const getListWorkspacesResponseMock = (
+  overrideResponse: Partial<
+    Extract<WorkspaceListResponseResponse, object>
+  > = {},
+): WorkspaceListResponseResponse => ({
+  workspaces: Array.from(
+    { length: faker.number.int({ min: 1, max: 10 }) },
+    (_, i) => i + 1,
+  ).map(() => ({
+    id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    logoUrl: faker.internet.url(),
+    userRole: faker.helpers.arrayElement(["owner", "admin", "member"] as const),
+    channels: Array.from(
+      { length: faker.number.int({ min: 1, max: 10 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      newMessagesCount: faker.number.int(),
+    })),
+    users: Array.from(
+      { length: faker.number.int({ min: 1, max: 10 }) },
+      (_, i) => i + 1,
+    ).map(() => ({
+      id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      surname: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      email: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      avatarUrl: faker.string.alpha({ length: { min: 10, max: 20 } }),
+      status: faker.helpers.arrayElement([
+        "online",
+        "meeting",
+        "vacation",
+        "notDisturb",
+        "workAtHome",
+        "freeTime",
+        "offline",
+      ] as const),
+    })),
+  })),
+  ...overrideResponse,
+});
 
-export const getListWorkspacesResponseMock = (overrideResponse: Partial<Extract<WorkspaceListResponseResponse, object>> = {}): WorkspaceListResponseResponse => ({workspaces: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), logoUrl: faker.internet.url(), userRole: faker.helpers.arrayElement(['owner','admin','member'] as const), channels: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), newMessagesCount: faker.number.int()})), users: Array.from({ length: faker.number.int({min: 1, max: 10}) }, (_, i) => i + 1).map(() => ({id: faker.string.alpha({length: {min: 10, max: 20}}), name: faker.string.alpha({length: {min: 10, max: 20}}), surname: faker.string.alpha({length: {min: 10, max: 20}}), email: faker.string.alpha({length: {min: 10, max: 20}}), avatarUrl: faker.string.alpha({length: {min: 10, max: 20}}), status: faker.helpers.arrayElement(['online','meeting','vacation','notDisturb','workAtHome','freeTime','offline'] as const)}))})), ...overrideResponse})
+export const getCreateWorkspaceMockHandler = (
+  overrideResponse?:
+    | CreatePaymentResponseResponse
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) =>
+        | Promise<CreatePaymentResponseResponse>
+        | CreatePaymentResponseResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    "*/workspaces",
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCreateWorkspaceResponseMock(),
+        { status: 201 },
+      );
+    },
+    options,
+  );
+};
 
+export const getListWorkspacesMockHandler = (
+  overrideResponse?:
+    | WorkspaceListResponseResponse
+    | ((
+        info: Parameters<Parameters<typeof http.get>[1]>[0],
+      ) =>
+        | Promise<WorkspaceListResponseResponse>
+        | WorkspaceListResponseResponse),
+  options?: RequestHandlerOptions,
+) => {
+  return http.get(
+    "*/workspaces",
+    async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getListWorkspacesResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
 
-export const getCreateWorkspaceMockHandler = (overrideResponse?: CreatePaymentResponseResponse | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<CreatePaymentResponseResponse> | CreatePaymentResponseResponse), options?: RequestHandlerOptions) => {
-  return http.post('*/workspaces', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+export const getAcceptWorkspacePaymentMockHandler = (
+  overrideResponse?:
+    | void
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<void> | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    "*/workspaces/accept-payment",
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      if (typeof overrideResponse === "function") {
+        await overrideResponse(info);
+      }
 
+      return new HttpResponse(null, { status: 200 });
+    },
+    options,
+  );
+};
 
-    return HttpResponse.json(overrideResponse !== undefined
-    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getCreateWorkspaceResponseMock(),
-      { status: 201
-      })
-  }, options)
-}
+export const getUpdateWorkspaceLogoMockHandler = (
+  overrideResponse?:
+    | void
+    | ((
+        info: Parameters<Parameters<typeof http.patch>[1]>[0],
+      ) => Promise<void> | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.patch(
+    "*/workspaces/:workspaceId",
+    async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
+      if (typeof overrideResponse === "function") {
+        await overrideResponse(info);
+      }
 
-export const getListWorkspacesMockHandler = (overrideResponse?: WorkspaceListResponseResponse | ((info: Parameters<Parameters<typeof http.get>[1]>[0]) => Promise<WorkspaceListResponseResponse> | WorkspaceListResponseResponse), options?: RequestHandlerOptions) => {
-  return http.get('*/workspaces', async (info: Parameters<Parameters<typeof http.get>[1]>[0]) => {
-
-
-    return HttpResponse.json(overrideResponse !== undefined
-    ? (typeof overrideResponse === "function" ? await overrideResponse(info) : overrideResponse)
-    : getListWorkspacesResponseMock(),
-      { status: 200
-      })
-  }, options)
-}
-
-export const getAcceptWorkspacePaymentMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.post>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.post('*/workspaces/accept-payment', async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
-  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
-
-    return new HttpResponse(null,
-      { status: 200
-      })
-  }, options)
-}
-
-export const getUpdateWorkspaceLogoMockHandler = (overrideResponse?: void | ((info: Parameters<Parameters<typeof http.patch>[1]>[0]) => Promise<void> | void), options?: RequestHandlerOptions) => {
-  return http.patch('*/workspaces/:workspaceId', async (info: Parameters<Parameters<typeof http.patch>[1]>[0]) => {
-  if (typeof overrideResponse === 'function') {await overrideResponse(info); }
-
-    return new HttpResponse(null,
-      { status: 200
-      })
-  }, options)
-}
+      return new HttpResponse(null, { status: 200 });
+    },
+    options,
+  );
+};
 export const getWorkspaceMock = () => [
   getCreateWorkspaceMockHandler(),
   getListWorkspacesMockHandler(),
   getAcceptWorkspacePaymentMockHandler(),
-  getUpdateWorkspaceLogoMockHandler()
-]
+  getUpdateWorkspaceLogoMockHandler(),
+];

@@ -4,19 +4,23 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import * as zod from 'zod';
-
+import * as zod from "zod";
 
 /**
  * Delete an existing attachment from a specific message within a channel. Only the author of the message or workspace admins can delete attachments.
  * @summary Delete an attachment from a message in a channel
  */
 export const DeleteAttachmentFromChannelMessageParams = zod.object({
-  "workspaceId": zod.string().uuid().describe('The ID of the workspace.'),
-  "channelId": zod.string().uuid().describe('The unique identifier of the channel.'),
-  "messageId": zod.string().uuid().describe('The unique identifier of the message.'),
-  "attachmentId": zod.string().uuid().describe('The ID of the attachment.')
-})
+  workspaceId: zod.string().uuid().describe("The ID of the workspace."),
+  channelId: zod
+    .string()
+    .uuid()
+    .describe("The unique identifier of the channel."),
+  messageId: zod
+    .string()
+    .uuid()
+    .describe("The unique identifier of the message."),
+  attachmentId: zod.string().uuid().describe("The ID of the attachment."),
+});
 
-export const DeleteAttachmentFromChannelMessageResponse = zod.unknown()
-
+export const DeleteAttachmentFromChannelMessageResponse = zod.unknown();
