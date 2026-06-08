@@ -34,8 +34,7 @@ jobs:
         run: npm install -g typedoc
 
       - name: Generate TypeDoc documentation
-        working-directory: shared/generators/typedoc
-        run: typedoc --options typedoc.json
+        run: typedoc --options shared/generators/typedoc/typedoc.json
 
       - name: Commit and push generated documentation
         uses: stefanzweifel/git-auto-commit-action@v5

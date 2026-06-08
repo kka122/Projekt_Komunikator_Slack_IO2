@@ -1,7 +1,7 @@
 import type {JSX} from "react";
 import AnimatedMain from "../../components/AnimatedMain/AnimatedMain.tsx";
 import {useNavigate} from "react-router";
-import InlineHotkey from "../../components/HotkeyText/InlineHotkey.tsx";
+import InlineHotkey from "../../components/InlineHotkey/InlineHotkey.tsx";
 import styles from './HomePage.module.css'
 
 function HomePage(): JSX.Element {

@@ -1,7 +1,7 @@
 import {type JSX} from "react";
 import {useGoogleLogin} from "@react-oauth/google";
 import styles from './GoogleAuth.module.css'
-import InlineHotkey from "../HotkeyText/InlineHotkey.tsx";
+import InlineHotkey from "../InlineHotkey/InlineHotkey.tsx";
 // import type {GoogleAuthRequestBody} from "../../api/models";
 
 function GoogleAuth(): JSX.Element {

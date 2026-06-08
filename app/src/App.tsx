@@ -1,6 +1,6 @@
 import './App.css'
 import {RouterProvider} from "react-router/dom";
-import {createBrowserRouter, Navigate} from "react-router";
+import {createBrowserRouter} from "react-router";
 import Root from "./layouts/Root.tsx";
 import HomePage from "./pages/HomePage/HomePage.tsx";
 import LoginPage from "./pages/LoginPage/LoginPage.tsx";
@@ -10,7 +10,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     Component: Root,
-    errorElement: <Navigate to={"/"}/>,
+    errorElement: <h1>aaaa</h1>,
     children: [
       {
         index: true,
