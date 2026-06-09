@@ -4,9 +4,9 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import type { ErrorSchema } from "./errorSchema";
+import type { Error } from "./error";
 
 /**
  * Not Found - The requested resource was not found
  */
-export type N404Response = ErrorSchema;
+export type N404Response = Error;

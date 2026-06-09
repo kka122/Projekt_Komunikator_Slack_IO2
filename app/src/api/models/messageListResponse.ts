@@ -6,7 +6,7 @@
  */
 import type { Message } from "./message";
 
-export type MessageListResponseResponse = {
+export type MessageListResponse = {
   /** List of messages. */
   messages: Message[];
 };

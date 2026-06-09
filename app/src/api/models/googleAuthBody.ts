@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-/**
- * User logged in successfully
- */
-export type LoginResponseResponse = void;
+export type GoogleAuthBody = {
+  /** Google OAuth token obtained from the client */
+  token: string;
+};

@@ -8,9 +8,9 @@ import { HttpResponse, http } from "msw";
 import type { RequestHandlerOptions } from "msw";
 
 import type {
-  LoginResponseResponse,
-  LogoutResponseResponse,
-  TokenRefreshResponseResponse,
+  LoginResponse,
+  LogoutResponse,
+  TokenRefreshResponse,
 } from "../../models";
 
 export const getRegisterUserMockHandler = (
@@ -36,10 +36,10 @@ export const getRegisterUserMockHandler = (
 
 export const getLoginUserMockHandler = (
   overrideResponse?:
-    | LoginResponseResponse
+    | LoginResponse
     | ((
         info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) => Promise<LoginResponseResponse> | LoginResponseResponse),
+      ) => Promise<LoginResponse> | LoginResponse),
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
@@ -57,10 +57,10 @@ export const getLoginUserMockHandler = (
 
 export const getGoogleAuthMockHandler = (
   overrideResponse?:
-    | LoginResponseResponse
+    | LoginResponse
     | ((
         info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) => Promise<LoginResponseResponse> | LoginResponseResponse),
+      ) => Promise<LoginResponse> | LoginResponse),
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
@@ -78,12 +78,10 @@ export const getGoogleAuthMockHandler = (
 
 export const getRefreshTokenMockHandler = (
   overrideResponse?:
-    | TokenRefreshResponseResponse
+    | TokenRefreshResponse
     | ((
         info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) =>
-        | Promise<TokenRefreshResponseResponse>
-        | TokenRefreshResponseResponse),
+      ) => Promise<TokenRefreshResponse> | TokenRefreshResponse),
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
@@ -101,10 +99,10 @@ export const getRefreshTokenMockHandler = (
 
 export const getLogoutUserMockHandler = (
   overrideResponse?:
-    | LogoutResponseResponse
+    | LogoutResponse
     | ((
         info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) => Promise<LogoutResponseResponse> | LogoutResponseResponse),
+      ) => Promise<LogoutResponse> | LogoutResponse),
   options?: RequestHandlerOptions,
 ) => {
   return http.post(

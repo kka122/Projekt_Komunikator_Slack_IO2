@@ -6,7 +6,7 @@
  */
 import type { User } from "./user";
 
-export type CurrentUserProfileResponseResponse = {
+export type CurrentUserProfileResponse = {
   /** The current user's profile information. */
   user: User;
 };

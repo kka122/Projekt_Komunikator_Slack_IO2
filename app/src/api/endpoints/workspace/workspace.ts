@@ -19,16 +19,16 @@ import axios from "axios";
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 
 import type {
-  AcceptPaymentRequestBody,
-  CreatePaymentResponseResponse,
-  CreateWorkspaceRequestBody,
+  AcceptPaymentBody,
+  CreatePaymentResponse,
+  CreateWorkspaceBody,
   N400Response,
   N401Response,
   N402Response,
   N403Response,
   N404Response,
-  UpdateWorkspaceLogoRequestBody,
-  WorkspaceListResponseResponse,
+  UpdateWorkspaceLogoBody,
+  WorkspaceListResponse,
 } from "../../models";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
@@ -40,15 +40,15 @@ type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
  * @summary Create a new workspace
  */
 export const createWorkspace = (
-  createWorkspaceRequestBody?: CreateWorkspaceRequestBody,
+  createWorkspaceBody?: CreateWorkspaceBody,
   options?: AxiosRequestConfig,
-): Promise<AxiosResponse<CreatePaymentResponseResponse>> => {
+): Promise<AxiosResponse<CreatePaymentResponse>> => {
   const formData = new FormData();
-  if (createWorkspaceRequestBody?.workspaceName !== undefined) {
-    formData.append(`workspaceName`, createWorkspaceRequestBody.workspaceName);
+  if (createWorkspaceBody?.workspaceName !== undefined) {
+    formData.append(`workspaceName`, createWorkspaceBody.workspaceName);
   }
-  if (createWorkspaceRequestBody?.workspaceLogo !== undefined) {
-    formData.append(`workspaceLogo`, createWorkspaceRequestBody.workspaceLogo);
+  if (createWorkspaceBody?.workspaceLogo !== undefined) {
+    formData.append(`workspaceLogo`, createWorkspaceBody.workspaceLogo);
   }
 
   return axios.post(`http://localhost:5000/api/workspaces`, formData, options);
@@ -61,14 +61,14 @@ export const getCreateWorkspaceMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createWorkspace>>,
     TError,
-    { data?: CreateWorkspaceRequestBody },
+    { data?: CreateWorkspaceBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof createWorkspace>>,
   TError,
-  { data?: CreateWorkspaceRequestBody },
+  { data?: CreateWorkspaceBody },
   TContext
 > => {
   const mutationKey = ["createWorkspace"];
@@ -82,7 +82,7 @@ export const getCreateWorkspaceMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof createWorkspace>>,
-    { data?: CreateWorkspaceRequestBody }
+    { data?: CreateWorkspaceBody }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -95,9 +95,7 @@ export const getCreateWorkspaceMutationOptions = <
 export type CreateWorkspaceMutationResult = NonNullable<
   Awaited<ReturnType<typeof createWorkspace>>
 >;
-export type CreateWorkspaceMutationBody =
-  | CreateWorkspaceRequestBody
-  | undefined;
+export type CreateWorkspaceMutationBody = CreateWorkspaceBody | undefined;
 export type CreateWorkspaceMutationError = AxiosError<
   N400Response | N401Response
 >;
@@ -112,14 +110,14 @@ export const useCreateWorkspace = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createWorkspace>>,
     TError,
-    { data?: CreateWorkspaceRequestBody },
+    { data?: CreateWorkspaceBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationResult<
   Awaited<ReturnType<typeof createWorkspace>>,
   TError,
-  { data?: CreateWorkspaceRequestBody },
+  { data?: CreateWorkspaceBody },
   TContext
 > => {
   return useMutation(getCreateWorkspaceMutationOptions(options));
@@ -130,7 +128,7 @@ export const useCreateWorkspace = <
  */
 export const listWorkspaces = (
   options?: AxiosRequestConfig,
-): Promise<AxiosResponse<WorkspaceListResponseResponse>> => {
+): Promise<AxiosResponse<WorkspaceListResponse>> => {
   return axios.get(`http://localhost:5000/api/workspaces`, options);
 };
 
@@ -198,12 +196,12 @@ export function useListWorkspaces<
  * @summary Accept payment for workspace creation
  */
 export const acceptWorkspacePayment = (
-  acceptPaymentRequestBody?: AcceptPaymentRequestBody,
+  acceptPaymentBody?: AcceptPaymentBody,
   options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<void>> => {
   return axios.post(
     `http://localhost:5000/api/workspaces/accept-payment`,
-    acceptPaymentRequestBody,
+    acceptPaymentBody,
     options,
   );
 };
@@ -215,14 +213,14 @@ export const getAcceptWorkspacePaymentMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof acceptWorkspacePayment>>,
     TError,
-    { data?: AcceptPaymentRequestBody },
+    { data?: AcceptPaymentBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof acceptWorkspacePayment>>,
   TError,
-  { data?: AcceptPaymentRequestBody },
+  { data?: AcceptPaymentBody },
   TContext
 > => {
   const mutationKey = ["acceptWorkspacePayment"];
@@ -236,7 +234,7 @@ export const getAcceptWorkspacePaymentMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof acceptWorkspacePayment>>,
-    { data?: AcceptPaymentRequestBody }
+    { data?: AcceptPaymentBody }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -249,9 +247,7 @@ export const getAcceptWorkspacePaymentMutationOptions = <
 export type AcceptWorkspacePaymentMutationResult = NonNullable<
   Awaited<ReturnType<typeof acceptWorkspacePayment>>
 >;
-export type AcceptWorkspacePaymentMutationBody =
-  | AcceptPaymentRequestBody
-  | undefined;
+export type AcceptWorkspacePaymentMutationBody = AcceptPaymentBody | undefined;
 export type AcceptWorkspacePaymentMutationError = AxiosError<
   N400Response | N401Response | N402Response
 >;
@@ -266,14 +262,14 @@ export const useAcceptWorkspacePayment = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof acceptWorkspacePayment>>,
     TError,
-    { data?: AcceptPaymentRequestBody },
+    { data?: AcceptPaymentBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationResult<
   Awaited<ReturnType<typeof acceptWorkspacePayment>>,
   TError,
-  { data?: AcceptPaymentRequestBody },
+  { data?: AcceptPaymentBody },
   TContext
 > => {
   return useMutation(getAcceptWorkspacePaymentMutationOptions(options));
@@ -284,15 +280,12 @@ export const useAcceptWorkspacePayment = <
  */
 export const updateWorkspaceLogo = (
   workspaceId: string,
-  updateWorkspaceLogoRequestBody?: UpdateWorkspaceLogoRequestBody,
+  updateWorkspaceLogoBody?: UpdateWorkspaceLogoBody,
   options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<void>> => {
   const formData = new FormData();
-  if (updateWorkspaceLogoRequestBody?.workspaceLogo !== undefined) {
-    formData.append(
-      `workspaceLogo`,
-      updateWorkspaceLogoRequestBody.workspaceLogo,
-    );
+  if (updateWorkspaceLogoBody?.workspaceLogo !== undefined) {
+    formData.append(`workspaceLogo`, updateWorkspaceLogoBody.workspaceLogo);
   }
 
   return axios.patch(
@@ -311,14 +304,14 @@ export const getUpdateWorkspaceLogoMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateWorkspaceLogo>>,
     TError,
-    { workspaceId: string; data?: UpdateWorkspaceLogoRequestBody },
+    { workspaceId: string; data?: UpdateWorkspaceLogoBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof updateWorkspaceLogo>>,
   TError,
-  { workspaceId: string; data?: UpdateWorkspaceLogoRequestBody },
+  { workspaceId: string; data?: UpdateWorkspaceLogoBody },
   TContext
 > => {
   const mutationKey = ["updateWorkspaceLogo"];
@@ -332,7 +325,7 @@ export const getUpdateWorkspaceLogoMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof updateWorkspaceLogo>>,
-    { workspaceId: string; data?: UpdateWorkspaceLogoRequestBody }
+    { workspaceId: string; data?: UpdateWorkspaceLogoBody }
   > = (props) => {
     const { workspaceId, data } = props ?? {};
 
@@ -346,7 +339,7 @@ export type UpdateWorkspaceLogoMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateWorkspaceLogo>>
 >;
 export type UpdateWorkspaceLogoMutationBody =
-  | UpdateWorkspaceLogoRequestBody
+  | UpdateWorkspaceLogoBody
   | undefined;
 export type UpdateWorkspaceLogoMutationError = AxiosError<
   N400Response | N401Response | N403Response | N404Response
@@ -364,14 +357,14 @@ export const useUpdateWorkspaceLogo = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateWorkspaceLogo>>,
     TError,
-    { workspaceId: string; data?: UpdateWorkspaceLogoRequestBody },
+    { workspaceId: string; data?: UpdateWorkspaceLogoBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationResult<
   Awaited<ReturnType<typeof updateWorkspaceLogo>>,
   TError,
-  { workspaceId: string; data?: UpdateWorkspaceLogoRequestBody },
+  { workspaceId: string; data?: UpdateWorkspaceLogoBody },
   TContext
 > => {
   return useMutation(getUpdateWorkspaceLogoMutationOptions(options));

@@ -9,13 +9,11 @@ import { faker } from "@faker-js/faker";
 import { HttpResponse, http } from "msw";
 import type { RequestHandlerOptions } from "msw";
 
-import type { DirectChatListResponseResponse } from "../../models";
+import type { DirectChatListResponse } from "../../models";
 
 export const getListDirectChatsResponseMock = (
-  overrideResponse: Partial<
-    Extract<DirectChatListResponseResponse, object>
-  > = {},
-): DirectChatListResponseResponse => ({
+  overrideResponse: Partial<Extract<DirectChatListResponse, object>> = {},
+): DirectChatListResponse => ({
   directChats: Array.from(
     { length: faker.number.int({ min: 1, max: 10 }) },
     (_, i) => i + 1,
@@ -44,12 +42,10 @@ export const getListDirectChatsResponseMock = (
 
 export const getListDirectChatsMockHandler = (
   overrideResponse?:
-    | DirectChatListResponseResponse
+    | DirectChatListResponse
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<DirectChatListResponseResponse>
-        | DirectChatListResponseResponse),
+      ) => Promise<DirectChatListResponse> | DirectChatListResponse),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(

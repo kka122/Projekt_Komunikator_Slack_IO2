@@ -9,11 +9,11 @@ import { faker } from "@faker-js/faker";
 import { HttpResponse, http } from "msw";
 import type { RequestHandlerOptions } from "msw";
 
-import type { MessageListResponseResponse } from "../../models";
+import type { MessageListResponse } from "../../models";
 
 export const getListChannelMessagesResponseMock = (
-  overrideResponse: Partial<Extract<MessageListResponseResponse, object>> = {},
-): MessageListResponseResponse => ({
+  overrideResponse: Partial<Extract<MessageListResponse, object>> = {},
+): MessageListResponse => ({
   messages: Array.from(
     { length: faker.number.int({ min: 1, max: 10 }) },
     (_, i) => i + 1,
@@ -81,8 +81,8 @@ export const getListChannelMessagesResponseMock = (
 });
 
 export const getListDirectChatMessagesResponseMock = (
-  overrideResponse: Partial<Extract<MessageListResponseResponse, object>> = {},
-): MessageListResponseResponse => ({
+  overrideResponse: Partial<Extract<MessageListResponse, object>> = {},
+): MessageListResponse => ({
   messages: Array.from(
     { length: faker.number.int({ min: 1, max: 10 }) },
     (_, i) => i + 1,
@@ -172,10 +172,10 @@ export const getCreateChannelMessageMockHandler = (
 
 export const getListChannelMessagesMockHandler = (
   overrideResponse?:
-    | MessageListResponseResponse
+    | MessageListResponse
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<MessageListResponseResponse> | MessageListResponseResponse),
+      ) => Promise<MessageListResponse> | MessageListResponse),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
@@ -259,10 +259,10 @@ export const getCreateDirectChatMessageMockHandler = (
 
 export const getListDirectChatMessagesMockHandler = (
   overrideResponse?:
-    | MessageListResponseResponse
+    | MessageListResponse
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<MessageListResponseResponse> | MessageListResponseResponse),
+      ) => Promise<MessageListResponse> | MessageListResponse),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(

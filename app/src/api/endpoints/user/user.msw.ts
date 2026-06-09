@@ -10,15 +10,13 @@ import { HttpResponse, http } from "msw";
 import type { RequestHandlerOptions } from "msw";
 
 import type {
-  CurrentUserProfileResponseResponse,
-  UsersListResponseResponse,
+  CurrentUserProfileResponse,
+  UsersListResponse,
 } from "../../models";
 
 export const getGetCurrentUserProfileResponseMock = (
-  overrideResponse: Partial<
-    Extract<CurrentUserProfileResponseResponse, object>
-  > = {},
-): CurrentUserProfileResponseResponse => ({
+  overrideResponse: Partial<Extract<CurrentUserProfileResponse, object>> = {},
+): CurrentUserProfileResponse => ({
   user: {
     id: faker.string.alpha({ length: { min: 10, max: 20 } }),
     name: faker.string.alpha({ length: { min: 10, max: 20 } }),
@@ -39,8 +37,8 @@ export const getGetCurrentUserProfileResponseMock = (
 });
 
 export const getGetUserProfileByEmailResponseMock = (
-  overrideResponse: Partial<Extract<UsersListResponseResponse, object>> = {},
-): UsersListResponseResponse => ({
+  overrideResponse: Partial<Extract<UsersListResponse, object>> = {},
+): UsersListResponse => ({
   users: Array.from(
     { length: faker.number.int({ min: 1, max: 10 }) },
     (_, i) => i + 1,
@@ -65,12 +63,10 @@ export const getGetUserProfileByEmailResponseMock = (
 
 export const getGetCurrentUserProfileMockHandler = (
   overrideResponse?:
-    | CurrentUserProfileResponseResponse
+    | CurrentUserProfileResponse
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<CurrentUserProfileResponseResponse>
-        | CurrentUserProfileResponseResponse),
+      ) => Promise<CurrentUserProfileResponse> | CurrentUserProfileResponse),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(
@@ -133,10 +129,10 @@ export const getDeleteCurrentUserAccountMockHandler = (
 
 export const getGetUserProfileByEmailMockHandler = (
   overrideResponse?:
-    | UsersListResponseResponse
+    | UsersListResponse
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<UsersListResponseResponse> | UsersListResponseResponse),
+      ) => Promise<UsersListResponse> | UsersListResponse),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(

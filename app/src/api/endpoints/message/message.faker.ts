@@ -6,11 +6,11 @@
  */
 import { faker } from "@faker-js/faker";
 
-import type { MessageListResponseResponse } from "../../models";
+import type { MessageListResponse } from "../../models";
 
 export const getListChannelMessagesResponseMock = (
-  overrideResponse: Partial<Extract<MessageListResponseResponse, object>> = {},
-): MessageListResponseResponse => ({
+  overrideResponse: Partial<Extract<MessageListResponse, object>> = {},
+): MessageListResponse => ({
   messages: Array.from(
     { length: faker.number.int({ min: 1, max: 10 }) },
     (_, i) => i + 1,
@@ -78,8 +78,8 @@ export const getListChannelMessagesResponseMock = (
 });
 
 export const getListDirectChatMessagesResponseMock = (
-  overrideResponse: Partial<Extract<MessageListResponseResponse, object>> = {},
-): MessageListResponseResponse => ({
+  overrideResponse: Partial<Extract<MessageListResponse, object>> = {},
+): MessageListResponse => ({
   messages: Array.from(
     { length: faker.number.int({ min: 1, max: 10 }) },
     (_, i) => i + 1,

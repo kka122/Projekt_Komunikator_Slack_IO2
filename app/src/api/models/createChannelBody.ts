@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-/**
- * User logged out successfully
- */
-export type LogoutResponseResponse = void;
+export type CreateChannelBody = {
+  /** The name of the channel */
+  name: string;
+};

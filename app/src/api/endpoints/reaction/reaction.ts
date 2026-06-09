@@ -15,7 +15,7 @@ import axios from "axios";
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 
 import type {
-  AddReactionRequestBody,
+  AddReactionBody,
   N400Response,
   N401Response,
   N403Response,
@@ -34,12 +34,12 @@ export const addReactionToChannelMessage = (
   workspaceId: string,
   channelId: string,
   messageId: string,
-  addReactionRequestBody: AddReactionRequestBody,
+  addReactionBody: AddReactionBody,
   options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<void>> => {
   return axios.post(
     `http://localhost:5000/api/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}/reactions`,
-    addReactionRequestBody,
+    addReactionBody,
     options,
   );
 };
@@ -57,7 +57,7 @@ export const getAddReactionToChannelMessageMutationOptions = <
       workspaceId: string;
       channelId: string;
       messageId: string;
-      data: AddReactionRequestBody;
+      data: AddReactionBody;
     },
     TContext
   >;
@@ -69,7 +69,7 @@ export const getAddReactionToChannelMessageMutationOptions = <
     workspaceId: string;
     channelId: string;
     messageId: string;
-    data: AddReactionRequestBody;
+    data: AddReactionBody;
   },
   TContext
 > => {
@@ -88,7 +88,7 @@ export const getAddReactionToChannelMessageMutationOptions = <
       workspaceId: string;
       channelId: string;
       messageId: string;
-      data: AddReactionRequestBody;
+      data: AddReactionBody;
     }
   > = (props) => {
     const { workspaceId, channelId, messageId, data } = props ?? {};
@@ -108,7 +108,7 @@ export const getAddReactionToChannelMessageMutationOptions = <
 export type AddReactionToChannelMessageMutationResult = NonNullable<
   Awaited<ReturnType<typeof addReactionToChannelMessage>>
 >;
-export type AddReactionToChannelMessageMutationBody = AddReactionRequestBody;
+export type AddReactionToChannelMessageMutationBody = AddReactionBody;
 export type AddReactionToChannelMessageMutationError = AxiosError<
   N400Response | N401Response | N403Response | N404Response
 >;
@@ -129,7 +129,7 @@ export const useAddReactionToChannelMessage = <
       workspaceId: string;
       channelId: string;
       messageId: string;
-      data: AddReactionRequestBody;
+      data: AddReactionBody;
     },
     TContext
   >;
@@ -141,7 +141,7 @@ export const useAddReactionToChannelMessage = <
     workspaceId: string;
     channelId: string;
     messageId: string;
-    data: AddReactionRequestBody;
+    data: AddReactionBody;
   },
   TContext
 > => {
@@ -277,12 +277,12 @@ export const addReactionToDirectChatMessage = (
   workspaceId: string,
   directChatId: string,
   messageId: string,
-  addReactionRequestBody: AddReactionRequestBody,
+  addReactionBody: AddReactionBody,
   options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<void>> => {
   return axios.post(
     `http://localhost:5000/api/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${messageId}/reactions`,
-    addReactionRequestBody,
+    addReactionBody,
     options,
   );
 };
@@ -300,7 +300,7 @@ export const getAddReactionToDirectChatMessageMutationOptions = <
       workspaceId: string;
       directChatId: string;
       messageId: string;
-      data: AddReactionRequestBody;
+      data: AddReactionBody;
     },
     TContext
   >;
@@ -312,7 +312,7 @@ export const getAddReactionToDirectChatMessageMutationOptions = <
     workspaceId: string;
     directChatId: string;
     messageId: string;
-    data: AddReactionRequestBody;
+    data: AddReactionBody;
   },
   TContext
 > => {
@@ -331,7 +331,7 @@ export const getAddReactionToDirectChatMessageMutationOptions = <
       workspaceId: string;
       directChatId: string;
       messageId: string;
-      data: AddReactionRequestBody;
+      data: AddReactionBody;
     }
   > = (props) => {
     const { workspaceId, directChatId, messageId, data } = props ?? {};
@@ -351,7 +351,7 @@ export const getAddReactionToDirectChatMessageMutationOptions = <
 export type AddReactionToDirectChatMessageMutationResult = NonNullable<
   Awaited<ReturnType<typeof addReactionToDirectChatMessage>>
 >;
-export type AddReactionToDirectChatMessageMutationBody = AddReactionRequestBody;
+export type AddReactionToDirectChatMessageMutationBody = AddReactionBody;
 export type AddReactionToDirectChatMessageMutationError = AxiosError<
   N400Response | N401Response | N403Response | N404Response
 >;
@@ -372,7 +372,7 @@ export const useAddReactionToDirectChatMessage = <
       workspaceId: string;
       directChatId: string;
       messageId: string;
-      data: AddReactionRequestBody;
+      data: AddReactionBody;
     },
     TContext
   >;
@@ -384,7 +384,7 @@ export const useAddReactionToDirectChatMessage = <
     workspaceId: string;
     directChatId: string;
     messageId: string;
-    data: AddReactionRequestBody;
+    data: AddReactionBody;
   },
   TContext
 > => {

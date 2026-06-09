@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type CreateWorkspaceRequestBody = {
+export type CreateWorkspaceBody = {
   workspaceName: string;
   /** Optional workspace logo image file */
   workspaceLogo?: Blob;

@@ -4,9 +4,9 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import type { ErrorSchema } from "./errorSchema";
+import type { Error } from "./error";
 
 /**
  * Payment Required - Payment is required to access the resource
  */
-export type N402Response = ErrorSchema;
+export type N402Response = Error;

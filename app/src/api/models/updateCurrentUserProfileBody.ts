@@ -4,9 +4,9 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import type { UpdateCurrentUserProfileRequestBodyStatus } from "./updateCurrentUserProfileRequestBodyStatus";
+import type { UpdateCurrentUserProfileBodyStatus } from "./updateCurrentUserProfileBodyStatus";
 
-export type UpdateCurrentUserProfileRequestBody = {
+export type UpdateCurrentUserProfileBody = {
   /** The user's name. */
   name: string;
   /** The user's surname. */
@@ -16,5 +16,5 @@ export type UpdateCurrentUserProfileRequestBody = {
   /** The user's avatar image file. */
   avatar?: Blob;
   /** The user's current status. */
-  status: UpdateCurrentUserProfileRequestBodyStatus;
+  status: UpdateCurrentUserProfileBodyStatus;
 };

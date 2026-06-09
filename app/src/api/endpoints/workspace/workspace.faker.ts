@@ -7,24 +7,20 @@
 import { faker } from "@faker-js/faker";
 
 import type {
-  CreatePaymentResponseResponse,
-  WorkspaceListResponseResponse,
+  CreatePaymentResponse,
+  WorkspaceListResponse,
 } from "../../models";
 
 export const getCreateWorkspaceResponseMock = (
-  overrideResponse: Partial<
-    Extract<CreatePaymentResponseResponse, object>
-  > = {},
-): CreatePaymentResponseResponse => ({
+  overrideResponse: Partial<Extract<CreatePaymentResponse, object>> = {},
+): CreatePaymentResponse => ({
   clientSecret: faker.string.alpha({ length: { min: 10, max: 20 } }),
   ...overrideResponse,
 });
 
 export const getListWorkspacesResponseMock = (
-  overrideResponse: Partial<
-    Extract<WorkspaceListResponseResponse, object>
-  > = {},
-): WorkspaceListResponseResponse => ({
+  overrideResponse: Partial<Extract<WorkspaceListResponse, object>> = {},
+): WorkspaceListResponse => ({
   workspaces: Array.from(
     { length: faker.number.int({ min: 1, max: 10 }) },
     (_, i) => i + 1,

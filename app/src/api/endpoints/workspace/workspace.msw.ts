@@ -10,24 +10,20 @@ import { HttpResponse, http } from "msw";
 import type { RequestHandlerOptions } from "msw";
 
 import type {
-  CreatePaymentResponseResponse,
-  WorkspaceListResponseResponse,
+  CreatePaymentResponse,
+  WorkspaceListResponse,
 } from "../../models";
 
 export const getCreateWorkspaceResponseMock = (
-  overrideResponse: Partial<
-    Extract<CreatePaymentResponseResponse, object>
-  > = {},
-): CreatePaymentResponseResponse => ({
+  overrideResponse: Partial<Extract<CreatePaymentResponse, object>> = {},
+): CreatePaymentResponse => ({
   clientSecret: faker.string.alpha({ length: { min: 10, max: 20 } }),
   ...overrideResponse,
 });
 
 export const getListWorkspacesResponseMock = (
-  overrideResponse: Partial<
-    Extract<WorkspaceListResponseResponse, object>
-  > = {},
-): WorkspaceListResponseResponse => ({
+  overrideResponse: Partial<Extract<WorkspaceListResponse, object>> = {},
+): WorkspaceListResponse => ({
   workspaces: Array.from(
     { length: faker.number.int({ min: 1, max: 10 }) },
     (_, i) => i + 1,
@@ -69,12 +65,10 @@ export const getListWorkspacesResponseMock = (
 
 export const getCreateWorkspaceMockHandler = (
   overrideResponse?:
-    | CreatePaymentResponseResponse
+    | CreatePaymentResponse
     | ((
         info: Parameters<Parameters<typeof http.post>[1]>[0],
-      ) =>
-        | Promise<CreatePaymentResponseResponse>
-        | CreatePaymentResponseResponse),
+      ) => Promise<CreatePaymentResponse> | CreatePaymentResponse),
   options?: RequestHandlerOptions,
 ) => {
   return http.post(
@@ -95,12 +89,10 @@ export const getCreateWorkspaceMockHandler = (
 
 export const getListWorkspacesMockHandler = (
   overrideResponse?:
-    | WorkspaceListResponseResponse
+    | WorkspaceListResponse
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) =>
-        | Promise<WorkspaceListResponseResponse>
-        | WorkspaceListResponseResponse),
+      ) => Promise<WorkspaceListResponse> | WorkspaceListResponse),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(

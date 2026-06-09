@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type CreateChannelRequestBody = {
-  /** The name of the channel */
-  name: string;
+export type UpdateMessageBody = {
+  /** The updated content of the message. */
+  content: string;
 };

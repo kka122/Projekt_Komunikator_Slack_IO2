@@ -15,16 +15,16 @@ import axios from "axios";
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 
 import type {
-  GoogleAuthRequestBody,
-  LoginRequestBody,
-  LoginResponseResponse,
-  LogoutResponseResponse,
+  GoogleAuthBody,
+  LoginBody,
+  LoginResponse,
+  LogoutResponse,
   N400Response,
   N401Response,
   N403Response,
   N409Response,
-  RegisterRequestBody,
-  TokenRefreshResponseResponse,
+  RegisterBody,
+  TokenRefreshResponse,
 } from "../../models";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
@@ -36,16 +36,16 @@ type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
  * @summary Register a new user
  */
 export const registerUser = (
-  registerRequestBody: RegisterRequestBody,
+  registerBody: RegisterBody,
   options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<void>> => {
   const formData = new FormData();
-  formData.append(`name`, registerRequestBody.name);
-  formData.append(`surname`, registerRequestBody.surname);
-  formData.append(`email`, registerRequestBody.email);
-  formData.append(`password`, registerRequestBody.password);
-  if (registerRequestBody.avatar !== undefined) {
-    formData.append(`avatar`, registerRequestBody.avatar);
+  formData.append(`name`, registerBody.name);
+  formData.append(`surname`, registerBody.surname);
+  formData.append(`email`, registerBody.email);
+  formData.append(`password`, registerBody.password);
+  if (registerBody.avatar !== undefined) {
+    formData.append(`avatar`, registerBody.avatar);
   }
 
   return axios.post(
@@ -62,14 +62,14 @@ export const getRegisterUserMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof registerUser>>,
     TError,
-    { data: RegisterRequestBody },
+    { data: RegisterBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof registerUser>>,
   TError,
-  { data: RegisterRequestBody },
+  { data: RegisterBody },
   TContext
 > => {
   const mutationKey = ["registerUser"];
@@ -83,7 +83,7 @@ export const getRegisterUserMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof registerUser>>,
-    { data: RegisterRequestBody }
+    { data: RegisterBody }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -96,7 +96,7 @@ export const getRegisterUserMutationOptions = <
 export type RegisterUserMutationResult = NonNullable<
   Awaited<ReturnType<typeof registerUser>>
 >;
-export type RegisterUserMutationBody = RegisterRequestBody;
+export type RegisterUserMutationBody = RegisterBody;
 export type RegisterUserMutationError = AxiosError<N400Response | N409Response>;
 
 /**
@@ -109,14 +109,14 @@ export const useRegisterUser = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof registerUser>>,
     TError,
-    { data: RegisterRequestBody },
+    { data: RegisterBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationResult<
   Awaited<ReturnType<typeof registerUser>>,
   TError,
-  { data: RegisterRequestBody },
+  { data: RegisterBody },
   TContext
 > => {
   return useMutation(getRegisterUserMutationOptions(options));
@@ -126,14 +126,10 @@ export const useRegisterUser = <
  * @summary Log in a user and obtain an authentication token
  */
 export const loginUser = (
-  loginRequestBody: LoginRequestBody,
+  loginBody: LoginBody,
   options?: AxiosRequestConfig,
-): Promise<AxiosResponse<LoginResponseResponse>> => {
-  return axios.post(
-    `http://localhost:5000/api/auth/login`,
-    loginRequestBody,
-    options,
-  );
+): Promise<AxiosResponse<LoginResponse>> => {
+  return axios.post(`http://localhost:5000/api/auth/login`, loginBody, options);
 };
 
 export const getLoginUserMutationOptions = <
@@ -143,14 +139,14 @@ export const getLoginUserMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof loginUser>>,
     TError,
-    { data: LoginRequestBody },
+    { data: LoginBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof loginUser>>,
   TError,
-  { data: LoginRequestBody },
+  { data: LoginBody },
   TContext
 > => {
   const mutationKey = ["loginUser"];
@@ -164,7 +160,7 @@ export const getLoginUserMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof loginUser>>,
-    { data: LoginRequestBody }
+    { data: LoginBody }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -177,7 +173,7 @@ export const getLoginUserMutationOptions = <
 export type LoginUserMutationResult = NonNullable<
   Awaited<ReturnType<typeof loginUser>>
 >;
-export type LoginUserMutationBody = LoginRequestBody;
+export type LoginUserMutationBody = LoginBody;
 export type LoginUserMutationError = AxiosError<N400Response | N401Response>;
 
 /**
@@ -190,14 +186,14 @@ export const useLoginUser = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof loginUser>>,
     TError,
-    { data: LoginRequestBody },
+    { data: LoginBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationResult<
   Awaited<ReturnType<typeof loginUser>>,
   TError,
-  { data: LoginRequestBody },
+  { data: LoginBody },
   TContext
 > => {
   return useMutation(getLoginUserMutationOptions(options));
@@ -207,12 +203,12 @@ export const useLoginUser = <
  * @summary Authenticate a user using Google OAuth token
  */
 export const googleAuth = (
-  googleAuthRequestBody: GoogleAuthRequestBody,
+  googleAuthBody: GoogleAuthBody,
   options?: AxiosRequestConfig,
-): Promise<AxiosResponse<LoginResponseResponse>> => {
+): Promise<AxiosResponse<LoginResponse>> => {
   return axios.post(
     `http://localhost:5000/api/auth/google`,
-    googleAuthRequestBody,
+    googleAuthBody,
     options,
   );
 };
@@ -224,14 +220,14 @@ export const getGoogleAuthMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof googleAuth>>,
     TError,
-    { data: GoogleAuthRequestBody },
+    { data: GoogleAuthBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof googleAuth>>,
   TError,
-  { data: GoogleAuthRequestBody },
+  { data: GoogleAuthBody },
   TContext
 > => {
   const mutationKey = ["googleAuth"];
@@ -245,7 +241,7 @@ export const getGoogleAuthMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof googleAuth>>,
-    { data: GoogleAuthRequestBody }
+    { data: GoogleAuthBody }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -258,7 +254,7 @@ export const getGoogleAuthMutationOptions = <
 export type GoogleAuthMutationResult = NonNullable<
   Awaited<ReturnType<typeof googleAuth>>
 >;
-export type GoogleAuthMutationBody = GoogleAuthRequestBody;
+export type GoogleAuthMutationBody = GoogleAuthBody;
 export type GoogleAuthMutationError = AxiosError<N400Response | N401Response>;
 
 /**
@@ -271,14 +267,14 @@ export const useGoogleAuth = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof googleAuth>>,
     TError,
-    { data: GoogleAuthRequestBody },
+    { data: GoogleAuthBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationResult<
   Awaited<ReturnType<typeof googleAuth>>,
   TError,
-  { data: GoogleAuthRequestBody },
+  { data: GoogleAuthBody },
   TContext
 > => {
   return useMutation(getGoogleAuthMutationOptions(options));
@@ -289,7 +285,7 @@ export const useGoogleAuth = <
  */
 export const refreshToken = (
   options?: AxiosRequestConfig,
-): Promise<AxiosResponse<TokenRefreshResponseResponse>> => {
+): Promise<AxiosResponse<TokenRefreshResponse>> => {
   return axios.post(
     `http://localhost:5000/api/auth/refresh`,
     undefined,
@@ -367,7 +363,7 @@ export const useRefreshToken = <
  */
 export const logoutUser = (
   options?: AxiosRequestConfig,
-): Promise<AxiosResponse<LogoutResponseResponse>> => {
+): Promise<AxiosResponse<LogoutResponse>> => {
   return axios.post(
     `http://localhost:5000/api/auth/logout`,
     undefined,

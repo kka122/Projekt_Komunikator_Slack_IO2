@@ -19,13 +19,13 @@ import axios from "axios";
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 
 import type {
-  CreateMessageRequestBody,
-  MessageListResponseResponse,
+  CreateMessageBody,
+  MessageListResponse,
   N400Response,
   N401Response,
   N403Response,
   N404Response,
-  UpdateMessageRequestBody,
+  UpdateMessageBody,
 } from "../../models";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
@@ -39,15 +39,15 @@ type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 export const createChannelMessage = (
   workspaceId: string,
   channelId: string,
-  createMessageRequestBody?: CreateMessageRequestBody,
+  createMessageBody?: CreateMessageBody,
   options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<void>> => {
   const formData = new FormData();
-  if (createMessageRequestBody?.content !== undefined) {
-    formData.append(`content`, createMessageRequestBody.content);
+  if (createMessageBody?.content !== undefined) {
+    formData.append(`content`, createMessageBody.content);
   }
-  if (createMessageRequestBody?.attachments !== undefined) {
-    createMessageRequestBody?.attachments.forEach((value) =>
+  if (createMessageBody?.attachments !== undefined) {
+    createMessageBody?.attachments.forEach((value) =>
       formData.append(`attachments`, value),
     );
   }
@@ -68,14 +68,14 @@ export const getCreateChannelMessageMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createChannelMessage>>,
     TError,
-    { workspaceId: string; channelId: string; data?: CreateMessageRequestBody },
+    { workspaceId: string; channelId: string; data?: CreateMessageBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof createChannelMessage>>,
   TError,
-  { workspaceId: string; channelId: string; data?: CreateMessageRequestBody },
+  { workspaceId: string; channelId: string; data?: CreateMessageBody },
   TContext
 > => {
   const mutationKey = ["createChannelMessage"];
@@ -89,7 +89,7 @@ export const getCreateChannelMessageMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof createChannelMessage>>,
-    { workspaceId: string; channelId: string; data?: CreateMessageRequestBody }
+    { workspaceId: string; channelId: string; data?: CreateMessageBody }
   > = (props) => {
     const { workspaceId, channelId, data } = props ?? {};
 
@@ -102,9 +102,7 @@ export const getCreateChannelMessageMutationOptions = <
 export type CreateChannelMessageMutationResult = NonNullable<
   Awaited<ReturnType<typeof createChannelMessage>>
 >;
-export type CreateChannelMessageMutationBody =
-  | CreateMessageRequestBody
-  | undefined;
+export type CreateChannelMessageMutationBody = CreateMessageBody | undefined;
 export type CreateChannelMessageMutationError = AxiosError<
   N400Response | N401Response | N403Response | N404Response
 >;
@@ -121,14 +119,14 @@ export const useCreateChannelMessage = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createChannelMessage>>,
     TError,
-    { workspaceId: string; channelId: string; data?: CreateMessageRequestBody },
+    { workspaceId: string; channelId: string; data?: CreateMessageBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationResult<
   Awaited<ReturnType<typeof createChannelMessage>>,
   TError,
-  { workspaceId: string; channelId: string; data?: CreateMessageRequestBody },
+  { workspaceId: string; channelId: string; data?: CreateMessageBody },
   TContext
 > => {
   return useMutation(getCreateChannelMessageMutationOptions(options));
@@ -143,7 +141,7 @@ export const listChannelMessages = (
   pageSize: number = 20,
   page: number = 1,
   options?: AxiosRequestConfig,
-): Promise<AxiosResponse<MessageListResponseResponse>> => {
+): Promise<AxiosResponse<MessageListResponse>> => {
   return axios.get(
     `http://localhost:5000/api/workspaces/${workspaceId}/channels/${channelId}/messages/${pageSize}/${page}`,
     options,
@@ -267,12 +265,12 @@ export const updateChannelMessage = (
   workspaceId: string,
   channelId: string,
   messageId: string,
-  updateMessageRequestBody?: UpdateMessageRequestBody,
+  updateMessageBody?: UpdateMessageBody,
   options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<void>> => {
   return axios.patch(
     `http://localhost:5000/api/workspaces/${workspaceId}/channels/${channelId}/messages/${messageId}`,
-    updateMessageRequestBody,
+    updateMessageBody,
     options,
   );
 };
@@ -290,7 +288,7 @@ export const getUpdateChannelMessageMutationOptions = <
       workspaceId: string;
       channelId: string;
       messageId: string;
-      data?: UpdateMessageRequestBody;
+      data?: UpdateMessageBody;
     },
     TContext
   >;
@@ -302,7 +300,7 @@ export const getUpdateChannelMessageMutationOptions = <
     workspaceId: string;
     channelId: string;
     messageId: string;
-    data?: UpdateMessageRequestBody;
+    data?: UpdateMessageBody;
   },
   TContext
 > => {
@@ -321,7 +319,7 @@ export const getUpdateChannelMessageMutationOptions = <
       workspaceId: string;
       channelId: string;
       messageId: string;
-      data?: UpdateMessageRequestBody;
+      data?: UpdateMessageBody;
     }
   > = (props) => {
     const { workspaceId, channelId, messageId, data } = props ?? {};
@@ -341,9 +339,7 @@ export const getUpdateChannelMessageMutationOptions = <
 export type UpdateChannelMessageMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateChannelMessage>>
 >;
-export type UpdateChannelMessageMutationBody =
-  | UpdateMessageRequestBody
-  | undefined;
+export type UpdateChannelMessageMutationBody = UpdateMessageBody | undefined;
 export type UpdateChannelMessageMutationError = AxiosError<
   N400Response | N401Response | N403Response | N404Response
 >;
@@ -364,7 +360,7 @@ export const useUpdateChannelMessage = <
       workspaceId: string;
       channelId: string;
       messageId: string;
-      data?: UpdateMessageRequestBody;
+      data?: UpdateMessageBody;
     },
     TContext
   >;
@@ -376,7 +372,7 @@ export const useUpdateChannelMessage = <
     workspaceId: string;
     channelId: string;
     messageId: string;
-    data?: UpdateMessageRequestBody;
+    data?: UpdateMessageBody;
   },
   TContext
 > => {
@@ -482,15 +478,15 @@ export const useDeleteChannelMessage = <
 export const createDirectChatMessage = (
   workspaceId: string,
   directChatId: string,
-  createMessageRequestBody?: CreateMessageRequestBody,
+  createMessageBody?: CreateMessageBody,
   options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<void>> => {
   const formData = new FormData();
-  if (createMessageRequestBody?.content !== undefined) {
-    formData.append(`content`, createMessageRequestBody.content);
+  if (createMessageBody?.content !== undefined) {
+    formData.append(`content`, createMessageBody.content);
   }
-  if (createMessageRequestBody?.attachments !== undefined) {
-    createMessageRequestBody?.attachments.forEach((value) =>
+  if (createMessageBody?.attachments !== undefined) {
+    createMessageBody?.attachments.forEach((value) =>
       formData.append(`attachments`, value),
     );
   }
@@ -511,22 +507,14 @@ export const getCreateDirectChatMessageMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createDirectChatMessage>>,
     TError,
-    {
-      workspaceId: string;
-      directChatId: string;
-      data?: CreateMessageRequestBody;
-    },
+    { workspaceId: string; directChatId: string; data?: CreateMessageBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof createDirectChatMessage>>,
   TError,
-  {
-    workspaceId: string;
-    directChatId: string;
-    data?: CreateMessageRequestBody;
-  },
+  { workspaceId: string; directChatId: string; data?: CreateMessageBody },
   TContext
 > => {
   const mutationKey = ["createDirectChatMessage"];
@@ -540,11 +528,7 @@ export const getCreateDirectChatMessageMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof createDirectChatMessage>>,
-    {
-      workspaceId: string;
-      directChatId: string;
-      data?: CreateMessageRequestBody;
-    }
+    { workspaceId: string; directChatId: string; data?: CreateMessageBody }
   > = (props) => {
     const { workspaceId, directChatId, data } = props ?? {};
 
@@ -562,9 +546,7 @@ export const getCreateDirectChatMessageMutationOptions = <
 export type CreateDirectChatMessageMutationResult = NonNullable<
   Awaited<ReturnType<typeof createDirectChatMessage>>
 >;
-export type CreateDirectChatMessageMutationBody =
-  | CreateMessageRequestBody
-  | undefined;
+export type CreateDirectChatMessageMutationBody = CreateMessageBody | undefined;
 export type CreateDirectChatMessageMutationError = AxiosError<
   N400Response | N401Response | N403Response | N404Response
 >;
@@ -581,22 +563,14 @@ export const useCreateDirectChatMessage = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createDirectChatMessage>>,
     TError,
-    {
-      workspaceId: string;
-      directChatId: string;
-      data?: CreateMessageRequestBody;
-    },
+    { workspaceId: string; directChatId: string; data?: CreateMessageBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationResult<
   Awaited<ReturnType<typeof createDirectChatMessage>>,
   TError,
-  {
-    workspaceId: string;
-    directChatId: string;
-    data?: CreateMessageRequestBody;
-  },
+  { workspaceId: string; directChatId: string; data?: CreateMessageBody },
   TContext
 > => {
   return useMutation(getCreateDirectChatMessageMutationOptions(options));
@@ -611,7 +585,7 @@ export const listDirectChatMessages = (
   pageSize: number = 20,
   page: number = 1,
   options?: AxiosRequestConfig,
-): Promise<AxiosResponse<MessageListResponseResponse>> => {
+): Promise<AxiosResponse<MessageListResponse>> => {
   return axios.get(
     `http://localhost:5000/api/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${pageSize}/${page}`,
     options,
@@ -740,12 +714,12 @@ export const updateDirectChatMessage = (
   workspaceId: string,
   directChatId: string,
   messageId: string,
-  updateMessageRequestBody?: UpdateMessageRequestBody,
+  updateMessageBody?: UpdateMessageBody,
   options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<void>> => {
   return axios.patch(
     `http://localhost:5000/api/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${messageId}`,
-    updateMessageRequestBody,
+    updateMessageBody,
     options,
   );
 };
@@ -763,7 +737,7 @@ export const getUpdateDirectChatMessageMutationOptions = <
       workspaceId: string;
       directChatId: string;
       messageId: string;
-      data?: UpdateMessageRequestBody;
+      data?: UpdateMessageBody;
     },
     TContext
   >;
@@ -775,7 +749,7 @@ export const getUpdateDirectChatMessageMutationOptions = <
     workspaceId: string;
     directChatId: string;
     messageId: string;
-    data?: UpdateMessageRequestBody;
+    data?: UpdateMessageBody;
   },
   TContext
 > => {
@@ -794,7 +768,7 @@ export const getUpdateDirectChatMessageMutationOptions = <
       workspaceId: string;
       directChatId: string;
       messageId: string;
-      data?: UpdateMessageRequestBody;
+      data?: UpdateMessageBody;
     }
   > = (props) => {
     const { workspaceId, directChatId, messageId, data } = props ?? {};
@@ -814,9 +788,7 @@ export const getUpdateDirectChatMessageMutationOptions = <
 export type UpdateDirectChatMessageMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateDirectChatMessage>>
 >;
-export type UpdateDirectChatMessageMutationBody =
-  | UpdateMessageRequestBody
-  | undefined;
+export type UpdateDirectChatMessageMutationBody = UpdateMessageBody | undefined;
 export type UpdateDirectChatMessageMutationError = AxiosError<
   N400Response | N401Response | N403Response | N404Response
 >;
@@ -837,7 +809,7 @@ export const useUpdateDirectChatMessage = <
       workspaceId: string;
       directChatId: string;
       messageId: string;
-      data?: UpdateMessageRequestBody;
+      data?: UpdateMessageBody;
     },
     TContext
   >;
@@ -849,7 +821,7 @@ export const useUpdateDirectChatMessage = <
     workspaceId: string;
     directChatId: string;
     messageId: string;
-    data?: UpdateMessageRequestBody;
+    data?: UpdateMessageBody;
   },
   TContext
 > => {

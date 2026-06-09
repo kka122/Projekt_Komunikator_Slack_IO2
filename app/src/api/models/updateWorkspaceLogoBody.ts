@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type AcceptPaymentRequestBody = {
-  /** ID of the Stripe Payment Intent to confirm */
-  paymentIntentId: string;
+export type UpdateWorkspaceLogoBody = {
+  /** New workspace logo image file */
+  workspaceLogo: Blob;
 };

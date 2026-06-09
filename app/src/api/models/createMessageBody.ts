@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type CreateMessageRequestBody = {
+export type CreateMessageBody = {
   /** The content of the message. */
   content: string;
   /** A list of attachment files for the message. */

@@ -16,7 +16,7 @@ import axios from "axios";
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 
 import type {
-  DirectChatListResponseResponse,
+  DirectChatListResponse,
   N400Response,
   N401Response,
   N403Response,
@@ -34,7 +34,7 @@ type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
 export const listDirectChats = (
   workspaceId: string,
   options?: AxiosRequestConfig,
-): Promise<AxiosResponse<DirectChatListResponseResponse>> => {
+): Promise<AxiosResponse<DirectChatListResponse>> => {
   return axios.get(
     `http://localhost:5000/api/workspaces/${workspaceId}/direct-chats`,
     options,

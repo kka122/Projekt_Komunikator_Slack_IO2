@@ -4,9 +4,9 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import type { ErrorSchema } from "./errorSchema";
+import type { Error } from "./error";
 
 /**
  * Forbidden - The user does not have permission to access the resource
  */
-export type N403Response = ErrorSchema;
+export type N403Response = Error;

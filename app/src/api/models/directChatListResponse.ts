@@ -4,8 +4,8 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
+import type { DirectChat } from "./directChat";
 
-export type UpdateWorkspaceLogoRequestBody = {
-  /** New workspace logo image file */
-  workspaceLogo: Blob;
+export type DirectChatListResponse = {
+  directChats: DirectChat[];
 };

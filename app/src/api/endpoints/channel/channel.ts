@@ -19,13 +19,13 @@ import axios from "axios";
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 
 import type {
-  ChannelListResponseResponse,
-  CreateChannelRequestBody,
+  ChannelListResponse,
+  CreateChannelBody,
   N400Response,
   N401Response,
   N403Response,
   N404Response,
-  UpdateChannelNameRequestBody,
+  UpdateChannelNameBody,
 } from "../../models";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
@@ -38,12 +38,12 @@ type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
  */
 export const createChannel = (
   workspaceId: string,
-  createChannelRequestBody: CreateChannelRequestBody,
+  createChannelBody: CreateChannelBody,
   options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<void>> => {
   return axios.post(
     `http://localhost:5000/api/workspaces/${workspaceId}/channels`,
-    createChannelRequestBody,
+    createChannelBody,
     options,
   );
 };
@@ -57,14 +57,14 @@ export const getCreateChannelMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createChannel>>,
     TError,
-    { workspaceId: string; data: CreateChannelRequestBody },
+    { workspaceId: string; data: CreateChannelBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof createChannel>>,
   TError,
-  { workspaceId: string; data: CreateChannelRequestBody },
+  { workspaceId: string; data: CreateChannelBody },
   TContext
 > => {
   const mutationKey = ["createChannel"];
@@ -78,7 +78,7 @@ export const getCreateChannelMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof createChannel>>,
-    { workspaceId: string; data: CreateChannelRequestBody }
+    { workspaceId: string; data: CreateChannelBody }
   > = (props) => {
     const { workspaceId, data } = props ?? {};
 
@@ -91,7 +91,7 @@ export const getCreateChannelMutationOptions = <
 export type CreateChannelMutationResult = NonNullable<
   Awaited<ReturnType<typeof createChannel>>
 >;
-export type CreateChannelMutationBody = CreateChannelRequestBody;
+export type CreateChannelMutationBody = CreateChannelBody;
 export type CreateChannelMutationError = AxiosError<
   N400Response | N401Response | N403Response | N404Response
 >;
@@ -108,14 +108,14 @@ export const useCreateChannel = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof createChannel>>,
     TError,
-    { workspaceId: string; data: CreateChannelRequestBody },
+    { workspaceId: string; data: CreateChannelBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationResult<
   Awaited<ReturnType<typeof createChannel>>,
   TError,
-  { workspaceId: string; data: CreateChannelRequestBody },
+  { workspaceId: string; data: CreateChannelBody },
   TContext
 > => {
   return useMutation(getCreateChannelMutationOptions(options));
@@ -127,7 +127,7 @@ export const useCreateChannel = <
 export const listChannels = (
   workspaceId: string,
   options?: AxiosRequestConfig,
-): Promise<AxiosResponse<ChannelListResponseResponse>> => {
+): Promise<AxiosResponse<ChannelListResponse>> => {
   return axios.get(
     `http://localhost:5000/api/workspaces/${workspaceId}/channels`,
     options,
@@ -220,12 +220,12 @@ export function useListChannels<
 export const updateChannelName = (
   workspaceId: string,
   channelId: string,
-  updateChannelNameRequestBody: UpdateChannelNameRequestBody,
+  updateChannelNameBody: UpdateChannelNameBody,
   options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<void>> => {
   return axios.patch(
     `http://localhost:5000/api/workspaces/${workspaceId}/channels/${channelId}`,
-    updateChannelNameRequestBody,
+    updateChannelNameBody,
     options,
   );
 };
@@ -239,22 +239,14 @@ export const getUpdateChannelNameMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateChannelName>>,
     TError,
-    {
-      workspaceId: string;
-      channelId: string;
-      data: UpdateChannelNameRequestBody;
-    },
+    { workspaceId: string; channelId: string; data: UpdateChannelNameBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof updateChannelName>>,
   TError,
-  {
-    workspaceId: string;
-    channelId: string;
-    data: UpdateChannelNameRequestBody;
-  },
+  { workspaceId: string; channelId: string; data: UpdateChannelNameBody },
   TContext
 > => {
   const mutationKey = ["updateChannelName"];
@@ -268,11 +260,7 @@ export const getUpdateChannelNameMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof updateChannelName>>,
-    {
-      workspaceId: string;
-      channelId: string;
-      data: UpdateChannelNameRequestBody;
-    }
+    { workspaceId: string; channelId: string; data: UpdateChannelNameBody }
   > = (props) => {
     const { workspaceId, channelId, data } = props ?? {};
 
@@ -285,7 +273,7 @@ export const getUpdateChannelNameMutationOptions = <
 export type UpdateChannelNameMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateChannelName>>
 >;
-export type UpdateChannelNameMutationBody = UpdateChannelNameRequestBody;
+export type UpdateChannelNameMutationBody = UpdateChannelNameBody;
 export type UpdateChannelNameMutationError = AxiosError<
   N400Response | N401Response | N403Response | N404Response
 >;
@@ -302,22 +290,14 @@ export const useUpdateChannelName = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateChannelName>>,
     TError,
-    {
-      workspaceId: string;
-      channelId: string;
-      data: UpdateChannelNameRequestBody;
-    },
+    { workspaceId: string; channelId: string; data: UpdateChannelNameBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationResult<
   Awaited<ReturnType<typeof updateChannelName>>,
   TError,
-  {
-    workspaceId: string;
-    channelId: string;
-    data: UpdateChannelNameRequestBody;
-  },
+  { workspaceId: string; channelId: string; data: UpdateChannelNameBody },
   TContext
 > => {
   return useMutation(getUpdateChannelNameMutationOptions(options));

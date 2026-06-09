@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type GoogleAuthRequestBody = {
-  /** Google OAuth token obtained from the client */
-  token: string;
+export type AcceptPaymentBody = {
+  /** ID of the Stripe Payment Intent to confirm */
+  paymentIntentId: string;
 };

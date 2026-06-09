@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type AddReactionRequestBody = {
+export type AddReactionBody = {
   /** The emoji to add as a reaction. This should be a valid Unicode emoji. */
   emoji: string;
 };

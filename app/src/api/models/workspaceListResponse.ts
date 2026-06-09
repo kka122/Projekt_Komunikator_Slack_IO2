@@ -4,8 +4,8 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
+import type { Workspace } from "./workspace";
 
-export type UpdateChannelNameRequestBody = {
-  /** The new name of the channel */
-  name: string;
+export type WorkspaceListResponse = {
+  workspaces: Workspace[];
 };

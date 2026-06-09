@@ -4,8 +4,7 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import type { Channel } from "./channel";
 
-export type ChannelListResponseResponse = {
-  channels: Channel[];
-};
+export interface Error {
+  error: string;
+}

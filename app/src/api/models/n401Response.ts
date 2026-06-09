@@ -4,9 +4,9 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import type { ErrorSchema } from "./errorSchema";
+import type { Error } from "./error";
 
 /**
  * Unauthorized - Authentication is required and has failed or has not yet been provided
  */
-export type N401Response = ErrorSchema;
+export type N401Response = Error;

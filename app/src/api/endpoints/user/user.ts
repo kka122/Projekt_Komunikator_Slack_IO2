@@ -19,14 +19,14 @@ import axios from "axios";
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 
 import type {
-  CurrentUserProfileResponseResponse,
+  CurrentUserProfileResponse,
   N400Response,
   N401Response,
   N403Response,
   N404Response,
-  UpdateCurrentUserProfileRequestBody,
-  UpdateUserRoleRequestBody,
-  UsersListResponseResponse,
+  UpdateCurrentUserProfileBody,
+  UpdateUserRoleBody,
+  UsersListResponse,
 } from "../../models";
 
 type AwaitedInput<T> = PromiseLike<T> | T;
@@ -39,7 +39,7 @@ type Awaited<O> = O extends AwaitedInput<infer T> ? T : never;
  */
 export const getCurrentUserProfile = (
   options?: AxiosRequestConfig,
-): Promise<AxiosResponse<CurrentUserProfileResponseResponse>> => {
+): Promise<AxiosResponse<CurrentUserProfileResponse>> => {
   return axios.get(`http://localhost:5000/api/users/me`, options);
 };
 
@@ -109,17 +109,17 @@ export function useGetCurrentUserProfile<
  * @summary Update the profile of the currently authenticated user
  */
 export const updateCurrentUserProfile = (
-  updateCurrentUserProfileRequestBody: UpdateCurrentUserProfileRequestBody,
+  updateCurrentUserProfileBody: UpdateCurrentUserProfileBody,
   options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<void>> => {
   const formData = new FormData();
-  formData.append(`name`, updateCurrentUserProfileRequestBody.name);
-  formData.append(`surname`, updateCurrentUserProfileRequestBody.surname);
-  formData.append(`email`, updateCurrentUserProfileRequestBody.email);
-  if (updateCurrentUserProfileRequestBody.avatar !== undefined) {
-    formData.append(`avatar`, updateCurrentUserProfileRequestBody.avatar);
+  formData.append(`name`, updateCurrentUserProfileBody.name);
+  formData.append(`surname`, updateCurrentUserProfileBody.surname);
+  formData.append(`email`, updateCurrentUserProfileBody.email);
+  if (updateCurrentUserProfileBody.avatar !== undefined) {
+    formData.append(`avatar`, updateCurrentUserProfileBody.avatar);
   }
-  formData.append(`status`, updateCurrentUserProfileRequestBody.status);
+  formData.append(`status`, updateCurrentUserProfileBody.status);
 
   return axios.patch(`http://localhost:5000/api/users/me`, formData, options);
 };
@@ -131,14 +131,14 @@ export const getUpdateCurrentUserProfileMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateCurrentUserProfile>>,
     TError,
-    { data: UpdateCurrentUserProfileRequestBody },
+    { data: UpdateCurrentUserProfileBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof updateCurrentUserProfile>>,
   TError,
-  { data: UpdateCurrentUserProfileRequestBody },
+  { data: UpdateCurrentUserProfileBody },
   TContext
 > => {
   const mutationKey = ["updateCurrentUserProfile"];
@@ -152,7 +152,7 @@ export const getUpdateCurrentUserProfileMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof updateCurrentUserProfile>>,
-    { data: UpdateCurrentUserProfileRequestBody }
+    { data: UpdateCurrentUserProfileBody }
   > = (props) => {
     const { data } = props ?? {};
 
@@ -165,8 +165,7 @@ export const getUpdateCurrentUserProfileMutationOptions = <
 export type UpdateCurrentUserProfileMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateCurrentUserProfile>>
 >;
-export type UpdateCurrentUserProfileMutationBody =
-  UpdateCurrentUserProfileRequestBody;
+export type UpdateCurrentUserProfileMutationBody = UpdateCurrentUserProfileBody;
 export type UpdateCurrentUserProfileMutationError = AxiosError<
   N400Response | N401Response | N404Response
 >;
@@ -181,14 +180,14 @@ export const useUpdateCurrentUserProfile = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateCurrentUserProfile>>,
     TError,
-    { data: UpdateCurrentUserProfileRequestBody },
+    { data: UpdateCurrentUserProfileBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationResult<
   Awaited<ReturnType<typeof updateCurrentUserProfile>>,
   TError,
-  { data: UpdateCurrentUserProfileRequestBody },
+  { data: UpdateCurrentUserProfileBody },
   TContext
 > => {
   return useMutation(getUpdateCurrentUserProfileMutationOptions(options));
@@ -276,7 +275,7 @@ export const useDeleteCurrentUserAccount = <
 export const getUserProfileByEmail = (
   emailRegex: string,
   options?: AxiosRequestConfig,
-): Promise<AxiosResponse<UsersListResponseResponse>> => {
+): Promise<AxiosResponse<UsersListResponse>> => {
   return axios.get(`http://localhost:5000/api/users/${emailRegex}`, options);
 };
 
@@ -543,12 +542,12 @@ export const useRemoveUserFromWorkspace = <
 export const updateUserRoleInWorkspace = (
   userId: string,
   workspaceId: string,
-  updateUserRoleRequestBody: UpdateUserRoleRequestBody,
+  updateUserRoleBody: UpdateUserRoleBody,
   options?: AxiosRequestConfig,
 ): Promise<AxiosResponse<void>> => {
   return axios.patch(
     `http://localhost:5000/api/users/${userId}/workspaces/${workspaceId}/role`,
-    updateUserRoleRequestBody,
+    updateUserRoleBody,
     options,
   );
 };
@@ -562,14 +561,14 @@ export const getUpdateUserRoleInWorkspaceMutationOptions = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateUserRoleInWorkspace>>,
     TError,
-    { userId: string; workspaceId: string; data: UpdateUserRoleRequestBody },
+    { userId: string; workspaceId: string; data: UpdateUserRoleBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationOptions<
   Awaited<ReturnType<typeof updateUserRoleInWorkspace>>,
   TError,
-  { userId: string; workspaceId: string; data: UpdateUserRoleRequestBody },
+  { userId: string; workspaceId: string; data: UpdateUserRoleBody },
   TContext
 > => {
   const mutationKey = ["updateUserRoleInWorkspace"];
@@ -583,7 +582,7 @@ export const getUpdateUserRoleInWorkspaceMutationOptions = <
 
   const mutationFn: MutationFunction<
     Awaited<ReturnType<typeof updateUserRoleInWorkspace>>,
-    { userId: string; workspaceId: string; data: UpdateUserRoleRequestBody }
+    { userId: string; workspaceId: string; data: UpdateUserRoleBody }
   > = (props) => {
     const { userId, workspaceId, data } = props ?? {};
 
@@ -596,7 +595,7 @@ export const getUpdateUserRoleInWorkspaceMutationOptions = <
 export type UpdateUserRoleInWorkspaceMutationResult = NonNullable<
   Awaited<ReturnType<typeof updateUserRoleInWorkspace>>
 >;
-export type UpdateUserRoleInWorkspaceMutationBody = UpdateUserRoleRequestBody;
+export type UpdateUserRoleInWorkspaceMutationBody = UpdateUserRoleBody;
 export type UpdateUserRoleInWorkspaceMutationError = AxiosError<
   N400Response | N401Response | N403Response | N404Response
 >;
@@ -613,14 +612,14 @@ export const useUpdateUserRoleInWorkspace = <
   mutation?: UseMutationOptions<
     Awaited<ReturnType<typeof updateUserRoleInWorkspace>>,
     TError,
-    { userId: string; workspaceId: string; data: UpdateUserRoleRequestBody },
+    { userId: string; workspaceId: string; data: UpdateUserRoleBody },
     TContext
   >;
   axios?: AxiosRequestConfig;
 }): UseMutationResult<
   Awaited<ReturnType<typeof updateUserRoleInWorkspace>>,
   TError,
-  { userId: string; workspaceId: string; data: UpdateUserRoleRequestBody },
+  { userId: string; workspaceId: string; data: UpdateUserRoleBody },
   TContext
 > => {
   return useMutation(getUpdateUserRoleInWorkspaceMutationOptions(options));

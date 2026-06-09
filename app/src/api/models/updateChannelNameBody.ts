@@ -5,7 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type LoginRequestBody = {
-  email: string;
-  password: string;
+export type UpdateChannelNameBody = {
+  /** The new name of the channel */
+  name: string;
 };

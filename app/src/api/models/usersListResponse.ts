@@ -6,6 +6,6 @@
  */
 import type { User } from "./user";
 
-export type UsersListResponseResponse = {
+export type UsersListResponse = {
   users: User[];
 };

@@ -8,10 +8,10 @@
 /**
  * The user's current status.
  */
-export type UpdateCurrentUserProfileRequestBodyStatus =
-  (typeof UpdateCurrentUserProfileRequestBodyStatus)[keyof typeof UpdateCurrentUserProfileRequestBodyStatus];
+export type UpdateCurrentUserProfileBodyStatus =
+  (typeof UpdateCurrentUserProfileBodyStatus)[keyof typeof UpdateCurrentUserProfileBodyStatus];
 
-export const UpdateCurrentUserProfileRequestBodyStatus = {
+export const UpdateCurrentUserProfileBodyStatus = {
   online: "online",
   meeting: "meeting",
   vacation: "vacation",

@@ -9,11 +9,11 @@ import { faker } from "@faker-js/faker";
 import { HttpResponse, http } from "msw";
 import type { RequestHandlerOptions } from "msw";
 
-import type { ChannelListResponseResponse } from "../../models";
+import type { ChannelListResponse } from "../../models";
 
 export const getListChannelsResponseMock = (
-  overrideResponse: Partial<Extract<ChannelListResponseResponse, object>> = {},
-): ChannelListResponseResponse => ({
+  overrideResponse: Partial<Extract<ChannelListResponse, object>> = {},
+): ChannelListResponse => ({
   channels: Array.from(
     { length: faker.number.int({ min: 1, max: 10 }) },
     (_, i) => i + 1,
@@ -48,10 +48,10 @@ export const getCreateChannelMockHandler = (
 
 export const getListChannelsMockHandler = (
   overrideResponse?:
-    | ChannelListResponseResponse
+    | ChannelListResponse
     | ((
         info: Parameters<Parameters<typeof http.get>[1]>[0],
-      ) => Promise<ChannelListResponseResponse> | ChannelListResponseResponse),
+      ) => Promise<ChannelListResponse> | ChannelListResponse),
   options?: RequestHandlerOptions,
 ) => {
   return http.get(

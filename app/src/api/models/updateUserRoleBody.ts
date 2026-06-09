@@ -4,9 +4,9 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import type { UpdateUserRoleRequestBodyRole } from "./updateUserRoleRequestBodyRole";
+import type { UpdateUserRoleBodyRole } from "./updateUserRoleBodyRole";
 
-export type UpdateUserRoleRequestBody = {
+export type UpdateUserRoleBody = {
   /** The new role for the user. */
-  role: UpdateUserRoleRequestBodyRole;
+  role: UpdateUserRoleBodyRole;
 };

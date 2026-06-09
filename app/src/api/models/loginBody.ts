@@ -5,11 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 
-export type RegisterRequestBody = {
-  name: string;
-  surname: string;
+export type LoginBody = {
   email: string;
   password: string;
-  /** Optional avatar image file */
-  avatar?: Blob;
 };

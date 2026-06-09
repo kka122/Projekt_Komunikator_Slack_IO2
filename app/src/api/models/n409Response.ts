@@ -4,9 +4,9 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import type { ErrorSchema } from "./errorSchema";
+import type { Error } from "./error";
 
 /**
  * Conflict - The request could not be completed due to a conflict with the current state of the resource
  */
-export type N409Response = ErrorSchema;
+export type N409Response = Error;

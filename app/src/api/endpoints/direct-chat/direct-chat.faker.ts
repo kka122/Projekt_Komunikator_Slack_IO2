@@ -6,13 +6,11 @@
  */
 import { faker } from "@faker-js/faker";
 
-import type { DirectChatListResponseResponse } from "../../models";
+import type { DirectChatListResponse } from "../../models";
 
 export const getListDirectChatsResponseMock = (
-  overrideResponse: Partial<
-    Extract<DirectChatListResponseResponse, object>
-  > = {},
-): DirectChatListResponseResponse => ({
+  overrideResponse: Partial<Extract<DirectChatListResponse, object>> = {},
+): DirectChatListResponse => ({
   directChats: Array.from(
     { length: faker.number.int({ min: 1, max: 10 }) },
     (_, i) => i + 1,
