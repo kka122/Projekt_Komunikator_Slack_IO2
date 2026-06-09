@@ -6,6 +6,7 @@ interface InlineHotkeyProps extends HTMLProps<HTMLSpanElement> {
   hotkeyFunction: () => void;
   hotkeyKey: Hotkey;
   letterIndex?: number;
+  isBlocked?: boolean;
   children: string;
 }
 
@@ -13,10 +14,17 @@ function InlineHotkey({
                         hotkeyFunction,
                         hotkeyKey,
                         letterIndex = 0,
+                        isBlocked,
                         children,
                         ...props
                       }: InlineHotkeyProps): JSX.Element {
-  useHotkey(hotkeyKey, hotkeyFunction);
+  useHotkey(hotkeyKey, execHotkeyFunction);
+
+  function execHotkeyFunction() {
+    if (!isBlocked) {
+      hotkeyFunction();
+    }
+  }
 
   let indexCount = 0;
   let start = '';
@@ -32,7 +40,8 @@ function InlineHotkey({
     }
   })
 
-  return <span onClick={hotkeyFunction} className={styles.inlineHotkey} {...props}>
+  return <span onClick={execHotkeyFunction}
+               className={`${styles.inlineHotkey} ${isBlocked ? styles.blocked : undefined}`} {...props}>
     {start}
     <span className={'primary'}>[</span>
     {hotkeyKey}

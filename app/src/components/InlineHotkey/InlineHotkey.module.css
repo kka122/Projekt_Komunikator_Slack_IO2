@@ -1,8 +1,15 @@
 .inlineHotkey {
   cursor: pointer;
-  transition: color 0.2s ease-in-out;
+  transition: color 0.1s ease-in-out, opacity 0.1s ease-in-out;
 
   &:hover, &:focus-visible {
-    color: var(--color-primary);
+    &:not(.blocked) {
+      color: var(--color-primary);
+    }
   }
+}
+
+.blocked {
+  opacity: 0.5;
+  cursor: not-allowed;
 }

@@ -1,0 +1,46 @@
+.modal {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100dvw;
+  height: 100dvh;
+  z-index: 100;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+
+  font-size: 1.25rem;
+
+  color: var(--color-text);
+  background-color: color-mix(in srgb, var(--color-background) 80%, transparent);
+  border: none;
+
+  .con {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+
+    max-width: 600px;
+    padding: 2.5rem 5rem 3rem;
+
+    background-color: var(--color-background);
+    border-radius: 0.5rem;
+
+    border: 0.2rem solid var(--color-primary);
+
+    > p {
+      font-size: 1.25rem;
+    }
+
+    > div {
+      display: flex;
+      flex-direction: row;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+    }
+  }
+}
