@@ -2,8 +2,8 @@ import {type JSX, useRef} from "react";
 import {type CredentialResponse, GoogleLogin} from "@react-oauth/google";
 import styles from './GoogleAuth.module.css'
 import InlineHotkey from "../InlineHotkey/InlineHotkey.tsx";
-import type {GoogleAuthRequestBody} from "../../api/models";
-import {GoogleAuthBody} from "../../api/endpoints/auth/auth.zod.ts";
+import type {GoogleAuthBody} from "../../api/models";
+import {GoogleAuthBody as GoogleAuthBodyZod} from "../../api/endpoints/auth/auth.zod.ts";
 import {googleAuth} from "../../api/endpoints/auth/auth.ts";
 
 function GoogleAuth(): JSX.Element {
@@ -11,10 +11,10 @@ function GoogleAuth(): JSX.Element {
 
   const login = (credentialResponse: CredentialResponse) => {
     if (!credentialResponse.credential) return;
-    const requestBody: GoogleAuthRequestBody = {
+    const requestBody: GoogleAuthBody = {
       token: credentialResponse.credential
     }
-    const requestBodyParsed = GoogleAuthBody.safeParse(requestBody);
+    const requestBodyParsed = GoogleAuthBodyZod.safeParse(requestBody);
     if (!requestBodyParsed.success) {
       throw new Error('Invalid request body');
     }
