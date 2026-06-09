@@ -4,6 +4,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
+from routes.workspace_route import workspace_route
 
 load_dotenv('./.env')
 load_dotenv('../.env')
@@ -29,6 +30,7 @@ jwt = JWTManager(app)
 try:
     app.register_blueprint(post_auth_route)
     app.register_blueprint(google_auth_route)
+    app.register_blueprint(workspace_route)
 except Exception as blueprintError:
     print(f"Wystapil blad podczas rejestracji blueprinta: {blueprintError}")
     sys.exit(1)

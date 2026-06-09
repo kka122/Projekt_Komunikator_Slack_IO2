@@ -6,7 +6,6 @@ from google.auth import exceptions as google_auth_exceptions
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
 from flask_jwt_extended import create_access_token, create_refresh_token, set_refresh_cookies
-
 from db.DataBaseSetupInitialize import setup
 
 load_dotenv('./.env')
