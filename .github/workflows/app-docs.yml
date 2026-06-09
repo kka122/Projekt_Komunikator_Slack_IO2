@@ -9,6 +9,7 @@ on:
       - 'app/src/**/*.ts'
       - 'app/src/**/*.tsx'
       - 'shared/generators/typedoc/**'
+  workflow_dispatch:
 
 permissions:
   contents: write
