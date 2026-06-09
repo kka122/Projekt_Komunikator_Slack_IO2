@@ -8,8 +8,8 @@ from dotenv import load_dotenv
 load_dotenv('./.env')
 load_dotenv('../.env')
 
-from routes.google_auth_route import google_auth_route
-from routes.post_auth_route import post_auth_route
+from routes.auth_route.google_auth_route import google_auth_route
+from routes.auth_route.post_auth_route import post_auth_route
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True,

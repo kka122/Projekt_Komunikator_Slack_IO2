@@ -178,6 +178,10 @@ class Setup:
     def initialize(self):
         self._createTables()
 
+    ################################################################################################################
+    #                                              USER METHODS                                                    #
+    ################################################################################################################
+
     def addUser(self, name, surname, email, password=None, avatarUrl="", googleId=None):
         password = password if password else None
         googleId = googleId if googleId else None
@@ -326,3 +330,7 @@ class Setup:
                 .all()
             )
             return channels
+
+        ################################################################################################################
+        #                                              MESSAGE METHODS                                                 #
+        ################################################################################################################
