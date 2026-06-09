@@ -1,9 +1,11 @@
-from sqlalchemy import create_engine, Column, Integer, String, Text, text, Enum, DateTime, ForeignKey, Boolean, CheckConstraint
+from sqlalchemy import create_engine, Column, Integer, String, Text, text, Enum, DateTime, ForeignKey, Boolean, \
+    CheckConstraint
 from sqlalchemy.orm import declarative_base, relationship, Session
 from db.DataTypes import WorkspaceUserRole, UserStatus
 from datetime import datetime
 
 Base = declarative_base()
+
 
 class WorkSpaceUser(Base):
     __tablename__ = "workspace_user"
@@ -13,6 +15,7 @@ class WorkSpaceUser(Base):
 
     workspace = relationship("Workspace", back_populates="workspace_users")
     user = relationship("User", back_populates="workspace_users")
+
 
 class User(Base):
     __tablename__ = "user"
@@ -34,13 +37,14 @@ class User(Base):
     avatarUrl = Column(String, nullable=False, default="")
     createAt = Column(DateTime, default=datetime.now)
 
-    workspace_users = relationship("WorkSpaceUser", back_populates="user",cascade="all, delete-orphan")
+    workspace_users = relationship("WorkSpaceUser", back_populates="user", cascade="all, delete-orphan")
     channels = relationship("ChannelUser", back_populates="user")
     messages = relationship("Message", back_populates="user")
     reactions = relationship("Reaction", back_populates="user")
     attachments = relationship("Attachment", back_populates="user")
-    direct_chats_as_user1 = relationship("DirectChat",foreign_keys="DirectChat.user1Id",back_populates="user1")
-    direct_chats_as_user2 = relationship("DirectChat",foreign_keys="DirectChat.user2Id",back_populates="user2")
+    direct_chats_as_user1 = relationship("DirectChat", foreign_keys="DirectChat.user1Id", back_populates="user1")
+    direct_chats_as_user2 = relationship("DirectChat", foreign_keys="DirectChat.user2Id", back_populates="user2")
+
 
 class Workspace(Base):
     __tablename__ = "workspace"
@@ -48,10 +52,11 @@ class Workspace(Base):
     name = Column(String, nullable=False)
     logoUrl = Column(String, nullable=False)
 
-    workspace_users = relationship("WorkSpaceUser", back_populates="workspace",cascade="all, delete-orphan")
+    workspace_users = relationship("WorkSpaceUser", back_populates="workspace", cascade="all, delete-orphan")
     channels = relationship("Channel", back_populates="workspace")
     messages = relationship("Message", back_populates="workspace")
     direct_chats = relationship("DirectChat", back_populates="workspace")
+
 
 class Channel(Base):
     __tablename__ = "channel"
@@ -63,6 +68,7 @@ class Channel(Base):
     users = relationship("ChannelUser", back_populates="channel")
     messages = relationship("Message", back_populates="channel")
 
+
 class ChannelUser(Base):
     __tablename__ = "channel_user"
     channelId = Column(Integer, ForeignKey('channel.id'), primary_key=True)
@@ -71,6 +77,7 @@ class ChannelUser(Base):
 
     user = relationship("User", back_populates="channels")
     channel = relationship("Channel", back_populates="users")
+
 
 class Message(Base):
     __tablename__ = "message"
@@ -94,6 +101,7 @@ class Message(Base):
     channel = relationship("Channel", back_populates="messages")
     direct_chat = relationship("DirectChat", back_populates="messages")
 
+
 class Reaction(Base):
     __tablename__ = "reaction"
     id = Column(Integer, primary_key=True)
@@ -103,6 +111,7 @@ class Reaction(Base):
 
     user = relationship("User", back_populates="reactions")
     message = relationship("Message", back_populates="reactions")
+
 
 class Attachment(Base):
     __tablename__ = "attachment"
@@ -115,6 +124,7 @@ class Attachment(Base):
 
     user = relationship("User", back_populates="attachments")
     message = relationship("Message", back_populates="attachments")
+
 
 class DirectChat(Base):
     __tablename__ = "direct_chat"
@@ -131,7 +141,7 @@ class DirectChat(Base):
 
 
 class Setup:
-    def __init__(self,*,HOST = "localhost",PORT = 6000,BASE_NAME = "baza_danych",USER = "postgres",PASSWORD = "1234"):
+    def __init__(self, *, HOST="localhost", PORT=6000, BASE_NAME="baza_danych", USER="postgres", PASSWORD="1234"):
         self.HOST = HOST
         self.PORT = PORT
         self.BASE_NAME = BASE_NAME
@@ -142,10 +152,10 @@ class Setup:
         self.app_engine = None
 
     def _createDataBase(self):
-        set_engine = create_engine(self.SETUP_DATABASE_URI,isolation_level="AUTOCOMMIT")
+        set_engine = create_engine(self.SETUP_DATABASE_URI, isolation_level="AUTOCOMMIT")
 
         with set_engine.connect() as conn:
-            result = conn.execute(text("SELECT 1 FROM pg_database WHERE datname = :name"),{"name": self.BASE_NAME})
+            result = conn.execute(text("SELECT 1 FROM pg_database WHERE datname = :name"), {"name": self.BASE_NAME})
             exists = result.scalar() is not None
             if not exists:
                 conn.execute(text(f"CREATE DATABASE {self.BASE_NAME}"))
@@ -233,3 +243,86 @@ class Setup:
             session.refresh(user)
             return user, True
 
+    ################################################################################################################
+    #                                           CHANNEL METHODS                                                    #
+    ################################################################################################################
+
+    def addChannel(self, workspaceId, name, creatorEmail):
+        with Session(self.app_engine) as session:
+            user = session.query(User).filter(User.email == creatorEmail).first()
+            if not user:
+                raise ValueError("Uzytkownik nie istnieje")
+
+            new_channel = Channel(
+                workspaceId=int(workspaceId),
+                name=name,
+            )
+            session.add(new_channel)
+            session.flush()
+            new_membership = ChannelUser(
+                channelId=new_channel.id,
+                userId=user.id,
+                lastReadAt=datetime.now()
+            )
+            session.add(new_membership)
+            session.commit()
+            session.refresh(new_channel)
+            return new_channel
+
+    def deleteChannel(self, workspaceId, channelId, creatorEmail):
+        with Session(self.app_engine) as session:
+            user = session.query(User).filter(User.email == creatorEmail).first()
+            if not user:
+                raise ValueError("Uzytkownik nie istnieje")
+
+            channel = session.query(Channel).filter(Channel.id == channelId).first()
+            if not channel:
+                raise ValueError("Kanał nie istnieje")
+
+            if channel.workspaceId != int(workspaceId):
+                raise ValueError("Kanał nie należy do podanego workspaceId")
+
+            session.query(ChannelUser).filter(ChannelUser.channelId == channelId).delete()
+
+            session.query(Message).filter(Message.channelId == channelId).delete()
+
+            session.delete(channel)
+            session.commit()
+
+    def updateChannelName(self, workspaceId, channelId, newName, updaterEmail):
+        with Session(self.app_engine) as session:
+            user = session.query(User).filter(User.email == updaterEmail).first()
+            if not user:
+                raise ValueError("Uzytkownik nie istnieje")
+
+            channel = session.query(Channel).filter(Channel.id == channelId).first()
+            if not channel:
+                raise ValueError("Kanał nie istnieje")
+
+            if channel.workspaceId != int(workspaceId):
+                raise ValueError("Kanał nie należy do podanego workspaceId")
+
+            if not newName.strip():
+                raise ValueError("Nazwa kanału nie może być pusta")
+
+            channel.name = newName.strip()
+            session.commit()
+            session.refresh(channel)
+            return channel
+
+    def listAllChannels(self, workspaceId, creatorEmail):
+        with Session(self.app_engine) as session:
+            user = session.query(User).filter(User.email == creatorEmail).first()
+            if not user:
+                raise ValueError("Uzytkownik nie istnieje")
+
+            channels = (
+                session.query(Channel)
+                .join(ChannelUser, Channel.id == ChannelUser.channelId)
+                .filter(
+                    Channel.workspaceId == workspaceId,
+                    ChannelUser.userId == user.id
+                )
+                .all()
+            )
+            return channels
