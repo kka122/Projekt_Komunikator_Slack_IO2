@@ -54,14 +54,6 @@ services:
     volumes:
       - db_data:/var/lib/postgresql
 
-  openAPI:
-    container_name: openAPI
-    image: swaggerapi/swagger-ui
-    environment:
-      SWAGGER_JSON: /openapi/openapi.yaml
-    ports:
-      - "5001:8080"
-
 volumes:
   kafka_data:
   db_data:
