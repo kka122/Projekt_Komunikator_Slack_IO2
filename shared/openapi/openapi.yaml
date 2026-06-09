@@ -46,7 +46,7 @@ components:
 
   schemas:
     # ----- Error -----
-    ErrorSchema:
+    Error:
       type: object
       required: [ error ]
       properties:
@@ -206,7 +206,7 @@ components:
 
   parameters:
     # ----- Workspace -----
-    WorkspaceIDParameter:
+    WorkspaceID:
       name: workspaceId
       in: path
       description: The ID of the workspace.
@@ -216,7 +216,7 @@ components:
         format: uuid
 
     # ----- Channel -----
-    ChannelIDParameter:
+    ChannelID:
       name: channelId
       in: path
       description: The unique identifier of the channel.
@@ -226,7 +226,7 @@ components:
         format: uuid
 
     # ----- Message -----
-    MessageIDParameter:
+    MessageID:
       name: messageId
       in: path
       description: The unique identifier of the message.
@@ -236,7 +236,7 @@ components:
         format: uuid
 
     # ----- Direct Chat -----
-    DirectChatIDParameter:
+    DirectChatID:
       name: directChatId
       in: path
       description: The ID of the direct chat.
@@ -246,7 +246,7 @@ components:
         format: uuid
 
     # -----  Reaction -----
-    ReactionIDParameter:
+    ReactionID:
       name: reactionId
       in: path
       description: The ID of the reaction.
@@ -256,7 +256,7 @@ components:
         format: uuid
 
     # ----- Attachment -----
-    AttachmentIDParameter:
+    AttachmentID:
       name: attachmentId
       in: path
       description: The ID of the attachment.
@@ -266,7 +266,7 @@ components:
         format: uuid
 
     # ----- User -----
-    UserIDParameter:
+    UserID:
       name: userId
       in: path
       description: The ID of the user.
@@ -275,7 +275,7 @@ components:
         type: string
         format: uuid
 
-    UserEmailRegexParameter:
+    UserEmailRegex:
       name: emailRegex
       in: path
       description: The email regex of the user.
@@ -284,7 +284,7 @@ components:
         type: string
 
     # ----- Pagination -----
-    PageParameter:
+    Page:
       name: page
       in: path
       description: The page number to retrieve.
@@ -294,7 +294,7 @@ components:
         minimum: 1
         default: 1
 
-    PageSizeParameter:
+    PageSize:
       name: pageSize
       in: path
       description: The number of items to retrieve per page.
@@ -307,7 +307,7 @@ components:
 
   requestBodies:
     # ----- Auth -----
-    RegisterRequest:
+    Register:
       required: true
       content:
         multipart/form-data:
@@ -334,7 +334,7 @@ components:
                 format: binary
                 description: Optional avatar image file
 
-    LoginRequest:
+    Login:
       required: true
       content:
         application/json:
@@ -351,7 +351,7 @@ components:
                 format: password
                 example: Qwerty123!@#
 
-    GoogleAuthRequest:
+    GoogleAuth:
       required: true
       content:
         application/json:
@@ -364,7 +364,7 @@ components:
                 description: Google OAuth token obtained from the client
 
     # ----- Workspace -----
-    CreateWorkspaceRequest:
+    CreateWorkspace:
       content:
         multipart/form-data:
           schema:
@@ -379,7 +379,7 @@ components:
                 format: binary
                 description: Optional workspace logo image file
 
-    UpdateWorkspaceLogoRequest:
+    UpdateWorkspaceLogo:
       content:
         multipart/form-data:
           schema:
@@ -392,7 +392,7 @@ components:
                 description: New workspace logo image file
 
     # ----- Payment -----
-    AcceptPaymentRequest:
+    AcceptPayment:
       content:
         application/json:
           schema:
@@ -404,7 +404,7 @@ components:
                 description: ID of the Stripe Payment Intent to confirm
 
     # ----- Channel -----
-    CreateChannelRequest:
+    CreateChannel:
       required: true
       content:
         application/json:
@@ -416,7 +416,7 @@ components:
                 type: string
                 description: The name of the channel
 
-    UpdateChannelNameRequest:
+    UpdateChannelName:
       required: true
       content:
         application/json:
@@ -429,7 +429,7 @@ components:
                 description: The new name of the channel
 
     # ----- Message -----
-    CreateMessageRequest:
+    CreateMessage:
       description: Request body for creating a new message.
       content:
         multipart/form-data:
@@ -447,7 +447,7 @@ components:
                   format: binary
                 description: A list of attachment files for the message.
 
-    UpdateMessageRequest:
+    UpdateMessage:
       description: Request body for updating an existing message.
       content:
         application/json:
@@ -460,7 +460,7 @@ components:
                 description: The updated content of the message.
 
     # ----- Reaction -----
-    AddReactionRequest:
+    AddReaction:
       description: Request body for adding a reaction to a message.
       required: true
       content:
@@ -474,7 +474,7 @@ components:
                 description: The emoji to add as a reaction. This should be a valid Unicode emoji.
 
     # ----- User -----
-    UpdateCurrentUserProfileRequest:
+    UpdateCurrentUserProfile:
       description: Request body for updating the current user's profile.
       required: true
       content:
@@ -501,7 +501,7 @@ components:
                 enum: [ online, meeting, vacation, notDisturb, workAtHome, freeTime, offline ]
                 description: The user's current status.
 
-    UpdateUserRoleRequest:
+    UpdateUserRole:
       description: Request body for updating a user's role.
       required: true
       content:
@@ -517,7 +517,7 @@ components:
 
   responses:
     # ----- Auth -----
-    LoginResponse:
+    Login:
       description: User logged in successfully
       headers:
         Set-Cookie:
@@ -525,7 +525,7 @@ components:
           schema:
             type: string
 
-    TokenRefreshResponse:
+    TokenRefresh:
       description: Token refreshed successfully
       headers:
         Set-Cookie:
@@ -533,7 +533,7 @@ components:
           schema:
             type: string
 
-    LogoutResponse:
+    Logout:
       description: User logged out successfully
       headers:
         Set-Cookie:
@@ -542,7 +542,7 @@ components:
             type: string
 
     # ----- Payment -----
-    CreatePaymentResponse:
+    CreatePayment:
       description: Payment created
       content:
         application/json:
@@ -555,7 +555,7 @@ components:
                 description: Secret key generated by Stripe for processing the payment
 
     # ----- Workspace -----
-    WorkspaceListResponse:
+    WorkspaceList:
       description: List of workspaces retrieved successfully
       content:
         application/json:
@@ -569,7 +569,7 @@ components:
                   $ref: '#/components/schemas/Workspace'
 
     # ---- Channel -----
-    ChannelListResponse:
+    ChannelList:
       description: A list of channels.
       content:
         application/json:
@@ -583,7 +583,7 @@ components:
                   $ref: '#/components/schemas/Channel'
 
     # ----- Direct Chat -----
-    DirectChatListResponse:
+    DirectChatList:
       description: A list of direct chats.
       content:
         application/json:
@@ -597,7 +597,7 @@ components:
                   $ref: '#/components/schemas/DirectChat'
 
     # ----- Message -----
-    MessageListResponse:
+    MessageList:
       description: A list of messages.
       content:
         application/json:
@@ -612,7 +612,7 @@ components:
                 description: List of messages.
 
     # ----- User -----
-    CurrentUserProfileResponse:
+    CurrentUserProfile:
       description: The current user's profile information.
       content:
         application/json:
@@ -624,7 +624,7 @@ components:
                 $ref: '#/components/schemas/User'
                 description: The current user's profile information.
 
-    UsersListResponse:
+    UsersList:
       description: A list of users.
       content:
         application/json:
@@ -643,42 +643,42 @@ components:
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorSchema'
+            $ref: '#/components/schemas/Error'
 
     '401':
       description: Unauthorized - Authentication is required and has failed or has not yet been provided
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorSchema'
+            $ref: '#/components/schemas/Error'
 
     '402':
       description: Payment Required - Payment is required to access the resource
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorSchema'
+            $ref: '#/components/schemas/Error'
 
     '403':
       description: Forbidden - The user does not have permission to access the resource
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorSchema'
+            $ref: '#/components/schemas/Error'
 
     '404':
       description: Not Found - The requested resource was not found
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorSchema'
+            $ref: '#/components/schemas/Error'
 
     '409':
       description: Conflict - The request could not be completed due to a conflict with the current state of the resource
       content:
         application/json:
           schema:
-            $ref: '#/components/schemas/ErrorSchema'
+            $ref: '#/components/schemas/Error'
 
 security:
   - TokenAuth: [ ]
@@ -694,7 +694,7 @@ paths:
       security: [ ]
 
       requestBody:
-        $ref: '#/components/requestBodies/RegisterRequest'
+        $ref: '#/components/requestBodies/Register'
 
       responses:
         '201':
@@ -714,11 +714,11 @@ paths:
       security: [ ]
 
       requestBody:
-        $ref: '#/components/requestBodies/LoginRequest'
+        $ref: '#/components/requestBodies/Login'
 
       responses:
         '200':
-          $ref: '#/components/responses/LoginResponse'
+          $ref: '#/components/responses/Login'
 
         '400':
           $ref: '#/components/responses/400'
@@ -734,11 +734,11 @@ paths:
       security: [ ]
 
       requestBody:
-        $ref: '#/components/requestBodies/GoogleAuthRequest'
+        $ref: '#/components/requestBodies/GoogleAuth'
 
       responses:
         '200':
-          $ref: '#/components/responses/LoginResponse'
+          $ref: '#/components/responses/Login'
 
         '400':
           $ref: '#/components/responses/400'
@@ -756,7 +756,7 @@ paths:
 
       responses:
         '200':
-          $ref: '#/components/responses/TokenRefreshResponse'
+          $ref: '#/components/responses/TokenRefresh'
 
         '401':
           $ref: '#/components/responses/401'
@@ -774,7 +774,7 @@ paths:
 
       responses:
         '200':
-          $ref: '#/components/responses/LogoutResponse'
+          $ref: '#/components/responses/Logout'
 
         '401':
           $ref: '#/components/responses/401'
@@ -790,11 +790,11 @@ paths:
         - TokenAuth: [ ]
 
       requestBody:
-        $ref: '#/components/requestBodies/CreateWorkspaceRequest'
+        $ref: '#/components/requestBodies/CreateWorkspace'
 
       responses:
         '201':
-          $ref: '#/components/responses/CreatePaymentResponse'
+          $ref: '#/components/responses/CreatePayment'
 
         '400':
           $ref: '#/components/responses/400'
@@ -811,7 +811,7 @@ paths:
 
       responses:
         '200':
-          $ref: '#/components/responses/WorkspaceListResponse'
+          $ref: '#/components/responses/WorkspaceList'
 
         '401':
           $ref: '#/components/responses/401'
@@ -826,7 +826,7 @@ paths:
         - TokenAuth: [ ]
 
       requestBody:
-        $ref: '#/components/requestBodies/AcceptPaymentRequest'
+        $ref: '#/components/requestBodies/AcceptPayment'
 
       responses:
         '200':
@@ -848,10 +848,10 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/WorkspaceID'
 
       requestBody:
-        $ref: '#/components/requestBodies/UpdateWorkspaceLogoRequest'
+        $ref: '#/components/requestBodies/UpdateWorkspaceLogo'
 
       responses:
         '200':
@@ -876,10 +876,10 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/WorkspaceID'
 
       requestBody:
-        $ref: '#/components/requestBodies/CreateChannelRequest'
+        $ref: '#/components/requestBodies/CreateChannel'
 
       responses:
         '201':
@@ -902,11 +902,11 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/WorkspaceID'
 
       responses:
         '200':
-          $ref: '#/components/responses/ChannelListResponse'
+          $ref: '#/components/responses/ChannelList'
 
         '400':
           $ref: '#/components/responses/400'
@@ -926,11 +926,11 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
-        - $ref: '#/components/parameters/ChannelIDParameter'
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/ChannelID'
 
       requestBody:
-        $ref: '#/components/requestBodies/UpdateChannelNameRequest'
+        $ref: '#/components/requestBodies/UpdateChannelName'
 
       responses:
         '200':
@@ -953,8 +953,8 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
-        - $ref: '#/components/parameters/ChannelIDParameter'
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/ChannelID'
 
       responses:
         '200':
@@ -979,11 +979,11 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/WorkspaceID'
 
       responses:
         '200':
-          $ref: '#/components/responses/DirectChatListResponse'
+          $ref: '#/components/responses/DirectChatList'
 
         '400':
           $ref: '#/components/responses/400'
@@ -1004,11 +1004,11 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
-        - $ref: '#/components/parameters/ChannelIDParameter'
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/ChannelID'
 
       requestBody:
-        $ref: '#/components/requestBodies/CreateMessageRequest'
+        $ref: '#/components/requestBodies/CreateMessage'
 
       responses:
         '201':
@@ -1032,14 +1032,14 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
-        - $ref: '#/components/parameters/ChannelIDParameter'
-        - $ref: '#/components/parameters/PageParameter'
-        - $ref: '#/components/parameters/PageSizeParameter'
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/ChannelID'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
 
       responses:
         '200':
-          $ref: '#/components/responses/MessageListResponse'
+          $ref: '#/components/responses/MessageList'
 
         '400':
           $ref: '#/components/responses/400'
@@ -1059,12 +1059,12 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
-        - $ref: '#/components/parameters/ChannelIDParameter'
-        - $ref: '#/components/parameters/MessageIDParameter'
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/ChannelID'
+        - $ref: '#/components/parameters/MessageID'
 
       requestBody:
-        $ref: '#/components/requestBodies/UpdateMessageRequest'
+        $ref: '#/components/requestBodies/UpdateMessage'
 
       responses:
         '200':
@@ -1087,9 +1087,9 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
-        - $ref: '#/components/parameters/ChannelIDParameter'
-        - $ref: '#/components/parameters/MessageIDParameter'
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/ChannelID'
+        - $ref: '#/components/parameters/MessageID'
 
       responses:
         '200':
@@ -1113,11 +1113,11 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
-        - $ref: '#/components/parameters/DirectChatIDParameter'
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/DirectChatID'
 
       requestBody:
-        $ref: '#/components/requestBodies/CreateMessageRequest'
+        $ref: '#/components/requestBodies/CreateMessage'
 
       responses:
         '201':
@@ -1141,14 +1141,14 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
-        - $ref: '#/components/parameters/DirectChatIDParameter'
-        - $ref: '#/components/parameters/PageParameter'
-        - $ref: '#/components/parameters/PageSizeParameter'
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/DirectChatID'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
 
       responses:
         '200':
-          $ref: '#/components/responses/MessageListResponse'
+          $ref: '#/components/responses/MessageList'
 
         '400':
           $ref: '#/components/responses/400'
@@ -1168,12 +1168,12 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
-        - $ref: '#/components/parameters/DirectChatIDParameter'
-        - $ref: '#/components/parameters/MessageIDParameter'
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/DirectChatID'
+        - $ref: '#/components/parameters/MessageID'
 
       requestBody:
-        $ref: '#/components/requestBodies/UpdateMessageRequest'
+        $ref: '#/components/requestBodies/UpdateMessage'
 
       responses:
         '200':
@@ -1196,9 +1196,9 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
-        - $ref: '#/components/parameters/DirectChatIDParameter'
-        - $ref: '#/components/parameters/MessageIDParameter'
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/DirectChatID'
+        - $ref: '#/components/parameters/MessageID'
 
       responses:
         '200':
@@ -1223,12 +1223,12 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
-        - $ref: '#/components/parameters/ChannelIDParameter'
-        - $ref: '#/components/parameters/MessageIDParameter'
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/ChannelID'
+        - $ref: '#/components/parameters/MessageID'
 
       requestBody:
-        $ref: '#/components/requestBodies/AddReactionRequest'
+        $ref: '#/components/requestBodies/AddReaction'
 
       responses:
         '201':
@@ -1252,10 +1252,10 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
-        - $ref: '#/components/parameters/ChannelIDParameter'
-        - $ref: '#/components/parameters/MessageIDParameter'
-        - $ref: '#/components/parameters/ReactionIDParameter'
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/ChannelID'
+        - $ref: '#/components/parameters/MessageID'
+        - $ref: '#/components/parameters/ReactionID'
 
       responses:
         '200':
@@ -1279,12 +1279,12 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
-        - $ref: '#/components/parameters/DirectChatIDParameter'
-        - $ref: '#/components/parameters/MessageIDParameter'
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/DirectChatID'
+        - $ref: '#/components/parameters/MessageID'
 
       requestBody:
-        $ref: '#/components/requestBodies/AddReactionRequest'
+        $ref: '#/components/requestBodies/AddReaction'
 
       responses:
         '201':
@@ -1308,10 +1308,10 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
-        - $ref: '#/components/parameters/DirectChatIDParameter'
-        - $ref: '#/components/parameters/MessageIDParameter'
-        - $ref: '#/components/parameters/ReactionIDParameter'
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/DirectChatID'
+        - $ref: '#/components/parameters/MessageID'
+        - $ref: '#/components/parameters/ReactionID'
 
       responses:
         '200':
@@ -1336,10 +1336,10 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
-        - $ref: '#/components/parameters/ChannelIDParameter'
-        - $ref: '#/components/parameters/MessageIDParameter'
-        - $ref: '#/components/parameters/AttachmentIDParameter'
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/ChannelID'
+        - $ref: '#/components/parameters/MessageID'
+        - $ref: '#/components/parameters/AttachmentID'
 
       responses:
         '200':
@@ -1366,7 +1366,7 @@ paths:
 
       responses:
         '200':
-          $ref: '#/components/responses/CurrentUserProfileResponse'
+          $ref: '#/components/responses/CurrentUserProfile'
 
         '401':
           $ref: '#/components/responses/401'
@@ -1382,7 +1382,7 @@ paths:
         - TokenAuth: [ ]
 
       requestBody:
-        $ref: '#/components/requestBodies/UpdateCurrentUserProfileRequest'
+        $ref: '#/components/requestBodies/UpdateCurrentUserProfile'
 
       responses:
         '200':
@@ -1421,11 +1421,11 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/UserEmailRegexParameter'
+        - $ref: '#/components/parameters/UserEmailRegex'
 
       responses:
         '200':
-          $ref: '#/components/responses/UsersListResponse'
+          $ref: '#/components/responses/UsersList'
 
         '400':
           $ref: '#/components/responses/400'
@@ -1445,8 +1445,8 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/UserIDParameter'
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/WorkspaceID'
 
       responses:
         '200':
@@ -1469,8 +1469,8 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/UserIDParameter'
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/WorkspaceID'
 
       responses:
         '200':
@@ -1494,11 +1494,11 @@ paths:
       security:
         - TokenAuth: [ ]
       parameters:
-        - $ref: '#/components/parameters/UserIDParameter'
-        - $ref: '#/components/parameters/WorkspaceIDParameter'
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/WorkspaceID'
 
       requestBody:
-        $ref: '#/components/requestBodies/UpdateUserRoleRequest'
+        $ref: '#/components/requestBodies/UpdateUserRole'
 
       responses:
         '200':
