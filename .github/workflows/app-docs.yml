@@ -1,15 +1,6 @@
 name: Generate App Documentation
 
-on:
-  push:
-    branches:
-      - main
-    paths:
-      - '.github/workflows/app-docs.yml'
-      - 'app/src/**/*.ts'
-      - 'app/src/**/*.tsx'
-      - 'shared/generators/typedoc/**'
-  workflow_dispatch:
+on: workflow_dispatch
 
 permissions:
   contents: write

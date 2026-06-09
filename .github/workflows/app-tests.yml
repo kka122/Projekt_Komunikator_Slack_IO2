@@ -7,7 +7,6 @@ on:
     paths:
       - '.github/workflows/app-tests.yml'
       - 'app/**'
-  workflow_dispatch:
 
 permissions:
   contents: read
