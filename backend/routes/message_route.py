@@ -13,19 +13,19 @@ load_dotenv('../.env')
 message_route = Blueprint("message_route", __name__)
 
 
-@message_route.route("api/workspaces/<workspaceId>/channels/<channelId>/messages", methods=["POST"])
+@message_route.route("/workspaces/<workspaceId>/channels/<channelId>/messages", methods=["POST"])
 @jwt_required()
 def create_new_message(workspaceId, channelId):
     pass
 
 
-@message_route.route("/api/workspaces/<workspaceId>/channels/<channelId>/messages/<pageSize>/<page>", methods=["GET"])
+@message_route.route("/workspaces/<workspaceId>/channels/<channelId>/messages/<pageSize>/<page>", methods=["GET"])
 @jwt_required()
 def create_new_message(workspaceId, channelId, pageSize, page):
     pass
 
 
-@message_route.route("/api/workspaces/<workspaceId>/channels/<channelId>/messages/<messageId>", methods=["PATCH", "DELETE"])
+@message_route.route("/workspaces/<workspaceId>/channels/<channelId>/messages/<messageId>", methods=["PATCH", "DELETE"])
 @jwt_required()
 def create_new_message(workspaceId, channelId, messageId):
     if request.method == "PATCH":
@@ -34,19 +34,19 @@ def create_new_message(workspaceId, channelId, messageId):
         delete_message_channel(workspaceId, channelId, messageId)
 
 
-@message_route.route("/api/workspaces/<workspaceId>/direct-chats/<directChatId>/messages", methods=["POST"])
+@message_route.route("/workspaces/<workspaceId>/direct-chats/<directChatId>/messages", methods=["POST"])
 @jwt_required()
 def create_new_message(workspaceId, directChatId):
     pass
 
 
-@message_route.route("/api/workspaces/<workspaceId>/direct-chats/<directChatId>/messages/<pageSize>/<page>", methods=["GET"])
+@message_route.route("/workspaces/<workspaceId>/direct-chats/<directChatId>/messages/<pageSize>/<page>", methods=["GET"])
 @jwt_required()
 def create_new_message(workspaceId, directChatId, pageSize, page):
     pass
 
 
-@message_route.route("/api/workspaces/<workspaceId>/direct-chats/<directChatId>/messages/<messageId>", methods=["PATCH", "DELETE"])
+@message_route.route("/workspaces/<workspaceId>/direct-chats/<directChatId>/messages/<messageId>", methods=["PATCH", "DELETE"])
 @jwt_required()
 def create_new_message(workspaceId, directChatId, messageId):
     if request.method == "PATCH":

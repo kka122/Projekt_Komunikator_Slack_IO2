@@ -17,7 +17,7 @@ stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
 WORKSPACE_PRICE_GROSZE = 2000
 CURRENCY = "pln"
 
-@workspace_route.route('/api/workspaces', methods=['POST'])
+@workspace_route.route('/workspaces', methods=['POST'])
 @jwt_required()
 def create_workspace():
     email = get_jwt_identity()
@@ -41,7 +41,7 @@ def create_workspace():
 
     return jsonify({"clientSecret": intent.client_secret}), 201
 
-@workspace_route.route('/api/workspaces/accept-payment', methods=['POST'])
+@workspace_route.route('/workspaces/accept-payment', methods=['POST'])
 @jwt_required()
 def accept_workspace_payment():
     email = get_jwt_identity()

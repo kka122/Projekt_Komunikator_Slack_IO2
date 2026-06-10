@@ -17,7 +17,7 @@ load_dotenv('../.env')
 post_auth_route = Blueprint("post_auth_route", __name__)
 
 
-@post_auth_route.route("/api/auth/register", methods=["POST"])
+@post_auth_route.route("/auth/register", methods=["POST"])
 def register():
     data = request.get_json(force=True)
     try:
@@ -36,7 +36,7 @@ def register():
         return jsonify({"error": str(e)}), 409
 
 
-@post_auth_route.route("/api/auth/login", methods=["POST"])
+@post_auth_route.route("/auth/login", methods=["POST"])
 def login():
     data = request.get_json(force=True)
     email = data.get("email")
@@ -61,7 +61,7 @@ def login():
     return jsonify({"error": "Zly adres email lub haslo"}), 401
 
 
-@post_auth_route.route("/api/auth/refresh", methods=["POST"])
+@post_auth_route.route("/auth/refresh", methods=["POST"])
 @jwt_required(refresh=True)
 def refresh():
     current_user = get_jwt_identity()
@@ -71,7 +71,7 @@ def refresh():
     return jsonify({"access_token": new_access_token}), 200
 
 
-@post_auth_route.route("/api/auth/logout", methods=["POST"])
+@post_auth_route.route("/auth/logout", methods=["POST"])
 def logout():
     response = make_response(jsonify({"message": "Wylogowano pomyslnie"}))
 

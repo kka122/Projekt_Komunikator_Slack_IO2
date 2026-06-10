@@ -15,7 +15,7 @@ google_auth_route = Blueprint("google_auth_route", __name__)
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_AUTH_CLIENT_ID")
 
 
-@google_auth_route.route("/api/auth/google", methods=["POST"])
+@google_auth_route.route("/auth/google", methods=["POST"])
 def google_auth():
     data = request.get_json(force=True)
     token = data.get("token")

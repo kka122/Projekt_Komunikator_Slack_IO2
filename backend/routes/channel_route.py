@@ -13,7 +13,7 @@ load_dotenv('../.env')
 channel_route = Blueprint("channel_route", __name__)
 
 
-@channel_route.route("/api/workspaces/<workspaceId>/channels", methods=["POST"])
+@channel_route.route("/workspaces/<workspaceId>/channels", methods=["POST"])
 @jwt_required()
 def create_channel(workspaceId):
     data = request.get_json()
@@ -32,7 +32,7 @@ def create_channel(workspaceId):
         return jsonify({"error": f"Wystąpił błąd podczas tworzenia kanału: {str(e)}"}), 500
 
 
-@channel_route.route("/api/workspaces/<workspaceId>/channels", methods=["GET"])
+@channel_route.route("/workspaces/<workspaceId>/channels", methods=["GET"])
 @jwt_required()
 def list_all_channels(workspaceId):
     user_email = get_jwt_identity()
@@ -43,7 +43,7 @@ def list_all_channels(workspaceId):
         return jsonify({"error": f"Wystąpił błąd podczas pobierania kanałów: {str(e)}"}), 500
 
 
-@channel_route.route("/api/workspaces/<workspaceId>/channels/<channelId>", methods=["PATCH"])
+@channel_route.route("/workspaces/<workspaceId>/channels/<channelId>", methods=["PATCH"])
 @jwt_required()
 def update_channel_name(workspaceId, channelId):
     data = request.get_json()
@@ -58,7 +58,7 @@ def update_channel_name(workspaceId, channelId):
         return jsonify({"error": f"Wystąpił błąd podczas aktualizacji nazwy kanału: {str(e)}"}), 500
 
 
-@channel_route.route("api/workspaces/<workspaceId>/channels/<channelId>", methods=["DELETE"])
+@channel_route.route("/workspaces/<workspaceId>/channels/<channelId>", methods=["DELETE"])
 @jwt_required()
 def delete_channel(workspaceId, channelId):
     user_email = get_jwt_identity()
