@@ -1,8 +1,8 @@
-from sqlalchemy import create_engine, Column, Integer, String, Text, text, Enum, DateTime, ForeignKey, Boolean, \
-    CheckConstraint
+from sqlalchemy import create_engine, Column, Integer, String, Text, text, Enum, DateTime, ForeignKey, Boolean, CheckConstraint
 from sqlalchemy.orm import declarative_base, relationship, Session
 from db.DataTypes import WorkspaceUserRole, UserStatus
 from datetime import datetime
+from sqlalchemy.exc import IntegrityError
 
 Base = declarative_base()
 
@@ -178,6 +178,11 @@ class Setup:
     def initialize(self):
         self._createTables()
 
+    ################################################################################################################
+    #                                             USER  METHODS                                                    #
+    ################################################################################################################
+
+
     def addUser(self, name, surname, email, password=None, avatarUrl="", googleId=None):
         password = password if password else None
         googleId = googleId if googleId else None
@@ -327,14 +332,14 @@ class Setup:
             )
             return channels
 
-        ################################################################################################################
-        #                                              MESSAGE METHODS                                                 #
-        ################################################################################################################
+    ################################################################################################################
+    #                                              WORKSPACE METHODS                                                 #
+    ################################################################################################################
     def getUserByEmail(self, email):
         with Session(self.app_engine) as session:
             return session.query(User).filter(User.email == email).first()
 
-    def createWorkspace(self, name, ownerEmail, stripePaymentIntentId, logoUrl = ""):
+    def createWorkspace(self, name, ownerEmail, stripePaymentIntentId, logoUrl=""):
         with Session(self.app_engine) as session:
             existing = (session.query(Workspace).filter(Workspace.stripePaymentIntentId == stripePaymentIntentId).first())
             if existing:
@@ -344,11 +349,11 @@ class Setup:
             if user is None:
                 raise ValueError("Uzytkownik nie istnieje")
 
-            workspace = Workspace(name = name, logoUrl = logoUrl or "", stripePaymentIntentId = stripePaymentIntentId)
+            workspace = Workspace(name=name, logoUrl=logoUrl or "", stripePaymentIntentId=stripePaymentIntentId)
             session.add(workspace)
             session.flush()
 
-            membership = WorkSpaceUser(workspaceId = workspace.id, userId = user.id, role = WorkspaceUserRole.owner)
+            membership = WorkSpaceUser(workspaceId=workspace.id, userId=user.id, role=WorkspaceUserRole.owner)
             session.add(membership)
 
             try:
