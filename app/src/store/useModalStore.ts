@@ -1,5 +1,6 @@
 import {create} from 'zustand'
 import type {Hotkey} from "@tanstack/react-hotkeys";
+import type {ReactNode} from "react";
 
 interface ModalOption {
   label: string
@@ -7,14 +8,14 @@ interface ModalOption {
   function: () => void
 }
 
-export type OpenModalOptions = Omit<ModalStoreData, 'isOpen'>
-
 interface ModalStoreData {
   isOpen: boolean
-  content: string
+  content: ReactNode
   options?: ModalOption[]
   onClose?: () => void
 }
+
+export type OpenModalOptions = Omit<ModalStoreData, 'isOpen'>
 
 interface ModalStoreActions {
   openModal: (data: OpenModalOptions) => void

@@ -7,5 +7,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY ./backend .
 COPY .env .
 
+RUN chmod +x run.sh
+
 EXPOSE 5000
-CMD ["python", "main.py"]
+CMD ["./run.sh"]

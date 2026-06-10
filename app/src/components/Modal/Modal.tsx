@@ -41,8 +41,8 @@ function Modal({...props}: ModalProps): JSX.Element {
                               exit={'exit'}
                               transition={{duration: 0.3}}>
       <div className={styles.con}>
-        <p>{content}</p>
-        <div>
+        {content}
+        <div className={styles.options}>
           {options && options.length > 0 ? options.map((option, index) => {
             return <InlineHotkey key={index} hotkeyFunction={() => execOptionFunction(option.function)}
                                  hotkeyKey={option.hotkey}>{option.label}</InlineHotkey>
