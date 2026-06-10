@@ -31,11 +31,7 @@
 
     border: 0.2rem solid var(--color-primary);
 
-    > p {
-      font-size: 1.25rem;
-    }
-
-    > div {
+    .options {
       display: flex;
       flex-direction: row;
       justify-content: center;

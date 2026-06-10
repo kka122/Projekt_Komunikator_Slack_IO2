@@ -28,6 +28,10 @@ const router = createBrowserRouter([
             Component: RegisterPage
           },
         ]
+      },
+      {
+        path: "workspace",
+        Component: () => <h1>Workspace</h1>
       }
     ]
   }
