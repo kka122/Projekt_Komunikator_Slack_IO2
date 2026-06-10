@@ -76,7 +76,7 @@ components:
           description: URL of the user's avatar image
         status:
           type: string
-          enum: [ online, meeting, vacation, notDisturb, workAtHome, freeTime, offline ]
+          enum: [ online, meeting, vacations, notDisturb, workAtHome, freeTime, offline ]
 
     # ----- Channel -----
     Channel:
@@ -498,7 +498,7 @@ components:
                 description: The user's avatar image file.
               status:
                 type: string
-                enum: [ online, meeting, vacation, notDisturb, workAtHome, freeTime, offline ]
+                enum: [ online, meeting, vacations, notDisturb, workAtHome, freeTime, offline ]
                 description: The user's current status.
 
     UpdateUserRole:
