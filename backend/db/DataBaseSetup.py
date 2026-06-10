@@ -51,6 +51,7 @@ class Workspace(Base):
     id = Column(Integer, primary_key=True)
     name = Column(String, nullable=False)
     logoUrl = Column(String, nullable=False)
+    stripePaymentIntentId = Column(String, unique=True)
 
     workspace_users = relationship("WorkSpaceUser", back_populates="workspace", cascade="all, delete-orphan")
     channels = relationship("Channel", back_populates="workspace")
