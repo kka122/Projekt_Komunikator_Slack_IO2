@@ -39,8 +39,8 @@ try:
     app.register_blueprint(message_route, url_prefix="/api")
     app.register_blueprint(channel_route, url_prefix="/api")
     app.register_blueprint(direct_chat_route, url_prefix="/api")
-    app.register_blueprint(google_auth_route,url_prefix="/api")
-    app.register_blueprint(user_route,url_prefix="/api")
+    app.register_blueprint(google_auth_route, url_prefix="/api")
+    app.register_blueprint(user_route, url_prefix="/api")
 except Exception as blueprintError:
     print(f"Wystapil blad podczas rejestracji blueprinta: {blueprintError}")
     sys.exit(1)

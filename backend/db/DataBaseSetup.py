@@ -183,7 +183,6 @@ class Setup:
     #                                             USER  METHODS                                                    #
     ################################################################################################################
 
-
     def addUser(self, name, surname, email, password=None, avatarUrl="", googleId=None):
         password = password if password else None
         googleId = googleId if googleId else None
@@ -400,8 +399,9 @@ class Setup:
     #                                              DIRECT CHAT METHODS                                             #
     ################################################################################################################
 
-    def listAllDirectChats(self,workspaceId,userEmail):
+    def listAllDirectChats(self, workspaceId, userEmail):
         pass
+
     ################################################################################################################
     #                                              USER METHODS                                                    #
     ################################################################################################################
@@ -416,14 +416,16 @@ class Setup:
 
     def getWorkspaceRole(self, userId, workspaceId):
         with Session(self.app_engine) as session:
-            membership = (session.query(WorkSpaceUser).filter(WorkSpaceUser.userId == userId, WorkSpaceUser.workspaceId == workspaceId).first())
+            membership = (
+                session.query(WorkSpaceUser).filter(WorkSpaceUser.userId == userId, WorkSpaceUser.workspaceId == workspaceId).first())
             if membership is None:
                 return None
             return membership.role.value
 
     def isOwnerOrAdminAnywhere(self, userId):
         with Session(self.app_engine) as session:
-            membership = (session.query(WorkSpaceUser).filter(WorkSpaceUser.userId == userId, WorkSpaceUser.role.in_([WorkspaceUserRole.owner, WorkspaceUserRole.admin])).first())
+            membership = (session.query(WorkSpaceUser).filter(WorkSpaceUser.userId == userId, WorkSpaceUser.role.in_(
+                [WorkspaceUserRole.owner, WorkspaceUserRole.admin])).first())
             return membership is not None
 
     def updateUserProfile(self, email, name, surname, status, avatarUrl=None):
@@ -479,9 +481,9 @@ class Setup:
         with Session(self.app_engine) as session:
             channel_ids = [c.id for c in session.query(Channel.id).filter(Channel.workspaceId == workspaceId)]
             if channel_ids:
-                session.query(ChannelUser).filter(ChannelUser.userId == userId,ChannelUser.channelId.in_(channel_ids)).delete()
+                session.query(ChannelUser).filter(ChannelUser.userId == userId, ChannelUser.channelId.in_(channel_ids)).delete()
 
-            session.query(WorkSpaceUser).filter(WorkSpaceUser.userId == userId,WorkSpaceUser.workspaceId == workspaceId).delete()
+            session.query(WorkSpaceUser).filter(WorkSpaceUser.userId == userId, WorkSpaceUser.workspaceId == workspaceId).delete()
             session.commit()
 
     def updateUserRoleInWorkspace(self, workspaceId, userId, newRole):
@@ -497,4 +499,3 @@ class Setup:
     def searchUsersByEmail(self, emailRegex, limit=20):
         with Session(self.app_engine) as session:
             return session.query(User).filter(User.email.op("~*")(emailRegex)).limit(limit).all()
-
