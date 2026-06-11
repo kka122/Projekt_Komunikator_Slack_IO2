@@ -7,6 +7,8 @@ interface InlineHotkeyProps extends HTMLProps<HTMLSpanElement> {
   hotkeyKey: Hotkey;
   letterIndex?: number;
   isBlocked?: boolean;
+  hasAlert?: boolean;
+  isActive?: boolean;
   children: string;
 }
 
@@ -15,7 +17,10 @@ function InlineHotkey({
                         hotkeyKey,
                         letterIndex = 0,
                         isBlocked,
+                        hasAlert,
+                        isActive,
                         children,
+                        className,
                         ...props
                       }: InlineHotkeyProps): JSX.Element {
   useHotkey(hotkeyKey, execHotkeyFunction);
@@ -33,20 +38,25 @@ function InlineHotkey({
     if (letter.toLowerCase() === hotkeyKey.toLowerCase()) {
       indexCount++;
 
-      if (indexCount === letterIndex + 1) {
+      if (indexCount <= letterIndex + 1) {
         start = children.substring(0, index);
         end = children.substring(index + 1);
       }
     }
+    if (index === children.length - 1 && (indexCount === 0 || letterIndex < 0)) {
+      start = children + ' ';
+      end = '';
+    }
   })
 
-  return <span onClick={execHotkeyFunction}
-               className={`${styles.inlineHotkey} ${isBlocked ? styles.blocked : undefined}`} {...props}>
+  return <span {...props} onClick={execHotkeyFunction}
+               className={`${styles.inlineHotkey} ${isBlocked ? styles.blocked : undefined} ${hasAlert ? styles.alert : undefined} 
+               ${isActive ? 'primary' : undefined} ${className ?? undefined}`}>
     {start}
-    <span className={'primary'}>[</span>
-    {hotkeyKey}
-    <span className={'primary'}>]</span>
-    {end}
+      <span className={'primary'}>[</span>
+      {hotkeyKey}
+      <span className={'primary'}>]</span>
+      {end}
   </span>
 }
 

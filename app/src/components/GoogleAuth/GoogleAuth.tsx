@@ -7,44 +7,81 @@ import {GoogleAuthBody as GoogleAuthBodyZod} from "../../api/endpoints/auth/auth
 import {googleAuth} from "../../api/endpoints/auth/auth.ts";
 import useModalStore from "../../store/useModalStore.ts";
 import {useShallow} from "zustand/react/shallow";
+import {GetCurrentUserProfileResponse} from "../../api/endpoints/user/user.zod.ts";
+import useUserStore from "../../store/useUserStore.ts";
+import {useNavigate} from "react-router";
+import {getCurrentUserProfile} from "../../api/endpoints/user/user.ts";
 
 function GoogleAuth(): JSX.Element {
   const googleLoginRef = useRef<HTMLDivElement>(null);
   const openModal = useModalStore(useShallow(state => state.openModal))
+  const setUser = useUserStore(useShallow(state => state.setUser))
+  const navigate = useNavigate();
 
   const [isPending, setIsPending] = useState<boolean>(false);
 
-  const login = (credentialResponse: CredentialResponse) => {
+  function loginSuccess() {
+    openModal({
+      content: 'Logged in successfully.',
+      onClose: () => {
+        setIsPending(false)
+        navigate('/workspaces')
+      },
+    })
+  }
+
+  function loginError() {
+    openModal({
+      content: 'An error occurred during login. Please try again.',
+      onClose: () => setIsPending(false),
+    });
+  }
+
+  function login(credentialResponse: CredentialResponse) {
     setIsPending(true);
     if (!credentialResponse.credential) return;
+
     const requestBody: GoogleAuthBody = {
       token: credentialResponse.credential
     }
+
     const requestBodyParsed = GoogleAuthBodyZod.safeParse(requestBody);
     if (!requestBodyParsed.success) {
-      openModal({
-        content: 'Logowanie nie powiodło się',
-        onClose: () => setIsPending(false),
-      });
+      loginError();
+      console.log('Validation error:', requestBodyParsed.error);
       return;
     }
 
     googleAuth(requestBodyParsed.data)
       .then(response => {
-        openModal({
-          content: 'Zalogowano pomyślnie',
-          onClose: () => {
-            setIsPending(false);
-          },
+        if (response.status !== 200) {
+          loginError();
+          console.log('Login error:', response.statusText);
+          return
+        }
+
+        getCurrentUserProfile().then(profileResponse => {
+          const userParsed = GetCurrentUserProfileResponse.safeParse(profileResponse.data);
+          if (!userParsed.success) {
+            loginError();
+            console.log('User data validation error:', userParsed.error);
+            return
+          }
+
+          setUser(userParsed.data.user);
+          loginSuccess();
+        }).catch(error => {
+          loginError();
+          console.log('Profile retrieval error:', error);
         })
-        console.log('Login successful', response);
       })
       .catch(error => {
-        console.error(error);
+        loginError();
+        console.log('Login error:', error);
       })
   }
 
-  const triggerGoogleLogin = () => {
+  function triggerGoogleLogin() {
     const button = googleLoginRef.current?.querySelector('div[role="button"]') as HTMLElement;
     if (button) {
       button.click();
@@ -53,7 +90,7 @@ function GoogleAuth(): JSX.Element {
 
   return <div className={styles.googleAuth}>
     <InlineHotkey hotkeyFunction={triggerGoogleLogin} hotkeyKey={'G'} letterIndex={1} isBlocked={isPending}>
-      Zaloguj się przez Google
+      Sign in with Google
     </InlineHotkey>
     <div ref={googleLoginRef} className={styles.googleButton}>
       <GoogleLogin onSuccess={login} onError={() => console.log('Login Failed')}/>

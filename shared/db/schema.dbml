@@ -55,6 +55,7 @@ Table direct_chat {
   user1_id integer [not null, ref: > user.id]
   user2_id integer [not null, ref: > user.id]
   workspace_id integer [not null, ref: > workspace.id]
+  last_read_at datetime [not null]
 }
 
 Table message {

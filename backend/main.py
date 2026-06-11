@@ -4,6 +4,7 @@ from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
+from routes.workspace_route import workspace_route
 
 load_dotenv('./.env')
 load_dotenv('../.env')
@@ -14,6 +15,7 @@ from routes.auth_route.google_auth_route import google_auth_route
 from routes.auth_route.post_auth_route import post_auth_route
 from routes.message_route import message_route
 from routes.channel_route import channel_route
+from routes.user_route import user_route
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True,
@@ -37,6 +39,8 @@ try:
     app.register_blueprint(message_route, url_prefix="/api")
     app.register_blueprint(channel_route, url_prefix="/api")
     app.register_blueprint(direct_chat_route, url_prefix="/api")
+    app.register_blueprint(google_auth_route,url_prefix="/api")
+    app.register_blueprint(user_route,url_prefix="/api")
 except Exception as blueprintError:
     print(f"Wystapil blad podczas rejestracji blueprinta: {blueprintError}")
     sys.exit(1)

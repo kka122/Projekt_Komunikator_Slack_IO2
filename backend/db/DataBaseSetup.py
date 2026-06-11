@@ -1,10 +1,8 @@
-from datetime import datetime
-
 from sqlalchemy import create_engine, Column, Integer, String, Text, text, Enum, DateTime, ForeignKey, Boolean, CheckConstraint
-from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import declarative_base, relationship, Session
-
 from db.DataTypes import WorkspaceUserRole, UserStatus
+from datetime import datetime
+from sqlalchemy.exc import IntegrityError
 
 Base = declarative_base()
 
@@ -184,6 +182,7 @@ class Setup:
     ################################################################################################################
     #                                             USER  METHODS                                                    #
     ################################################################################################################
+
 
     def addUser(self, name, surname, email, password=None, avatarUrl="", googleId=None):
         password = password if password else None
@@ -403,3 +402,99 @@ class Setup:
 
     def listAllDirectChats(self,workspaceId,userEmail):
         pass
+    ################################################################################################################
+    #                                              USER METHODS                                                    #
+    ################################################################################################################
+
+    def getUserById(self, userId):
+        with Session(self.app_engine) as session:
+            return session.query(User).filter(User.id == userId).first()
+
+    def getWorkspaceById(self, workspaceId):
+        with Session(self.app_engine) as session:
+            return session.query(Workspace).filter(Workspace.id == workspaceId).first()
+
+    def getWorkspaceRole(self, userId, workspaceId):
+        with Session(self.app_engine) as session:
+            membership = (session.query(WorkSpaceUser).filter(WorkSpaceUser.userId == userId, WorkSpaceUser.workspaceId == workspaceId).first())
+            if membership is None:
+                return None
+            return membership.role.value
+
+    def isOwnerOrAdminAnywhere(self, userId):
+        with Session(self.app_engine) as session:
+            membership = (session.query(WorkSpaceUser).filter(WorkSpaceUser.userId == userId, WorkSpaceUser.role.in_([WorkspaceUserRole.owner, WorkspaceUserRole.admin])).first())
+            return membership is not None
+
+    def updateUserProfile(self, email, name, surname, status, avatarUrl=None):
+        with Session(self.app_engine) as session:
+            user = session.query(User).filter(User.email == email).first()
+            if user is None:
+                return False
+            user.name = name
+            user.surname = surname
+            user.status = UserStatus(status)
+            if avatarUrl is not None:
+                user.avatarUrl = avatarUrl
+            session.commit()
+            return True
+
+    def deleteUserAccount(self, email):
+        with Session(self.app_engine) as session:
+            user = session.query(User).filter(User.email == email).first()
+            if user is None:
+                return False
+
+            chat_ids = [c.id for c in session.query(DirectChat.id).filter(
+                (DirectChat.user1Id == user.id) | (DirectChat.user2Id == user.id))]
+
+            msg_filter = (Message.authorId == user.id)
+            if chat_ids:
+                msg_filter = msg_filter | Message.directChatId.in_(chat_ids)
+            msg_ids = [m.id for m in session.query(Message.id).filter(msg_filter)]
+
+            if msg_ids:
+                session.query(Reaction).filter(Reaction.messageId.in_(msg_ids)).delete()
+                session.query(Attachment).filter(Attachment.messageId.in_(msg_ids)).delete()
+                session.query(Message).filter(Message.parentMessageId.in_(msg_ids)).update(
+                    {Message.parentMessageId: None})
+                session.query(Message).filter(Message.id.in_(msg_ids)).delete()
+
+            session.query(Reaction).filter(Reaction.userId == user.id).delete()
+            session.query(Attachment).filter(Attachment.userId == user.id).delete()
+            if chat_ids:
+                session.query(DirectChat).filter(DirectChat.id.in_(chat_ids)).delete()
+            session.query(ChannelUser).filter(ChannelUser.userId == user.id).delete()
+            session.query(WorkSpaceUser).filter(WorkSpaceUser.userId == user.id).delete()
+            session.delete(user)
+            session.commit()
+            return True
+
+    def addUserToWorkspace(self, workspaceId, userId):
+        with Session(self.app_engine) as session:
+            session.add(WorkSpaceUser(workspaceId=workspaceId, userId=userId, role=WorkspaceUserRole.member))
+            session.commit()
+
+    def removeUserFromWorkspace(self, workspaceId, userId):
+        with Session(self.app_engine) as session:
+            channel_ids = [c.id for c in session.query(Channel.id).filter(Channel.workspaceId == workspaceId)]
+            if channel_ids:
+                session.query(ChannelUser).filter(ChannelUser.userId == userId,ChannelUser.channelId.in_(channel_ids)).delete()
+
+            session.query(WorkSpaceUser).filter(WorkSpaceUser.userId == userId,WorkSpaceUser.workspaceId == workspaceId).delete()
+            session.commit()
+
+    def updateUserRoleInWorkspace(self, workspaceId, userId, newRole):
+        with Session(self.app_engine) as session:
+            membership = (session.query(WorkSpaceUser).filter(WorkSpaceUser.userId == userId,
+                                                              WorkSpaceUser.workspaceId == workspaceId).first())
+            if membership is None:
+                return False
+            membership.role = WorkspaceUserRole(newRole)
+            session.commit()
+            return True
+
+    def searchUsersByEmail(self, emailRegex, limit=20):
+        with Session(self.app_engine) as session:
+            return session.query(User).filter(User.email.op("~*")(emailRegex)).limit(limit).all()
+
