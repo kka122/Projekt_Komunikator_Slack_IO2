@@ -13,6 +13,7 @@ from routes.auth_route.google_auth_route import google_auth_route
 from routes.auth_route.post_auth_route import post_auth_route
 from routes.message_route import message_route
 from routes.channel_route import channel_route
+from routes.user_route import user_route
 app = Flask(__name__)
 CORS(app, supports_credentials=True,
      origins=["http://localhost:5173", "http://localhost:8080", "http://localhost:5001"])
@@ -34,6 +35,7 @@ try:
     app.register_blueprint(workspace_route,url_prefix="/api")
     app.register_blueprint(message_route,url_prefix="/api")
     app.register_blueprint(channel_route,url_prefix="/api")
+    app.register_blueprint(user_route,url_prefix="/api")
 except Exception as blueprintError:
     print(f"Wystapil blad podczas rejestracji blueprinta: {blueprintError}")
     sys.exit(1)
