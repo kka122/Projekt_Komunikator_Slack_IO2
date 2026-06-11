@@ -16,13 +16,13 @@ function HomePage(): JSX.Element {
   }
 
   return <AnimatedMain className={styles.homePage}>
-    <h1><span className={'primary'}>Szponcik</span>, komunikator dla prawdziwych nerdów</h1>
+    <h1><span className={'primary'}>Szponcik</span>, communicator for true nerds!</h1>
     <ul className={'large'}>
       <li>
-        <InlineHotkey hotkeyFunction={goToLoginPage} hotkeyKey={"Z"}>Zaloguj</InlineHotkey>
+        <InlineHotkey hotkeyFunction={goToLoginPage} hotkeyKey={"L"}>Login</InlineHotkey>
       </li>
       <li>
-        <InlineHotkey hotkeyFunction={goToRegisterPage} hotkeyKey={"R"}>Zarejestruj</InlineHotkey>
+        <InlineHotkey hotkeyFunction={goToRegisterPage} hotkeyKey={"R"}>Register</InlineHotkey>
       </li>
     </ul>
   </AnimatedMain>

@@ -7,9 +7,37 @@
   width: 100%;
   min-height: 100dvh;
 
-  padding: 2rem;
+  padding: 1rem;
 }
 
 .primary {
   color: var(--color-primary);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  border: 0.2rem solid var(--color-text);
+  margin-bottom: 1rem;
+  max-width: 400px;
+  width: 100%;
+
+  > label {
+    &:not(:first-child) {
+      margin-top: 1rem;
+    }
+  }
+
+  > input {
+    width: 100%;
+
+  }
+
+  > .submit {
+    margin-top: 2rem;
+    text-align: center;
+    font-size: 1.25rem;
+  }
 }
