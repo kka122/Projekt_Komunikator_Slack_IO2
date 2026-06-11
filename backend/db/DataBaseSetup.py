@@ -1,8 +1,10 @@
-from sqlalchemy import create_engine, Column, Integer, String, Text, text, Enum, DateTime, ForeignKey, Boolean, CheckConstraint
-from sqlalchemy.orm import declarative_base, relationship, Session
-from db.DataTypes import WorkspaceUserRole, UserStatus
 from datetime import datetime
+
+from sqlalchemy import create_engine, Column, Integer, String, Text, text, Enum, DateTime, ForeignKey, Boolean, CheckConstraint
 from sqlalchemy.exc import IntegrityError
+from sqlalchemy.orm import declarative_base, relationship, Session
+
+from db.DataTypes import WorkspaceUserRole, UserStatus
 
 Base = declarative_base()
 
@@ -183,7 +185,6 @@ class Setup:
     #                                             USER  METHODS                                                    #
     ################################################################################################################
 
-
     def addUser(self, name, surname, email, password=None, avatarUrl="", googleId=None):
         password = password if password else None
         googleId = googleId if googleId else None
@@ -334,8 +335,9 @@ class Setup:
             return channels
 
     ################################################################################################################
-    #                                              WORKSPACE METHODS                                                 #
+    #                                              WORKSPACE METHODS                                               #
     ################################################################################################################
+
     def getUserByEmail(self, email):
         with Session(self.app_engine) as session:
             return session.query(User).filter(User.email == email).first()
@@ -366,3 +368,38 @@ class Setup:
 
             session.refresh(workspace)
             return workspace, True
+
+    ################################################################################################################
+    #                                              MESSAGE METHODS                                                 #
+    ################################################################################################################
+
+    def createMessageChannel(self):
+        pass
+
+    def listAllMessageChannels(self):
+        pass
+
+    def updateMessageChannels(self):
+        pass
+
+    def deleteMessageChannel(self):
+        pass
+
+    def createMessageChat(self):
+        pass
+
+    def listAllMessageChat(self):
+        pass
+
+    def updateMessageChat(self):
+        pass
+
+    def deleteMessageChat(self):
+        pass
+
+    ################################################################################################################
+    #                                              DIRECT CHAT METHODS                                             #
+    ################################################################################################################
+
+    def listAllDirectChats(self,workspaceId,userEmail):
+        pass

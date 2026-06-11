@@ -15,19 +15,19 @@ message_route = Blueprint("message_route", __name__)
 
 @message_route.route("/workspaces/<workspaceId>/channels/<channelId>/messages", methods=["POST"])
 @jwt_required()
-def create_new_message(workspaceId, channelId):
+def create_new_message_channel(workspaceId, channelId):
     pass
 
 
 @message_route.route("/workspaces/<workspaceId>/channels/<channelId>/messages/<pageSize>/<page>", methods=["GET"])
 @jwt_required()
-def create_new_message(workspaceId, channelId, pageSize, page):
+def list_all_message_channel(workspaceId, channelId, pageSize, page):
     pass
 
 
 @message_route.route("/workspaces/<workspaceId>/channels/<channelId>/messages/<messageId>", methods=["PATCH", "DELETE"])
 @jwt_required()
-def create_new_message(workspaceId, channelId, messageId):
+def message_channel(workspaceId, channelId, messageId):
     if request.method == "PATCH":
         update_message_channel(workspaceId, channelId, messageId)
     elif request.method == "DELETE":
@@ -36,19 +36,19 @@ def create_new_message(workspaceId, channelId, messageId):
 
 @message_route.route("/workspaces/<workspaceId>/direct-chats/<directChatId>/messages", methods=["POST"])
 @jwt_required()
-def create_new_message(workspaceId, directChatId):
+def create_new_massage_chat(workspaceId, directChatId):
     pass
 
 
 @message_route.route("/workspaces/<workspaceId>/direct-chats/<directChatId>/messages/<pageSize>/<page>", methods=["GET"])
 @jwt_required()
-def create_new_message(workspaceId, directChatId, pageSize, page):
+def list_all_message_chat(workspaceId, directChatId, pageSize, page):
     pass
 
 
 @message_route.route("/workspaces/<workspaceId>/direct-chats/<directChatId>/messages/<messageId>", methods=["PATCH", "DELETE"])
 @jwt_required()
-def create_new_message(workspaceId, directChatId, messageId):
+def message_chat(workspaceId, directChatId, messageId):
     if request.method == "PATCH":
         update_message_chat(workspaceId, directChatId, messageId)
     elif request.method == "DELETE":

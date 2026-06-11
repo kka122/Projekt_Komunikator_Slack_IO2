@@ -8,6 +8,9 @@ from flask_jwt_extended import (
     jwt_required,
     get_jwt_identity
 )
+import os
+from werkzeug.utils import secure_filename
+import bcrypt
 
 from db.DataBaseSetupInitialize import setup
 
@@ -15,17 +18,18 @@ load_dotenv('./.env')
 load_dotenv('../.env')
 
 post_auth_route = Blueprint("post_auth_route", __name__)
-
+UPLOAD_FOLDER=os.path
 
 @post_auth_route.route("/auth/register", methods=["POST"])
 def register():
-    data = request.get_json(force=True)
+    data=request.form
+    hashed_password = hash_password(data["password"])
     try:
         setup.addUser(
             name=data["name"],
             surname=data["surname"],
             email=data["email"],
-            password=data["password"],
+            password=hashed_password,
             avatarUrl=data.get("avatar", ""),
             googleId=None
         )
@@ -41,11 +45,12 @@ def login():
     data = request.get_json(force=True)
     email = data.get("email")
     password = data.get("password")
+    hashed_password = hash_password(password)
 
-    if not email or not password:
+    if not email or not hashed_password:
         return jsonify({"error": "Email i haslo sa wymagane"}), 400
 
-    if setup.checkUser(email, password):
+    if setup.checkUser(email, hashed_password):
         access_token = create_access_token(identity=email)
         refresh_token = create_refresh_token(identity=email)
 
@@ -78,3 +83,7 @@ def logout():
     unset_jwt_cookies(response)
 
     return response, 200
+
+
+def hash_password(password: str) -> str:
+    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
