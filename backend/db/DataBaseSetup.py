@@ -139,6 +139,17 @@ class DirectChat(Base):
     user1 = relationship("User", foreign_keys=[user1Id], back_populates="direct_chats_as_user1")
     user2 = relationship("User", foreign_keys=[user2Id], back_populates="direct_chats_as_user2")
     messages = relationship("Message", back_populates="direct_chat")
+    reads = relationship("DirectChatUser", back_populates="direct_chat", cascade="all, delete-orphan")
+
+
+class DirectChatUser(Base):
+    __tablename__ = "direct_chat_user"
+    directChatId = Column(Integer, ForeignKey('direct_chat.id'), primary_key=True)
+    userId = Column(Integer, ForeignKey('user.id'), primary_key=True)
+    lastReadAt = Column(DateTime)
+
+    direct_chat = relationship("DirectChat", back_populates="reads")
+    user = relationship("User")
 
 
 class Setup:
@@ -400,7 +411,104 @@ class Setup:
     ################################################################################################################
 
     def listAllDirectChats(self, workspaceId, userEmail):
-        pass
+        with Session(self.app_engine) as session:
+            user = session.query(User).filter(User.email == userEmail).first()
+            if not user:
+                raise ValueError("Uzytkownik nie istnieje")
+
+            workspace = session.query(Workspace).filter(Workspace.id == int(workspaceId)).first()
+            if not workspace:
+                raise ValueError("Workspace nie istnieje")
+
+            membership = (
+                session.query(WorkSpaceUser)
+                .filter(WorkSpaceUser.workspaceId == int(workspaceId), WorkSpaceUser.userId == user.id)
+                .first()
+            )
+            if not membership:
+                raise PermissionError("Uzytkownik nie nalezy do tego workspace")
+
+            chats = (
+                session.query(DirectChat)
+                .filter(
+                    DirectChat.workspaceId == int(workspaceId),
+                    (DirectChat.user1Id == user.id) | (DirectChat.user2Id == user.id),
+                )
+                .all()
+            )
+
+            result = []
+            for chat in chats:
+                other = chat.user2 if chat.user1Id == user.id else chat.user1
+
+                read = (
+                    session.query(DirectChatUser)
+                    .filter(
+                        DirectChatUser.directChatId == chat.id,
+                        DirectChatUser.userId == user.id,
+                    )
+                    .first()
+                )
+
+                count_filter = [
+                    Message.directChatId == chat.id,
+                    Message.authorId == other.id,
+                    Message.isDeleted == False,
+                ]
+                if read and read.lastReadAt is not None:
+                    count_filter.append(Message.createAt > read.lastReadAt)
+
+                new_messages_count = session.query(Message).filter(*count_filter).count()
+
+                result.append({
+                    "id": str(chat.id),
+                    "participant": {
+                        "id": str(other.id),
+                        "name": other.name,
+                        "surname": other.surname,
+                        "email": other.email,
+                        "avatarUrl": other.avatarUrl,
+                        "status": other.status.value,
+                    },
+                    "newMessagesCount": new_messages_count,
+                })
+
+            return result
+
+    def markDirectChatRead(self, workspaceId, directChatId, userEmail):
+        with Session(self.app_engine) as session:
+            user = session.query(User).filter(User.email == userEmail).first()
+            if not user:
+                raise ValueError("Uzytkownik nie istnieje")
+
+            chat = (
+                session.query(DirectChat)
+                .filter(
+                    DirectChat.id == int(directChatId),
+                    DirectChat.workspaceId == int(workspaceId),
+                )
+                .first()
+            )
+            if not chat:
+                raise ValueError("Czat nie istnieje")
+
+            if user.id not in (chat.user1Id, chat.user2Id):
+                raise PermissionError("Uzytkownik nie nalezy do tego czatu")
+
+            read = (
+                session.query(DirectChatUser)
+                .filter(
+                    DirectChatUser.directChatId == chat.id,
+                    DirectChatUser.userId == user.id,
+                )
+                .first()
+            )
+            if read:
+                read.lastReadAt = datetime.now()
+            else:
+                read = DirectChatUser(directChatId=chat.id, userId=user.id, lastReadAt=datetime.now())
+                session.add(read)
+            session.commit()
 
     ################################################################################################################
     #                                              USER METHODS                                                    #
@@ -465,6 +573,7 @@ class Setup:
             session.query(Reaction).filter(Reaction.userId == user.id).delete()
             session.query(Attachment).filter(Attachment.userId == user.id).delete()
             if chat_ids:
+                session.query(DirectChatUser).filter(DirectChatUser.directChatId.in_(chat_ids)).delete()
                 session.query(DirectChat).filter(DirectChat.id.in_(chat_ids)).delete()
             session.query(ChannelUser).filter(ChannelUser.userId == user.id).delete()
             session.query(WorkSpaceUser).filter(WorkSpaceUser.userId == user.id).delete()

@@ -4,7 +4,6 @@ from flask import Flask
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 from dotenv import load_dotenv
-from routes.workspace_route import workspace_route
 
 load_dotenv('./.env')
 load_dotenv('../.env')
@@ -39,7 +38,6 @@ try:
     app.register_blueprint(message_route, url_prefix="/api")
     app.register_blueprint(channel_route, url_prefix="/api")
     app.register_blueprint(direct_chat_route, url_prefix="/api")
-    app.register_blueprint(google_auth_route, url_prefix="/api")
     app.register_blueprint(user_route, url_prefix="/api")
 except Exception as blueprintError:
     print(f"Wystapil blad podczas rejestracji blueprinta: {blueprintError}")
@@ -48,3 +46,4 @@ except Exception as blueprintError:
 if __name__ == "__main__":
     debug = os.environ.get("FLASK_DEBUG", "1") == "1"
     app.run(debug=debug, host="0.0.0.0", port=5000)
+
