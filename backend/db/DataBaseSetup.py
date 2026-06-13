@@ -3,6 +3,7 @@ from sqlalchemy.orm import declarative_base, relationship, Session
 from db.DataTypes import WorkspaceUserRole, UserStatus
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError
+import bcrypt
 
 Base = declarative_base()
 
@@ -227,12 +228,17 @@ class Setup:
                 session.query(User)
                 .filter(
                     User.email == email,
-                    User.password == password,
                     User.googleId.is_(None)
                 )
                 .first()
             )
-            return user is not None
+            if user is None or user.password is None:
+                return False
+            if user.password != password:
+                return False
+            elif user.password == password:
+                return True
+            return None
 
     def getOrCreateGoogleUser(self, googleId, email, name, surname, avatarUrl=""):
         with Session(self.app_engine) as session:

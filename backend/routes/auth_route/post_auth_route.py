@@ -4,12 +4,11 @@ from flask_jwt_extended import (
     create_access_token,
     create_refresh_token,
     set_refresh_cookies,
+    set_access_cookies,
     unset_jwt_cookies,
     jwt_required,
     get_jwt_identity
 )
-import os
-from werkzeug.utils import secure_filename
 import bcrypt
 
 from db.DataBaseSetupInitialize import setup
@@ -18,13 +17,13 @@ load_dotenv('./.env')
 load_dotenv('../.env')
 
 post_auth_route = Blueprint("post_auth_route", __name__)
-UPLOAD_FOLDER=os.path
+
 
 @post_auth_route.route("/auth/register", methods=["POST"])
 def register():
-    data=request.form
-    hashed_password = hash_password(data["password"])
+    data = request.form
     try:
+        hashed_password = hash_password(data["password"])
         setup.addUser(
             name=data["name"],
             surname=data["surname"],
@@ -33,7 +32,14 @@ def register():
             avatarUrl=data.get("avatar", ""),
             googleId=None
         )
-        return jsonify({"message": "Rejestracja zakonczona pomyslnie"}), 201
+        access_token = create_access_token(identity=data["email"])
+        refresh_token = create_refresh_token(identity=data["email"])
+
+        response = make_response(jsonify({"message": "Rejestracja zakonczona pomyslnie"}), 201)
+        set_access_cookies(response, access_token)
+        set_refresh_cookies(response, refresh_token)
+
+        return response
     except KeyError as e:
         return jsonify({"error": f"Brak pola: {e}"}), 400
     except ValueError as e:
@@ -44,8 +50,7 @@ def register():
 def login():
     data = request.get_json(force=True)
     email = data.get("email")
-    password = data.get("password")
-    hashed_password = hash_password(password)
+    hashed_password = hash_password(data.get["password"])
 
     if not email or not hashed_password:
         return jsonify({"error": "Email i haslo sa wymagane"}), 400
@@ -54,14 +59,11 @@ def login():
         access_token = create_access_token(identity=email)
         refresh_token = create_refresh_token(identity=email)
 
-        response = make_response(jsonify({
-            "message": "Zalogowano pomyslnie",
-            "access_token": access_token
-        }))
-
+        response = make_response(jsonify({"message": "zalogowano pomyslnie"}), 200)
+        set_access_cookies(response, access_token)
         set_refresh_cookies(response, refresh_token)
 
-        return response, 200
+        return response
 
     return jsonify({"error": "Zly adres email lub haslo"}), 401
 
@@ -73,7 +75,10 @@ def refresh():
 
     new_access_token = create_access_token(identity=current_user)
 
-    return jsonify({"access_token": new_access_token}), 200
+    response = make_response(jsonify({"message": "Token odswiezony"}), 200)
+    set_access_cookies(response, new_access_token)
+
+    return response
 
 
 @post_auth_route.route("/auth/logout", methods=["POST"])
