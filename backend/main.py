@@ -1,4 +1,4 @@
-import os, sys
+import os, sys, re
 from datetime import timedelta
 from flask import Flask
 from flask_cors import CORS
@@ -18,7 +18,7 @@ from routes.user_route import user_route
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True,
-     origins=["http://localhost:5173", "http://localhost:8080", "http://localhost:5001"])
+     origins=re.compile(r"http://localhost(:\d+)?$"))
 
 app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "super-tajny-klucz-zmien-na-produkcji")
 app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies"]
