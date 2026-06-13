@@ -49,7 +49,7 @@ def register():
 def login():
     data = request.get_json(force=True)
     email = data.get("email")
-    password=data.get["password"]
+    password=data.get("password")
 
     if not email or not password:
         return jsonify({"error": "Email i haslo sa wymagane"}), 400
