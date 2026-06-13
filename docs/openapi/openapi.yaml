@@ -1,0 +1,1514 @@
+openapi: 3.1.1
+
+info:
+  title: Szponcik communicator API
+  version: 1.0.0
+
+tags:
+  - name: Auth
+    description: User authentication and registration
+
+  - name: Workspace
+    description: Workspaces management
+
+  - name: Channel
+    description: Channels management
+
+  - name: Direct Chat
+    description: Direct chats management
+
+  - name: Message
+    description: Messages in channels and direct chats management
+
+  - name: Reaction
+    description: Reactions to messages management
+
+  - name: Attachment
+    description: Attachments management
+
+  - name: User
+    description: User profile and settings management
+
+servers:
+  - url: http://localhost:5000/api
+    description: Local server
+
+components:
+  securitySchemes:
+    TokenAuth:
+      type: apiKey
+      in: cookie
+      name: access_token
+    RefreshTokenAuth:
+      type: apiKey
+      in: cookie
+      name: refresh_token
+
+  schemas:
+    # ----- Error -----
+    Error:
+      type: object
+      required: [ error ]
+      properties:
+        error:
+          type: string
+          example: Something went wrong
+
+    # ----- User -----
+    User:
+      type: object
+      required: [ id, name, surname, email, avatarUrl, status ]
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the user
+        name:
+          type: string
+          description: Name of the user
+        surname:
+          type: string
+          description: Surname of the user
+        email:
+          type: string
+          description: Email address of the user
+        avatarUrl:
+          type: string
+          description: URL of the user's avatar image
+        status:
+          type: string
+          enum: [ online, meeting, vacations, notDisturb, workAtHome, freeTime, offline ]
+
+    # ----- Channel -----
+    Channel:
+      type: object
+      required: [ id, name, newMessagesCount ]
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the channel
+        name:
+          type: string
+          description: Name of the channel
+        newMessagesCount:
+          type: integer
+          description: Number of new messages in the channel
+
+    # ----- Workspace -----
+    Workspace:
+      type: object
+      required: [ id, name, logoUrl, userRole, channels, users ]
+      properties:
+        id:
+          type: string
+          example: 123e4567-e89b-12d3-a456-426614174000
+        name:
+          type: string
+          example: My Workspace
+        logoUrl:
+          type: string
+          format: uri
+          example: https://example.com/workspace-logo.png
+        userRole:
+          type: string
+          enum: [ owner, admin, member ]
+          description: The role of the authenticated user within the workspace
+        channels:
+          type: array
+          items:
+            $ref: '#/components/schemas/Channel'
+          description: List of channels within the workspace
+        users:
+          type: array
+          items:
+            $ref: '#/components/schemas/User'
+          description: List of users who are members of the workspace
+
+    # ----- Attachment -----
+    Attachment:
+      type: object
+      required: [ id, filename, url, size ]
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the attachment.
+        filename:
+          type: string
+          description: Name of the attached file.
+        url:
+          type: string
+          format: uri
+          description: URL where the attachment can be accessed.
+        size:
+          type: integer
+          description: Size of the attached file in bytes.
+
+    # ----- Reaction -----
+    Reaction:
+      type: object
+      required: [ id, emoji, user ]
+      properties:
+        id:
+          type: string
+          description: The unique identifier of the reaction.
+        emoji:
+          type: string
+          description: The emoji used in the reaction.
+        user:
+          $ref: '#/components/schemas/User'
+          description: The user who made the reaction.
+
+    # -----  Message -----
+    Message:
+      type: object
+      required: [ id, content, sender, timestamp ]
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the message.
+        content:
+          type: string
+          description: The content of the message.
+        sender:
+          $ref: '#/components/schemas/User'
+          description: The user who sent the message.
+        timestamp:
+          type: string
+          format: date-time
+          description: The time when the message was sent.
+        attachments:
+          type: array
+          items:
+            $ref: '#/components/schemas/Attachment'
+          description: List of attachments included in the message.
+        reactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Reaction'
+          description: List of reactions to the message.
+        isEdited:
+          type: boolean
+          description: Indicates whether the message has been edited.
+
+    # ----- Direct Chat -----
+    DirectChat:
+      type: object
+      required: [ id, participant, newMessagesCount ]
+      properties:
+        id:
+          type: string
+          description: Unique identifier for the direct chat
+        participant:
+          $ref: '#/components/schemas/User'
+          description: The other participant in the direct chat
+        newMessagesCount:
+          type: integer
+          description: Number of new messages in the direct chat
+
+  parameters:
+    # ----- Workspace -----
+    WorkspaceID:
+      name: workspaceId
+      in: path
+      description: The ID of the workspace.
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    # ----- Channel -----
+    ChannelID:
+      name: channelId
+      in: path
+      description: The unique identifier of the channel.
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    # ----- Message -----
+    MessageID:
+      name: messageId
+      in: path
+      description: The unique identifier of the message.
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    # ----- Direct Chat -----
+    DirectChatID:
+      name: directChatId
+      in: path
+      description: The ID of the direct chat.
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    # -----  Reaction -----
+    ReactionID:
+      name: reactionId
+      in: path
+      description: The ID of the reaction.
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    # ----- Attachment -----
+    AttachmentID:
+      name: attachmentId
+      in: path
+      description: The ID of the attachment.
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    # ----- User -----
+    UserID:
+      name: userId
+      in: path
+      description: The ID of the user.
+      required: true
+      schema:
+        type: string
+        format: uuid
+
+    UserEmailRegex:
+      name: emailRegex
+      in: path
+      description: The email regex of the user.
+      required: true
+      schema:
+        type: string
+
+    # ----- Pagination -----
+    Page:
+      name: page
+      in: path
+      description: The page number to retrieve.
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+        default: 1
+
+    PageSize:
+      name: pageSize
+      in: path
+      description: The number of items to retrieve per page.
+      required: true
+      schema:
+        type: integer
+        minimum: 1
+        maximum: 50
+        default: 20
+
+  requestBodies:
+    # ----- Auth -----
+    Register:
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required: [ name, surname, email, password ]
+            properties:
+              name:
+                type: string
+                example: John
+              surname:
+                type: string
+                example: Doe
+              email:
+                type: string
+                format: email
+                example: john.doe@example.com
+              password:
+                type: string
+                format: password
+                example: Qwerty123!@#
+              avatar:
+                type: string
+                format: binary
+                description: Optional avatar image file
+
+    Login:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ email, password ]
+            properties:
+              email:
+                type: string
+                format: email
+                example: john.doe@example.com
+              password:
+                type: string
+                format: password
+                example: Qwerty123!@#
+
+    GoogleAuth:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ token ]
+            properties:
+              token:
+                type: string
+                description: Google OAuth token obtained from the client
+
+    # ----- Workspace -----
+    CreateWorkspace:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required: [ workspaceName ]
+            properties:
+              workspaceName:
+                type: string
+                example: My Workspace
+              workspaceLogo:
+                type: string
+                format: binary
+                description: Optional workspace logo image file
+
+    UpdateWorkspaceLogo:
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required: [ workspaceLogo ]
+            properties:
+              workspaceLogo:
+                type: string
+                format: binary
+                description: New workspace logo image file
+
+    # ----- Payment -----
+    AcceptPayment:
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ paymentIntentId ]
+            properties:
+              paymentIntentId:
+                type: string
+                description: ID of the Stripe Payment Intent to confirm
+
+    # ----- Channel -----
+    CreateChannel:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ name ]
+            properties:
+              name:
+                type: string
+                description: The name of the channel
+
+    UpdateChannelName:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ name ]
+            properties:
+              name:
+                type: string
+                description: The new name of the channel
+
+    # ----- Message -----
+    CreateMessage:
+      description: Request body for creating a new message.
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required: [ content, attachments ]
+            properties:
+              content:
+                type: string
+                description: The content of the message.
+              attachments:
+                type: array
+                items:
+                  type: string
+                  format: binary
+                description: A list of attachment files for the message.
+
+    UpdateMessage:
+      description: Request body for updating an existing message.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ content ]
+            properties:
+              content:
+                type: string
+                description: The updated content of the message.
+
+    # ----- Reaction -----
+    AddReaction:
+      description: Request body for adding a reaction to a message.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ emoji ]
+            properties:
+              emoji:
+                type: string
+                description: The emoji to add as a reaction. This should be a valid Unicode emoji.
+
+    # ----- User -----
+    UpdateCurrentUserProfile:
+      description: Request body for updating the current user's profile.
+      required: true
+      content:
+        multipart/form-data:
+          schema:
+            type: object
+            required: [ name, surname, email, status ]
+            properties:
+              name:
+                type: string
+                description: The user's name.
+              surname:
+                type: string
+                description: The user's surname.
+              email:
+                type: string
+                description: The user's email address.
+              avatar:
+                type: string
+                format: binary
+                description: The user's avatar image file.
+              status:
+                type: string
+                enum: [ online, meeting, vacations, notDisturb, workAtHome, freeTime, offline ]
+                description: The user's current status.
+
+    UpdateUserRole:
+      description: Request body for updating a user's role.
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ role ]
+            properties:
+              role:
+                type: string
+                enum: [ admin, member ]
+                description: The new role for the user.
+
+  responses:
+    # ----- Auth -----
+    Login:
+      description: User logged in successfully
+      headers:
+        Set-Cookie:
+          description: Sets both access_token and refresh_token cookies
+          schema:
+            type: string
+
+    TokenRefresh:
+      description: Token refreshed successfully
+      headers:
+        Set-Cookie:
+          description: Sets a new access_token cookie
+          schema:
+            type: string
+
+    Logout:
+      description: User logged out successfully
+      headers:
+        Set-Cookie:
+          description: Clears both access_token and refresh_token cookies
+          schema:
+            type: string
+
+    # ----- Payment -----
+    CreatePayment:
+      description: Payment created
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ clientSecret ]
+            properties:
+              clientSecret:
+                type: string
+                description: Secret key generated by Stripe for processing the payment
+
+    # ----- Workspace -----
+    WorkspaceList:
+      description: List of workspaces retrieved successfully
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ workspaces ]
+            properties:
+              workspaces:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Workspace'
+
+    # ---- Channel -----
+    ChannelList:
+      description: A list of channels.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ channels ]
+            properties:
+              channels:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Channel'
+
+    # ----- Direct Chat -----
+    DirectChatList:
+      description: A list of direct chats.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ directChats ]
+            properties:
+              directChats:
+                type: array
+                items:
+                  $ref: '#/components/schemas/DirectChat'
+
+    # ----- Message -----
+    MessageList:
+      description: A list of messages.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ messages ]
+            properties:
+              messages:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+                description: List of messages.
+
+    # ----- User -----
+    CurrentUserProfile:
+      description: The current user's profile information.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ user ]
+            properties:
+              user:
+                $ref: '#/components/schemas/User'
+                description: The current user's profile information.
+
+    UsersList:
+      description: A list of users.
+      content:
+        application/json:
+          schema:
+            type: object
+            required: [ users ]
+            properties:
+              users:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+    # ----- Error -----
+    '400':
+      description: Bad Request - The request could not be understood or was missing required parameters
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    '401':
+      description: Unauthorized - Authentication is required and has failed or has not yet been provided
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    '402':
+      description: Payment Required - Payment is required to access the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    '403':
+      description: Forbidden - The user does not have permission to access the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    '404':
+      description: Not Found - The requested resource was not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+    '409':
+      description: Conflict - The request could not be completed due to a conflict with the current state of the resource
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/Error'
+
+security:
+  - TokenAuth: [ ]
+
+paths:
+  # ----- Auth -----
+  /auth/register:
+    post:
+      operationId: registerUser
+      tags: [ Auth ]
+      summary: Register a new user
+      description: Create a new user account with the provided information. The profile picture is optional and can be uploaded as part of the registration process.
+      security: [ ]
+
+      requestBody:
+        $ref: '#/components/requestBodies/Register'
+
+      responses:
+        '201':
+          description: User registered successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '409':
+          $ref: '#/components/responses/409'
+
+  /auth/login:
+    post:
+      operationId: loginUser
+      tags: [ Auth ]
+      summary: Log in a user and obtain an authentication token
+      description: Authenticate a user with their email and password. On successful authentication, sets both access_token and refresh_token cookies for session management.
+      security: [ ]
+
+      requestBody:
+        $ref: '#/components/requestBodies/Login'
+
+      responses:
+        '200':
+          $ref: '#/components/responses/Login'
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+
+  /auth/google:
+    post:
+      operationId: googleAuth
+      tags: [ Auth ]
+      summary: Authenticate a user using Google OAuth token
+      description: Authenticate a user with a Google OAuth token. On successful authentication, sets both access_token and refresh_token cookies for session management.
+      security: [ ]
+
+      requestBody:
+        $ref: '#/components/requestBodies/GoogleAuth'
+
+      responses:
+        '200':
+          $ref: '#/components/responses/Login'
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+
+  /auth/refresh:
+    post:
+      operationId: refreshToken
+      tags: [ Auth ]
+      summary: Refresh the authentication token using the refresh token
+      description: Use the refresh token to obtain a new access token. This endpoint requires a valid refresh_token cookie and will set a new access_token cookie on success.
+      security:
+        - RefreshTokenAuth: [ ]
+
+      responses:
+        '200':
+          $ref: '#/components/responses/TokenRefresh'
+
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+
+  /auth/logout:
+    post:
+      operationId: logoutUser
+      tags: [ Auth ]
+      summary: Log out the authenticated user
+      description: Log out the currently authenticated user by clearing the access_token and refresh_token cookies.
+      security:
+        - TokenAuth: [ ]
+
+      responses:
+        '200':
+          $ref: '#/components/responses/Logout'
+
+        '401':
+          $ref: '#/components/responses/401'
+
+  # ----- Workspace -----
+  /workspaces:
+    post:
+      operationId: createWorkspace
+      tags: [ Workspace ]
+      summary: Create a new workspace
+      description: Create a new workspace with the provided name and optional logo. The user creating the workspace will be set as the owner. To create workspace client need complete payment using returned Stripe Payment Intent client secret.
+      security:
+        - TokenAuth: [ ]
+
+      requestBody:
+        $ref: '#/components/requestBodies/CreateWorkspace'
+
+      responses:
+        '201':
+          $ref: '#/components/responses/CreatePayment'
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+
+    get:
+      operationId: listWorkspaces
+      tags: [ Workspace ]
+      summary: List all workspaces the user is a member of
+      description: Retrieve a list of all workspaces that the authenticated user is a member of, including their roles within each workspace.
+      security:
+        - TokenAuth: [ ]
+
+      responses:
+        '200':
+          $ref: '#/components/responses/WorkspaceList'
+
+        '401':
+          $ref: '#/components/responses/401'
+
+  /workspaces/accept-payment:
+    post:
+      operationId: acceptWorkspacePayment
+      tags: [ Workspace ]
+      summary: Accept payment for workspace creation
+      description: Confirm the Stripe Payment Intent for workspace creation. This endpoint should be called after the client completes the payment process using the client secret provided in the response of the workspace creation endpoint.
+      security:
+        - TokenAuth: [ ]
+
+      requestBody:
+        $ref: '#/components/requestBodies/AcceptPayment'
+
+      responses:
+        '200':
+          description: Payment accepted and workspace created successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '402':
+          $ref: '#/components/responses/402'
+
+  /workspaces/{workspaceId}:
+    patch:
+      operationId: updateWorkspaceLogo
+      tags: [ Workspace ]
+      summary: Update workspace logo
+      description: Update the logo of an existing workspace. Only the workspace owner can update the logo.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateWorkspaceLogo'
+
+      responses:
+        '200':
+          description: Workspace logo updated successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+  # ----- Channel -----
+  /workspaces/{workspaceId}/channels:
+    post:
+      operationId: createChannel
+      tags: [ Channel ]
+      summary: Create a new channel in a workspace
+      description: Create a new channel within the specified workspace. The user creating the channel will be added as a member of that channel. Only owners and admins of the workspace can create channels.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+
+      requestBody:
+        $ref: '#/components/requestBodies/CreateChannel'
+
+      responses:
+        '201':
+          description: Channel created successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+    get:
+      operationId: listChannels
+      tags: [ Channel ]
+      summary: List all channels in a workspace
+      description: Retrieve a list of all channels within the specified workspace.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+
+      responses:
+        '200':
+          $ref: '#/components/responses/ChannelList'
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+  /workspaces/{workspaceId}/channels/{channelId}:
+    patch:
+      operationId: updateChannelName
+      tags: [ Channel ]
+      summary: Update the name of a channel
+      description: Update the name of an existing channel within the specified workspace. Only owners and admins of the workspace can update channel names.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/ChannelID'
+
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateChannelName'
+
+      responses:
+        '200':
+          description: Channel name updated successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+    delete:
+      operationId: deleteChannel
+      tags: [ Channel ]
+      summary: Delete a channel from a workspace
+      description: Delete an existing channel from the specified workspace. Only owners and admins of the workspace can delete channels.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/ChannelID'
+
+      responses:
+        '200':
+          description: Channel deleted successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+  # ----- Direct Chat -----
+  /workspaces/{workspaceId}/direct-chats:
+    get:
+      operationId: listDirectChats
+      tags: [ Direct Chat ]
+      summary: List all direct chats in a workspace
+      description: Retrieve a list of all direct chats that the authenticated user is a part of within the specified workspace.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+
+      responses:
+        '200':
+          $ref: '#/components/responses/DirectChatList'
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+  # ----- Message -----
+  /workspaces/{workspaceId}/channels/{channelId}/messages:
+    post:
+      operationId: createChannelMessage
+      tags: [ Message ]
+      summary: Create a new message in a channel
+      description: Create a new message within the specified channel. The authenticated user will be set as the author of the message. Only members of the channel can create messages.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/ChannelID'
+
+      requestBody:
+        $ref: '#/components/requestBodies/CreateMessage'
+
+      responses:
+        '201':
+          description: Message created successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+  /workspaces/{workspaceId}/channels/{channelId}/messages/{pageSize}/{page}:
+    get:
+      operationId: listChannelMessages
+      tags: [ Message ]
+      summary: List messages in a channel with pagination
+      description: Retrieve a paginated list of messages within the specified channel. Only members of the channel can view its messages.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/ChannelID'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+
+      responses:
+        '200':
+          $ref: '#/components/responses/MessageList'
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+  /workspaces/{workspaceId}/channels/{channelId}/messages/{messageId}:
+    patch:
+      operationId: updateChannelMessage
+      tags: [ Message ]
+      summary: Update a message in a channel
+      description: Update the content of an existing message within the specified channel. Only the author of the message can update it.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/ChannelID'
+        - $ref: '#/components/parameters/MessageID'
+
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateMessage'
+
+      responses:
+        '200':
+          description: Message updated successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+    delete:
+      operationId: deleteChannelMessage
+      tags: [ Message ]
+      summary: Delete a message from a channel
+      description: Delete an existing message from the specified channel. Only the author of the message or workspace admins can delete messages.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/ChannelID'
+        - $ref: '#/components/parameters/MessageID'
+
+      responses:
+        '200':
+          description: Message deleted successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+  /workspaces/{workspaceId}/direct-chats/{directChatId}/messages:
+    post:
+      operationId: createDirectChatMessage
+      tags: [ Message ]
+      summary: Create a new message in a direct chat
+      description: Create a new message within the specified direct chat. The authenticated user will be set as the author of the message. Only members of the direct chat can create messages.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/DirectChatID'
+
+      requestBody:
+        $ref: '#/components/requestBodies/CreateMessage'
+
+      responses:
+        '201':
+          description: Message created successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+  /workspaces/{workspaceId}/direct-chats/{directChatId}/messages/{pageSize}/{page}:
+    get:
+      operationId: listDirectChatMessages
+      tags: [ Message ]
+      summary: List messages in a direct chat with pagination
+      description: Retrieve a paginated list of messages within the specified direct chat. Only members of the direct chat can view its messages.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/DirectChatID'
+        - $ref: '#/components/parameters/Page'
+        - $ref: '#/components/parameters/PageSize'
+
+      responses:
+        '200':
+          $ref: '#/components/responses/MessageList'
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+  /workspaces/{workspaceId}/direct-chats/{directChatId}/messages/{messageId}:
+    patch:
+      operationId: updateDirectChatMessage
+      tags: [ Message ]
+      summary: Update a message in a direct chat
+      description: Update the content of an existing message within the specified direct chat. Only the author of the message can update it.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/DirectChatID'
+        - $ref: '#/components/parameters/MessageID'
+
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateMessage'
+
+      responses:
+        '200':
+          description: Message updated successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+    delete:
+      operationId: deleteDirectChatMessage
+      tags: [ Message ]
+      summary: Delete a message from a direct chat
+      description: Delete an existing message from the specified direct chat. Only the author of the message or workspace admins can delete messages.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/DirectChatID'
+        - $ref: '#/components/parameters/MessageID'
+
+      responses:
+        '200':
+          description: Message deleted successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+  # ----- Reaction -----
+  /workspaces/{workspaceId}/channels/{channelId}/messages/{messageId}/reactions:
+    post:
+      operationId: addReactionToChannelMessage
+      tags: [ Reaction ]
+      summary: Add a reaction to a message in a channel
+      description: Add a reaction to a specific message within a channel. The authenticated user will be set as the author of the reaction. Only members of the channel can add reactions to its messages.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/ChannelID'
+        - $ref: '#/components/parameters/MessageID'
+
+      requestBody:
+        $ref: '#/components/requestBodies/AddReaction'
+
+      responses:
+        '201':
+          description: Reaction added successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+  /workspaces/{workspaceId}/channels/{channelId}/messages/{messageId}/reactions/{reactionId}:
+    delete:
+      operationId: removeReactionFromChannelMessage
+      tags: [ Reaction ]
+      summary: Remove a reaction from a message in a channel
+      description: Remove an existing reaction from a specific message within a channel. Only the author of the reaction or workspace admins can remove reactions.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/ChannelID'
+        - $ref: '#/components/parameters/MessageID'
+        - $ref: '#/components/parameters/ReactionID'
+
+      responses:
+        '200':
+          description: Reaction removed successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+  /workspaces/{workspaceId}/direct-chats/{directChatId}/messages/{messageId}/reactions:
+    post:
+      operationId: addReactionToDirectChatMessage
+      tags: [ Reaction ]
+      summary: Add a reaction to a message in a direct chat
+      description: Add a reaction to a specific message within a direct chat. The authenticated user will be set as the author of the reaction. Only members of the direct chat can add reactions to its messages.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/DirectChatID'
+        - $ref: '#/components/parameters/MessageID'
+
+      requestBody:
+        $ref: '#/components/requestBodies/AddReaction'
+
+      responses:
+        '201':
+          description: Reaction added successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+  /workspaces/{workspaceId}/direct-chats/{directChatId}/messages/{messageId}/reactions/{reactionId}:
+    delete:
+      operationId: removeReactionFromDirectChatMessage
+      tags: [ Reaction ]
+      summary: Remove a reaction from a message in a direct chat
+      description: Remove an existing reaction from a specific message within a direct chat. Only the author of the reaction or workspace admins can remove reactions.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/DirectChatID'
+        - $ref: '#/components/parameters/MessageID'
+        - $ref: '#/components/parameters/ReactionID'
+
+      responses:
+        '200':
+          description: Reaction removed successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+  # ----- Attachment -----
+  /workspaces/{workspaceId}/channels/{channelId}/messages/{messageId}/attachments/{attachmentId}:
+    delete:
+      operationId: deleteAttachmentFromChannelMessage
+      tags: [ Attachment ]
+      summary: Delete an attachment from a message in a channel
+      description: Delete an existing attachment from a specific message within a channel. Only the author of the message or workspace admins can delete attachments.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/ChannelID'
+        - $ref: '#/components/parameters/MessageID'
+        - $ref: '#/components/parameters/AttachmentID'
+
+      responses:
+        '200':
+          description: Attachment deleted successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+  # ----- User -----
+  /users/me:
+    get:
+      operationId: getCurrentUserProfile
+      tags: [ User ]
+      summary: Get the profile of the currently authenticated user
+      description: Retrieve the profile information of the currently authenticated user, including their name, email, profile picture URL, and the list of workspaces they are a member of.
+      security:
+        - TokenAuth: [ ]
+
+      responses:
+        '200':
+          $ref: '#/components/responses/CurrentUserProfile'
+
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+
+    patch:
+      operationId: updateCurrentUserProfile
+      tags: [ User ]
+      summary: Update the profile of the currently authenticated user
+      description: Update the profile information of the currently authenticated user, such as their name and profile picture. The email cannot be updated through this endpoint. To change the email, users must contact support.
+      security:
+        - TokenAuth: [ ]
+
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateCurrentUserProfile'
+
+      responses:
+        '200':
+          description: User profile updated successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '404':
+          $ref: '#/components/responses/404'
+
+    delete:
+      operationId: deleteCurrentUserAccount
+      tags: [ User ]
+      summary: Delete the account of the currently authenticated user
+      description: Permanently delete the account of the currently authenticated user. This action cannot be undone and will remove all user data from the system. Users will be asked to confirm this action before proceeding.
+      security:
+        - TokenAuth: [ ]
+
+      responses:
+        '200':
+          description: User account deleted successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+
+  /users/{emailRegex}:
+    get:
+      operationId: getUserProfileByEmail
+      tags: [ User ]
+      summary: Get the profile of a user by email
+      description: Retrieve the profile information of a user by their email address. This endpoint is useful for searching users when adding them to a workspace. Only workspace owners and admins can search for users by email.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/UserEmailRegex'
+
+      responses:
+        '200':
+          $ref: '#/components/responses/UsersList'
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+  /users/{userId}/workspaces/{workspaceId}:
+    post:
+      operationId: addUserToWorkspace
+      tags: [ User ]
+      summary: Add a user to a workspace
+      description: Add an existing user to a specific workspace. Only workspace owners can add users, and they cannot add themselves.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/WorkspaceID'
+
+      responses:
+        '200':
+          description: User added to workspace successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+    delete:
+      operationId: removeUserFromWorkspace
+      tags: [ User ]
+      summary: Remove a user from a workspace
+      description: Remove a user from a specific workspace. Only workspace owners can remove users, and they cannot remove themselves.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/WorkspaceID'
+
+      responses:
+        '200':
+          description: User removed from workspace successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+  /users/{userId}/workspaces/{workspaceId}/role:
+    patch:
+      operationId: updateUserRoleInWorkspace
+      tags: [ User ]
+      summary: Update a user's role in a workspace
+      description: Update the role of a user within a specific workspace. Only workspace owners can update user roles, and they cannot change their own role.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/UserID'
+        - $ref: '#/components/parameters/WorkspaceID'
+
+      requestBody:
+        $ref: '#/components/requestBodies/UpdateUserRole'
+
+      responses:
+        '200':
+          description: User role updated successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
