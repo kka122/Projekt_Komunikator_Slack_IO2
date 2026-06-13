@@ -20,7 +20,7 @@ app = Flask(__name__)
 CORS(app, supports_credentials=True,
      origins=["http://localhost:5173", "http://localhost:8080", "http://localhost:5001"])
 
-app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "super-tajny-klucz-zmien-na-produkcji")
+app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY")
 app.config["JWT_TOKEN_LOCATION"] = ["headers", "cookies"]
 app.config["JWT_REFRESH_COOKIE_NAME"] = "refresh_token"
 app.config["JWT_COOKIE_SECURE"] = False
