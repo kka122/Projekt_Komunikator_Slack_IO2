@@ -5,7 +5,7 @@ from flask import Blueprint, request, jsonify, make_response
 from google.auth import exceptions as google_auth_exceptions
 from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
-from flask_jwt_extended import create_access_token, create_refresh_token, set_refresh_cookies
+from flask_jwt_extended import create_access_token, create_refresh_token, set_refresh_cookies, set_access_cookies
 from db.DataBaseSetupInitialize import setup
 
 load_dotenv('./.env')
@@ -58,10 +58,10 @@ def google_auth():
         response = make_response(jsonify({
             "message": "Google auth OK",
             "created": created,
-            "access_token": access_token
         }))
 
         set_refresh_cookies(response, refresh_token)
+        set_access_cookies(response, refresh_token)
 
         status_code = 201 if created else 200
         return response, status_code
