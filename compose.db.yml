@@ -54,6 +54,14 @@ services:
     volumes:
       - db_data:/var/lib/postgresql
 
+  docs:
+    container_name: docs
+    build:
+      context: docs
+      dockerfile: Dockerfile
+    ports:
+      - "8081:80"
+
 volumes:
   kafka_data:
   db_data:
