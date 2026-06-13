@@ -23,12 +23,11 @@ post_auth_route = Blueprint("post_auth_route", __name__)
 def register():
     data = request.form
     try:
-        hashed_password = hash_password(data["password"])
         setup.addUser(
             name=data["name"],
             surname=data["surname"],
             email=data["email"],
-            password=hashed_password,
+            password=data["password"],
             avatarUrl=data.get("avatar", ""),
             googleId=None
         )
@@ -50,12 +49,12 @@ def register():
 def login():
     data = request.get_json(force=True)
     email = data.get("email")
-    hashed_password = hash_password(data.get["password"])
+    password=data.get["password"]
 
-    if not email or not hashed_password:
+    if not email or not password:
         return jsonify({"error": "Email i haslo sa wymagane"}), 400
 
-    if setup.checkUser(email, hashed_password):
+    if setup.checkUser(email, password):
         access_token = create_access_token(identity=email)
         refresh_token = create_refresh_token(identity=email)
 
