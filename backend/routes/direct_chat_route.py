@@ -12,7 +12,7 @@ load_dotenv('../.env')
 
 direct_chat_route = Blueprint("direct_chat_route", __name__)
 
-@direct_chat_route.route("/api/workspaces/<workspace_id>/direct-chats", methods=["GET"])
+@direct_chat_route.route("/workspaces/<workspace_id>/direct-chats", methods=["GET"])
 @jwt_required()
 def list_all_direct_chats(workspace_id):
     user_mail = get_jwt_identity()

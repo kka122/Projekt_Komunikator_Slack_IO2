@@ -25,6 +25,7 @@ UPLOAD_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..",
 @post_auth_route.route("/auth/register", methods=["POST"])
 def register():
     data = request.form
+    saved_avatar_path = None
     try:
         avatar_url = ""
         avatar = request.files.get("avatar")
@@ -32,20 +33,30 @@ def register():
             try:
                 os.makedirs(UPLOAD_DIR, exist_ok=True)
                 filename = f"{uuid.uuid4().hex}{os.path.splitext(avatar.filename)[1]}"
-                avatar.save(os.path.join(UPLOAD_DIR, filename))
+                saved_avatar_path = os.path.join(UPLOAD_DIR, filename)
+                avatar.save(saved_avatar_path)
                 avatar_url = f"/api/uploads/avatars/{filename}"
             except OSError as e:
                 print(f"[Auth] Blad zapisu avatara: {e}")
                 return jsonify({"error": "Nie udalo sie zapisac avatara"}), 500
 
-        setup.addUser(
-            name=data["name"],
-            surname=data["surname"],
-            email=data["email"],
-            password=data["password"],
-            avatarUrl=avatar_url,
-            googleId=None
-        )
+        try:
+            setup.addUser(
+                name=data["name"],
+                surname=data["surname"],
+                email=data["email"],
+                password=data["password"],
+                avatarUrl=avatar_url,
+                googleId=None
+            )
+        except Exception:
+            if saved_avatar_path and os.path.exists(saved_avatar_path):
+                try:
+                    os.remove(saved_avatar_path)
+                except OSError as e:
+                    print(f"[Auth] Blad usuwania osieroconego avatara: {e}")
+            raise
+
         access_token = create_access_token(identity=data["email"])
         refresh_token = create_refresh_token(identity=data["email"])
 
@@ -58,6 +69,9 @@ def register():
         return jsonify({"error": f"Brak pola: {e}"}), 400
     except ValueError as e:
         return jsonify({"error": str(e)}), 409
+    except Exception as e:
+        print(f"[Auth] Nieoczekiwany blad rejestracji: {e}")
+        return jsonify({"error": "Nie udalo sie zarejestrowac uzytkownika"}), 500
 
 
 @post_auth_route.route("/auth/login", methods=["POST"])

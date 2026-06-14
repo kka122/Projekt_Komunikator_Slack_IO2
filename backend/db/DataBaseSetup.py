@@ -349,16 +349,35 @@ class Setup:
             if not user:
                 raise ValueError("Uzytkownik nie istnieje")
 
-            channels = (
-                session.query(Channel)
+            rows = (
+                session.query(Channel, ChannelUser.lastReadAt)
                 .join(ChannelUser, Channel.id == ChannelUser.channelId)
                 .filter(
-                    Channel.workspaceId == workspaceId,
+                    Channel.workspaceId == int(workspaceId),
                     ChannelUser.userId == user.id
                 )
                 .all()
             )
-            return channels
+
+            result = []
+            for channel, last_read_at in rows:
+                count_filter = [
+                    Message.channelId == channel.id,
+                    Message.authorId != user.id,
+                    Message.isDeleted == False,
+                ]
+                if last_read_at is not None:
+                    count_filter.append(Message.createAt > last_read_at)
+
+                new_messages_count = session.query(Message).filter(*count_filter).count()
+
+                result.append({
+                    "id": str(channel.id),
+                    "name": channel.name,
+                    "newMessagesCount": new_messages_count,
+                })
+
+            return result
 
     ################################################################################################################
     #                                              WORKSPACE METHODS                                               #

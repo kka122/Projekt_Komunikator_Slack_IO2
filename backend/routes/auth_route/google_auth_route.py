@@ -61,7 +61,7 @@ def google_auth():
         }))
 
         set_refresh_cookies(response, refresh_token)
-        set_access_cookies(response, refresh_token)
+        set_access_cookies(response, access_token)
 
         status_code = 201 if created else 200
         return response, status_code
