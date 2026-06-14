@@ -4,7 +4,7 @@ import enum
 class UserStatus(enum.Enum):
     online = "online"
     meeting = "meeting"
-    vacation = "vacation"
+    vacations = "vacations"
     notDisturb = "notDisturb"
     workAtHome = "workAtHome"
     freeTime = "freeTime"

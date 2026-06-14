@@ -7,6 +7,7 @@ from google.auth.transport import requests as google_requests
 from google.oauth2 import id_token
 from flask_jwt_extended import create_access_token, create_refresh_token, set_refresh_cookies, set_access_cookies
 from db.DataBaseSetupInitialize import setup
+from db.DataTypes import UserStatus
 
 load_dotenv('./.env')
 load_dotenv('../.env')
@@ -51,6 +52,8 @@ def google_auth():
             surname=surname,
             avatarUrl=avatar,
         )
+
+        setup.setUserStatus(email, UserStatus.online)
 
         access_token = create_access_token(identity=email)
         refresh_token = create_refresh_token(identity=email)

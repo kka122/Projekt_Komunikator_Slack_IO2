@@ -16,7 +16,6 @@ ADMIN_ROLES = ("owner", "admin")
 
 
 def _require_role(workspaceId, email, allowed_roles=None):
-    """Zwraca (user, err). err=None gdy OK, inaczej gotowa odpowiedź Flask."""
     user = setup.getUserByEmail(email)
     if user is None:
         return None, (jsonify({"error": "Uzytkownik nie istnieje"}), 401)

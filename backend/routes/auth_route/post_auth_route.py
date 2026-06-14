@@ -13,6 +13,7 @@ from flask_jwt_extended import (
 )
 
 from db.DataBaseSetupInitialize import setup
+from db.DataTypes import UserStatus
 
 load_dotenv('./.env')
 load_dotenv('../.env')
@@ -29,6 +30,16 @@ def register():
     try:
         avatar_url = ""
         avatar = request.files.get("avatar")
+
+        status_raw = data.get("status")
+        if status_raw:
+            try:
+                status = UserStatus(status_raw)
+            except ValueError:
+                return jsonify({"error": f"Nieprawidlowy status: {status_raw}"}), 400
+        else:
+            status = UserStatus.online
+
         if avatar and avatar.filename:
             try:
                 os.makedirs(UPLOAD_DIR, exist_ok=True)
@@ -47,7 +58,8 @@ def register():
                 email=data["email"],
                 password=data["password"],
                 avatarUrl=avatar_url,
-                googleId=None
+                googleId=None,
+                status=status
             )
         except Exception:
             if saved_avatar_path and os.path.exists(saved_avatar_path):
@@ -84,6 +96,7 @@ def login():
         return jsonify({"error": "Email i haslo sa wymagane"}), 400
 
     if setup.checkUser(email, password):
+        setup.setUserStatus(email, UserStatus.online)
         access_token = create_access_token(identity=email)
         refresh_token = create_refresh_token(identity=email)
 
@@ -110,7 +123,12 @@ def refresh():
 
 
 @post_auth_route.route("/auth/logout", methods=["POST"])
+@jwt_required(optional=True)
 def logout():
+    email = get_jwt_identity()
+    if email:
+        setup.setUserStatus(email, UserStatus.offline)
+
     response = make_response(jsonify({"message": "Wylogowano pomyslnie"}))
 
     unset_jwt_cookies(response)

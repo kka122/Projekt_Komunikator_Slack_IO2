@@ -208,9 +208,18 @@ class Setup:
         except ValueError:
             return False
 
-    def addUser(self, name, surname, email, password=None, avatarUrl="", googleId=None):
+    @staticmethod
+    def _coerceStatus(status):
+        if status is None:
+            return UserStatus.offline
+        if isinstance(status, UserStatus):
+            return status
+        return UserStatus(status)
+
+    def addUser(self, name, surname, email, password=None, avatarUrl="", googleId=None, status=None):
         password = password if password else None
         googleId = googleId if googleId else None
+        status = self._coerceStatus(status)
 
         if (password is None and googleId is None) or (password is not None and googleId is not None):
             raise ValueError("Dokladnie jedno z pol: password albo googleId musi byc ustawione")
@@ -230,7 +239,8 @@ class Setup:
                 email=email,
                 password=password_hash,
                 googleId=googleId,
-                avatarUrl=avatarUrl
+                avatarUrl=avatarUrl,
+                status=status
             )
             session.add(new_user)
             session.commit()
@@ -250,6 +260,16 @@ class Setup:
             if user is None or user.password is None:
                 return False
             return self._verifyPassword(password, user.password)
+
+    def setUserStatus(self, email, status):
+        status = self._coerceStatus(status)
+        with Session(self.app_engine) as session:
+            user = session.query(User).filter(User.email == email).first()
+            if user is None:
+                return False
+            user.status = status
+            session.commit()
+            return True
 
     def getOrCreateGoogleUser(self, googleId, email, name, surname, avatarUrl=""):
         with Session(self.app_engine) as session:
