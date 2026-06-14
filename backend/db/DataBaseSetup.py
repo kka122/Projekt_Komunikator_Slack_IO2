@@ -195,12 +195,27 @@ class Setup:
     #                                             USER  METHODS                                                    #
     ################################################################################################################
 
+    @staticmethod
+    def _hashPassword(password):
+        return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+    @staticmethod
+    def _verifyPassword(password, hashed):
+        if not hashed:
+            return False
+        try:
+            return bcrypt.checkpw(password.encode("utf-8"), hashed.encode("utf-8"))
+        except ValueError:
+            return False
+
     def addUser(self, name, surname, email, password=None, avatarUrl="", googleId=None):
         password = password if password else None
         googleId = googleId if googleId else None
 
         if (password is None and googleId is None) or (password is not None and googleId is not None):
             raise ValueError("Dokladnie jedno z pol: password albo googleId musi byc ustawione")
+
+        password_hash = self._hashPassword(password) if password is not None else None
 
         with Session(self.app_engine) as session:
             if session.query(User).filter(User.email == email).first():
@@ -213,7 +228,7 @@ class Setup:
                 name=name,
                 surname=surname,
                 email=email,
-                password=password,
+                password=password_hash,
                 googleId=googleId,
                 avatarUrl=avatarUrl
             )
@@ -234,11 +249,7 @@ class Setup:
             )
             if user is None or user.password is None:
                 return False
-            if user.password != password:
-                return False
-            elif user.password == password:
-                return True
-            return None
+            return self._verifyPassword(password, user.password)
 
     def getOrCreateGoogleUser(self, googleId, email, name, surname, avatarUrl=""):
         with Session(self.app_engine) as session:

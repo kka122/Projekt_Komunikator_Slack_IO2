@@ -1,3 +1,5 @@
+import os
+import uuid
 from dotenv import load_dotenv
 from flask import Blueprint, request, jsonify, make_response
 from flask_jwt_extended import (
@@ -9,7 +11,6 @@ from flask_jwt_extended import (
     jwt_required,
     get_jwt_identity
 )
-import bcrypt
 
 from db.DataBaseSetupInitialize import setup
 
@@ -18,17 +19,31 @@ load_dotenv('../.env')
 
 post_auth_route = Blueprint("post_auth_route", __name__)
 
+UPLOAD_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "uploads", "avatars"))
+
 
 @post_auth_route.route("/auth/register", methods=["POST"])
 def register():
     data = request.form
     try:
+        avatar_url = ""
+        avatar = request.files.get("avatar")
+        if avatar and avatar.filename:
+            try:
+                os.makedirs(UPLOAD_DIR, exist_ok=True)
+                filename = f"{uuid.uuid4().hex}{os.path.splitext(avatar.filename)[1]}"
+                avatar.save(os.path.join(UPLOAD_DIR, filename))
+                avatar_url = f"/api/uploads/avatars/{filename}"
+            except OSError as e:
+                print(f"[Auth] Blad zapisu avatara: {e}")
+                return jsonify({"error": "Nie udalo sie zapisac avatara"}), 500
+
         setup.addUser(
             name=data["name"],
             surname=data["surname"],
             email=data["email"],
             password=data["password"],
-            avatarUrl=data.get("avatar", ""),
+            avatarUrl=avatar_url,
             googleId=None
         )
         access_token = create_access_token(identity=data["email"])
@@ -87,7 +102,3 @@ def logout():
     unset_jwt_cookies(response)
 
     return response, 200
-
-
-def hash_password(password: str) -> str:
-    return bcrypt.hashpw(password.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
