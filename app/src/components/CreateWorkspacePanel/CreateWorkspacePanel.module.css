@@ -1,0 +1,23 @@
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: clamp(18rem, 100%, 26rem);
+  padding: 1.5rem;
+  background-color: var(--color-surface);
+  border: 0.1rem solid var(--color-border);
+  border-radius: 0.5rem;
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-top: 0.5rem;
+}

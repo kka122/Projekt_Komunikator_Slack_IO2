@@ -15,14 +15,22 @@ function HomePage(): JSX.Element {
     navigate("/auth/register");
   }
 
+  function goToWorkspaces() {
+    navigate("/workspaces");
+  }
+
   return <AnimatedMain className={styles.homePage}>
     <h1><span className={'primary'}>Szponcik</span>, communicator for true nerds!</h1>
+    <p className={'muted'}>Keyboard-first chat. Every action has a [key] — no mouse required.</p>
     <ul className={'large'}>
       <li>
         <InlineHotkey hotkeyFunction={goToLoginPage} hotkeyKey={"L"}>Login</InlineHotkey>
       </li>
       <li>
         <InlineHotkey hotkeyFunction={goToRegisterPage} hotkeyKey={"R"}>Register</InlineHotkey>
+      </li>
+      <li>
+        <InlineHotkey hotkeyFunction={goToWorkspaces} hotkeyKey={"O"}>Open app</InlineHotkey>
       </li>
     </ul>
   </AnimatedMain>

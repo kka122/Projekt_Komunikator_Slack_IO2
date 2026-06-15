@@ -1,5 +1,6 @@
 import {type JSX} from "react";
 import {AnimatePresence, type HTMLMotionProps, motion} from "framer-motion";
+import {useHotkey} from "@tanstack/react-hotkeys";
 import useModalStore from "../../store/useModalStore.ts";
 import {useShallow} from "zustand/react/shallow";
 import InlineHotkey from "../InlineHotkey/InlineHotkey.tsx";
@@ -31,6 +32,9 @@ function Modal({...props}: ModalProps): JSX.Element {
     closeModal();
   }
 
+  // Escape always dismisses the open modal.
+  useHotkey("Escape", closeModal, {enabled: isOpen});
+
   return <AnimatePresence>
     {isOpen && <motion.dialog {...props}
                               className={styles.modal}
@@ -44,9 +48,9 @@ function Modal({...props}: ModalProps): JSX.Element {
         {content}
         <div className={styles.options}>
           {options && options.length > 0 ? options.map((option, index) => {
-            return <InlineHotkey key={index} hotkeyFunction={() => execOptionFunction(option.function)}
+            return <InlineHotkey key={index} insideModal hotkeyFunction={() => execOptionFunction(option.function)}
                                  hotkeyKey={option.hotkey}>{option.label}</InlineHotkey>
-          }) : <InlineHotkey hotkeyFunction={closeModal} hotkeyKey={'O'}>Ok</InlineHotkey>}
+          }) : <InlineHotkey insideModal hotkeyFunction={closeModal} hotkeyKey={'O'}>Ok</InlineHotkey>}
         </div>
       </div>
     </motion.dialog>}

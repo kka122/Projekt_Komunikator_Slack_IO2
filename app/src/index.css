@@ -5,7 +5,64 @@
   --color-background: #141414;
   --color-primary: #fca311;
 
+  --color-surface: #1c1c1c;
+  --color-surface-raised: #242424;
+  --color-border: #2e2e2e;
+  --color-muted: #9a948c;
+  --color-danger: #ff5c5c;
+  --color-success: #46d369;
+
+  /* User presence colors, keyed by status enum from the OpenAPI spec. */
+  --status-online: #46d369;
+  --status-meeting: #fca311;
+  --status-vacations: #4fb0ff;
+  --status-notDisturb: #ff5c5c;
+  --status-workAtHome: #b388ff;
+  --status-freeTime: #46d369;
+  --status-offline: #6b6b6b;
+
   --font-primary: "JetBrains Mono";
+}
+
+::selection {
+  background-color: var(--color-primary);
+  color: var(--color-background);
+}
+
+button {
+  font-family: inherit;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  cursor: pointer;
+}
+
+input,
+textarea {
+  font-family: inherit;
+  font-size: inherit;
+  color: var(--color-text);
+  background-color: var(--color-background);
+  border: 0.1rem solid var(--color-border);
+  border-radius: 0.35rem;
+  padding: 0.5rem 0.75rem;
+  outline: none;
+}
+
+input:focus-visible,
+textarea:focus-visible {
+  border-color: var(--color-primary);
+}
+
+::-webkit-scrollbar {
+  width: 0.5rem;
+  height: 0.5rem;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 1rem;
 }
 
 * {
@@ -85,4 +142,29 @@ img {
 
 a {
   color: var(--color-primary);
+  text-decoration: none;
+}
+
+.muted {
+  color: var(--color-muted);
+}
+
+.danger {
+  color: var(--color-danger);
+}
+
+.success {
+  color: var(--color-success);
+}
+
+.srOnly {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
 }

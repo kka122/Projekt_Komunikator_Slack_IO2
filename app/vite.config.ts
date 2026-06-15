@@ -11,7 +11,8 @@ export default defineConfig(() => {
 
   const defineEnv: Record<string, string> = {}
   const envVarsToExpose = [
-    'GOOGLE_AUTH_CLIENT_ID'
+    'GOOGLE_AUTH_CLIENT_ID',
+    'STRIPE_PUBLISHABLE_KEY'
   ]
 
   envVarsToExpose.forEach(key => {

@@ -1,0 +1,33 @@
+.conversation {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.header {
+  display: flex;
+  align-items: baseline;
+  gap: 0.75rem;
+  padding: 0.85rem 1rem;
+  border-bottom: 0.1rem solid var(--color-border);
+  background-color: var(--color-surface);
+}
+
+.title {
+  margin: 0;
+  font-size: 1.2rem;
+  text-align: left;
+}
+
+.subtitle {
+  font-size: 0.85rem;
+  color: var(--color-muted);
+}
+
+.state {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
