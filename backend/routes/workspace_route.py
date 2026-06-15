@@ -63,13 +63,14 @@ def accept_workspace_payment():
         print(f"[Workspace] Blad retrieve PaymentIntent: {e}")
         return jsonify({"error": "Nieprawidlowy identyfikator platnosci"}), 400
 
-    if (intent.metadata or {}).get("owner_email") != email:
+    metadata = intent.metadata.to_dict() if intent.metadata else {}
+    if metadata.get("owner_email") != email:
         return jsonify({"error": "Brak dostepu do tej platnosci"}), 403
 
     if intent.status != "succeeded":
           return jsonify({"error": "Platnosc nie zostala zakonczona"}), 402
 
-    workspace_name = (intent.metadata or {}).get("workspace_name") or "Workspace"
+    workspace_name = metadata.get("workspace_name") or "Workspace"
     try:
         publish_workspace_create({
             "workspace_name": workspace_name,

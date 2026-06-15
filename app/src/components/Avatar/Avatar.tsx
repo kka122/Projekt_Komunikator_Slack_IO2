@@ -1,5 +1,6 @@
 import {type JSX, useState} from "react";
 import type {User} from "../../api/models";
+import {resolveAssetUrl} from "../../config/api.ts";
 import styles from "./Avatar.module.css";
 
 interface AvatarProps {
@@ -23,7 +24,7 @@ function Avatar({user, size = 36, showStatus = true}: AvatarProps): JSX.Element 
       title={`${user.name} ${user.surname} — ${user.status}`}
     >
       {showImage ? (
-        <img src={user.avatarUrl} alt="" onError={() => setBroken(true)}/>
+        <img src={resolveAssetUrl(user.avatarUrl)} alt="" onError={() => setBroken(true)}/>
       ) : (
         <span aria-hidden>{initials(user)}</span>
       )}

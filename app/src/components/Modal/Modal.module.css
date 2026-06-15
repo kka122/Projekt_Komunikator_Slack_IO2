@@ -22,7 +22,7 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    gap: 1rem;
+    gap: 2rem;
 
     max-width: 600px;
     padding: 3rem 5rem;
@@ -34,10 +34,11 @@
 
     .options {
       display: flex;
-      flex-direction: row;
+      flex-flow: row wrap;
       justify-content: center;
       align-items: center;
       width: 100%;
+      gap: 1rem 2rem;
     }
   }
 }

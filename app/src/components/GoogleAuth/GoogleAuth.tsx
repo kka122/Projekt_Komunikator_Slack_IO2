@@ -54,7 +54,7 @@ function GoogleAuth(): JSX.Element {
 
     googleAuth(requestBodyParsed.data)
       .then(response => {
-        if (response.status !== 200) {
+        if (response.status !== 200 && response.status !== 201) {
           loginError();
           console.log('Login error:', response.statusText);
           return
@@ -68,6 +68,7 @@ function GoogleAuth(): JSX.Element {
             return
           }
 
+          console.log('Login successful, user profile retrieved:', userParsed.data.user);
           setUser(userParsed.data.user);
           loginSuccess();
         }).catch(error => {

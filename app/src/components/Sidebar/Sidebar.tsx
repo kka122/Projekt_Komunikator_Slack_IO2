@@ -1,10 +1,13 @@
 import {type FormEvent, type JSX, useEffect, useMemo, useRef, useState} from "react";
 import {useNavigate, useParams} from "react-router";
+import {type Hotkey} from "@tanstack/react-hotkeys";
 import {useShallow} from "zustand/react/shallow";
 import {useWorkspace} from "../../layouts/workspaceContext.ts";
 import {useDirectChats} from "../../data/messaging.ts";
 import {useCreateChannel} from "../../data/workspaces.ts";
+import {useUpdateProfile} from "../../data/user.ts";
 import {useLogout} from "../../data/auth.ts";
+import {UpdateCurrentUserProfileBodyStatus} from "../../api/models";
 import {useListNavigation} from "../../hooks/useListNavigation.ts";
 import useModalStore from "../../store/useModalStore.ts";
 import InlineHotkey from "../InlineHotkey/InlineHotkey.tsx";
@@ -21,14 +24,17 @@ interface NavItem {
   user?: import("../../api/models").User;
 }
 
+const STATUS_VALUES = Object.values(UpdateCurrentUserProfileBodyStatus);
+
 function Sidebar(): JSX.Element {
-  const {workspace, isAdmin} = useWorkspace();
+  const {workspace, currentUser, isAdmin} = useWorkspace();
   const navigate = useNavigate();
   const params = useParams();
   const openModal = useModalStore(useShallow((state) => state.openModal));
 
   const directChats = useDirectChats(workspace.id);
   const createChannel = useCreateChannel();
+  const updateProfile = useUpdateProfile();
   const logout = useLogout();
 
   const navRef = useRef<HTMLDivElement>(null);
@@ -120,6 +126,23 @@ function Sidebar(): JSX.Element {
           </ul>
         </div>
       ),
+    });
+  }
+
+  function changeStatus() {
+    openModal({
+      content: "Set your status",
+      options: STATUS_VALUES.map((value, index) => ({
+        label: value,
+        hotkey: String(index + 1) as Hotkey,
+        function: () =>
+          updateProfile.mutate({
+            name: currentUser.name,
+            surname: currentUser.surname,
+            email: currentUser.email,
+            status: value,
+          }),
+      })),
     });
   }
 
@@ -215,6 +238,15 @@ function Sidebar(): JSX.Element {
           )}
         </div>
       )}
+
+      <div className={styles.me}>
+        <Avatar user={currentUser} size={28}/>
+        <span className={styles.meInfo}>
+          <span className={styles.meName}>{currentUser.name} {currentUser.surname}</span>
+          <span className={styles.meStatus}>{currentUser.status}</span>
+        </span>
+        <InlineHotkey hotkeyFunction={changeStatus} hotkeyKey="T" isBlocked={updateProfile.isPending}>Status</InlineHotkey>
+      </div>
 
       <footer className={styles.footer}>
         <InlineHotkey hotkeyFunction={() => navigate(`/workspaces/${workspace.id}/members`)} hotkeyKey="U">Users</InlineHotkey>

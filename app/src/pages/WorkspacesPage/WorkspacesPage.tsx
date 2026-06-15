@@ -11,6 +11,7 @@ import {useLogout} from "../../data/auth.ts";
 import {useListNavigation} from "../../hooks/useListNavigation.ts";
 import useModalStore from "../../store/useModalStore.ts";
 import type {Workspace} from "../../api/models";
+import {resolveAssetUrl} from "../../config/api.ts";
 import styles from "./WorkspacesPage.module.css";
 
 function WorkspacesPage(): JSX.Element {
@@ -97,7 +98,7 @@ function WorkspaceRow({workspace, active, onClick}: WorkspaceRowProps): JSX.Elem
     <button type="button" className={`${styles.row} ${active ? styles.active : ""}`} onClick={onClick}>
       <span className={styles.logo}>
         {showLogo ? (
-          <img src={workspace.logoUrl} alt="" onError={() => setBroken(true)}/>
+          <img src={resolveAssetUrl(workspace.logoUrl)} alt="" onError={() => setBroken(true)}/>
         ) : (
           workspace.name.charAt(0).toUpperCase()
         )}

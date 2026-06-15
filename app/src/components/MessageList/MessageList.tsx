@@ -1,6 +1,7 @@
 import {type JSX, type KeyboardEvent, type RefObject, useState} from "react";
 import type {Message, Reaction} from "../../api/models";
 import Avatar from "../Avatar/Avatar.tsx";
+import {resolveAssetUrl} from "../../config/api.ts";
 import styles from "./MessageList.module.css";
 
 // Toggling a reaction either removes the caller's existing one (mineReactionId
@@ -154,7 +155,7 @@ function MessageItem({
           <ul className={styles.attachments}>
             {message.attachments.map((attachment) => (
               <li key={attachment.id}>
-                <a href={attachment.url} target="_blank" rel="noreferrer">{attachment.filename}</a>
+                <a href={resolveAssetUrl(attachment.url)} target="_blank" rel="noreferrer">{attachment.filename}</a>
                 <span className="muted">{formatSize(attachment.size)}</span>
               </li>
             ))}

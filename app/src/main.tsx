@@ -8,9 +8,13 @@ import {GoogleOAuthProvider} from "@react-oauth/google";
 import {QueryClientProvider} from "@tanstack/react-query";
 import {HotkeysProvider} from "@tanstack/react-hotkeys";
 import queryClient from "./config/queryClient.ts";
+import {API_BASE_URL} from "./config/api.ts";
+import {setupAuthInterceptors} from "./api/httpAuth.ts";
 
 axios.defaults.withCredentials = true;
-axios.defaults.baseURL = 'http://localhost:5000/api'
+axios.defaults.baseURL = API_BASE_URL
+
+setupAuthInterceptors();
 
 const GOOGLE_AUTH_CLIENT_ID = import.meta.env.GOOGLE_AUTH_CLIENT_ID
 

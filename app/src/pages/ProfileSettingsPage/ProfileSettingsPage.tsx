@@ -34,13 +34,25 @@ function ProfileSettingsPage(): JSX.Element {
   const [status, setStatus] = useState<Status>(user?.status ?? UpdateCurrentUserProfileBodyStatus.online);
   const [avatar, setAvatar] = useState<File | null>(null);
 
+  // Status is its own request: the backend's PATCH /users/me still requires
+  // name/surname/email, so we send the saved identity plus the new status —
+  // independent of unsaved edits to the other fields.
+  function applyStatus(value: Status) {
+    if (!user) return;
+    setStatus(value);
+    updateProfile.mutate(
+      {name: user.name, surname: user.surname, email: user.email, status: value},
+      {onError: () => openModal({content: "Could not update status."})},
+    );
+  }
+
   function pickStatus() {
     openModal({
       content: "Set your status",
       options: STATUS_VALUES.map((value, index) => ({
         label: value,
         hotkey: String(index + 1) as Hotkey,
-        function: () => setStatus(value),
+        function: () => applyStatus(value),
       })),
     });
   }
