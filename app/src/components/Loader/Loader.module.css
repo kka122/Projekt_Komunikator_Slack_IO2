@@ -1,0 +1,17 @@
+.loader {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.1rem;
+  color: var(--color-muted);
+}
+
+.caret {
+  color: var(--color-primary);
+  animation: blink 1s step-start infinite;
+}
+
+@keyframes blink {
+  50% {
+    opacity: 0;
+  }
+}

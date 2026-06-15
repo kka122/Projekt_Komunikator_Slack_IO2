@@ -192,7 +192,7 @@ class Setup:
         self._createTables()
 
     ################################################################################################################
-    #                                             USER  METHODS                                                    #
+    #                                           USER AUTH METHODS                                                  #
     ################################################################################################################
 
     @staticmethod
@@ -558,7 +558,6 @@ class Setup:
         return membership is not None and membership.role in (WorkspaceUserRole.owner, WorkspaceUserRole.admin)
 
     def _getChannelForMember(self, session, workspaceId, channelId, email):
-        """Zwraca (user, channel). Rzuca LookupError/PermissionError."""
         user = session.query(User).filter(User.email == email).first()
         if not user:
             raise LookupError("Uzytkownik nie istnieje")
@@ -578,7 +577,6 @@ class Setup:
         return user, channel
 
     def _getChatForMember(self, session, workspaceId, directChatId, email):
-        """Zwraca (user, chat). Rzuca LookupError/PermissionError."""
         user = session.query(User).filter(User.email == email).first()
         if not user:
             raise LookupError("Uzytkownik nie istnieje")
@@ -603,7 +601,9 @@ class Setup:
             raise ValueError("Nieprawidłowe parametry paginacji")
         return page, pageSize
 
-    # ---------------------------------- CHANNEL MESSAGES ----------------------------------
+    ################################################################################################################
+    #                                             CHANNELS MESSAGE                                                 #
+    ################################################################################################################
 
     def createMessageChannel(self, workspaceId, channelId, authorEmail, content, attachments=None, parentMessageId=None):
         content = (content or "").strip()
@@ -701,8 +701,9 @@ class Setup:
             message.isDeleted = True
             session.commit()
 
-    # ---------------------------------- DIRECT CHAT MESSAGES ----------------------------------
-
+    ################################################################################################################
+    #                                             DIRECT CHAT MESSAGE                                              #
+    ################################################################################################################
     def createMessageChat(self, workspaceId, directChatId, authorEmail, content, attachments=None, parentMessageId=None):
         content = (content or "").strip()
         attachments = attachments or []
@@ -1105,3 +1106,63 @@ class Setup:
     def searchUsersByEmail(self, emailRegex, limit=20):
         with Session(self.app_engine) as session:
             return session.query(User).filter(User.email.op("~*")(emailRegex)).limit(limit).all()
+
+    ################################################################################################################
+    #                                            ATTACHMENT METHODS                                                #
+    ################################################################################################################
+
+    def deleteAttachmentChannel(self, workspaceId, channelId, messageId, attachmentId, requesterEmail):
+        with Session(self.app_engine) as session:
+            user, channel = self._getChannelForMember(session, workspaceId, channelId, requesterEmail)
+
+            message = (
+                session.query(Message)
+                .filter(Message.id == self._asId(messageId), Message.channelId == channel.id, Message.isDeleted == False)
+                .first()
+            )
+            if not message:
+                raise LookupError("Wiadomość nie istnieje")
+
+            attachment = (
+                session.query(Attachment)
+                .filter(Attachment.id == self._asId(attachmentId), Attachment.messageId == message.id)
+                .first()
+            )
+            if not attachment:
+                raise LookupError("Załącznik nie istnieje")
+
+            if message.authorId != user.id and not self._isWorkspaceAdmin(session, user.id, channel.workspaceId):
+                raise PermissionError("Brak uprawnień do usunięcia załącznika")
+
+            file_url = attachment.fileUrl
+            session.delete(attachment)
+            session.commit()
+            return file_url
+
+    def deleteAttachmentChat(self, workspaceId, directChatId, messageId, attachmentId, requesterEmail):
+        with Session(self.app_engine) as session:
+            user, chat = self._getChatForMember(session, workspaceId, directChatId, requesterEmail)
+
+            message = (
+                session.query(Message)
+                .filter(Message.id == self._asId(messageId), Message.directChatId == chat.id, Message.isDeleted == False)
+                .first()
+            )
+            if not message:
+                raise LookupError("Wiadomość nie istnieje")
+
+            attachment = (
+                session.query(Attachment)
+                .filter(Attachment.id == self._asId(attachmentId), Attachment.messageId == message.id)
+                .first()
+            )
+            if not attachment:
+                raise LookupError("Załącznik nie istnieje")
+
+            if message.authorId != user.id and not self._isWorkspaceAdmin(session, user.id, chat.workspaceId):
+                raise PermissionError("Brak uprawnień do usunięcia załącznika")
+
+            file_url = attachment.fileUrl
+            session.delete(attachment)
+            session.commit()
+            return file_url

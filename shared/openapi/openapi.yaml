@@ -1354,6 +1354,33 @@ paths:
         '404':
           $ref: '#/components/responses/404'
 
+  /workspaces/{workspaceId}/direct-chats/{directChatId}/messages/{messageId}/attachments/{attachmentId}:
+    delete:
+      operationId: deleteAttachmentFromDirectChatMessage
+      tags: [ Attachment ]
+      summary: Delete an attachment from a message in a direct chat
+      description: Delete an existing attachment from a specific message within a direct chat. Only the author of the message or workspace admins can delete attachments.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/DirectChatID'
+        - $ref: '#/components/parameters/MessageID'
+        - $ref: '#/components/parameters/AttachmentID'
+
+      responses:
+        '200':
+          description: Attachment deleted successfully
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
   # ----- User -----
   /users/me:
     get:
