@@ -76,7 +76,6 @@ function WorkspacesPage(): JSX.Element {
             <InlineHotkey hotkeyFunction={() => setCreating(true)} hotkeyKey="C">Create workspace</InlineHotkey>
             <InlineHotkey hotkeyFunction={() => navigate("/settings")} hotkeyKey="P">Profile</InlineHotkey>
             <InlineHotkey hotkeyFunction={confirmLogout} hotkeyKey="Q">Quit</InlineHotkey>
-            <InlineHotkey hotkeyFunction={() => navigate("/")} hotkeyKey="H">Home</InlineHotkey>
           </HintBar>
         </>
       )}

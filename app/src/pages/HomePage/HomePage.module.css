@@ -3,6 +3,11 @@
     max-width: 30ch;
   }
 
+  > p {
+    text-align: center;
+    text-wrap: pretty;
+  }
+
   ul {
     width: clamp(20rem, 100%, 25rem);
 

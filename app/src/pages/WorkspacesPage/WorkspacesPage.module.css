@@ -10,6 +10,11 @@
   width: clamp(18rem, 100%, 32rem);
   padding: 0.5rem;
   outline: none;
+
+  > p {
+    text-align: center;
+    text-wrap: pretty;
+  }
 }
 
 .list:focus-visible {
