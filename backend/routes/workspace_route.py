@@ -1,6 +1,7 @@
 import os
+import uuid
 from dotenv import load_dotenv
-from flask import Blueprint, request, jsonify
+from flask import Blueprint, request, jsonify, send_from_directory
 from flask_jwt_extended import jwt_required, get_jwt_identity
 import stripe
 from kafka.errors import KafkaError
@@ -16,6 +17,8 @@ workspace_route = Blueprint('workspace_route', __name__)
 stripe.api_key = os.environ.get("STRIPE_SECRET_KEY")
 WORKSPACE_PRICE_GROSZE = 2000
 CURRENCY = "pln"
+
+LOGO_UPLOAD_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "uploads", "logos"))
 
 @workspace_route.route('/workspaces', methods=['POST'])
 @jwt_required()
@@ -78,3 +81,54 @@ def accept_workspace_payment():
         return jsonify({"error": "Usluga chwilowo niedostepna, sprobuj ponownie"}), 503
 
     return jsonify({"status": "processing", "paymentIntentId": payment_intent_id}), 202
+
+@workspace_route.route('/workspaces', methods=['GET'])
+@jwt_required()
+def list_workspaces():
+    email = get_jwt_identity()
+
+    if setup.getUserByEmail(email) is None:
+        return jsonify({"error": "Uzytkownik nie istnieje"}), 401
+
+    workspaces = setup.listUserWorkspaces(email)
+    return jsonify({"workspaces": workspaces}), 200
+
+@workspace_route.route('/workspaces/<workspaceId>', methods=['PATCH'])
+@jwt_required()
+def update_workspace_logo(workspaceId):
+    email = get_jwt_identity()
+
+    try:
+        workspace_id = int(workspaceId)
+    except ValueError:
+        return jsonify({"error": "Nieprawidlowy format ID"}), 400
+
+    requester = setup.getUserByEmail(email)
+    if requester is None:
+        return jsonify({"error": "Uzytkownik nie istnieje"}), 401
+
+    if setup.getWorkspaceById(workspace_id) is None:
+        return jsonify({"error": "Workspace nie istnieje"}), 404
+
+    if setup.getWorkspaceRole(requester.id, workspace_id) != "owner":
+        return jsonify({"error": "Tylko wlasciciel workspace moze zmienic logo"}), 403
+
+    logo = request.files.get("workspaceLogo")
+    if logo is None or not logo.filename:
+        return jsonify({"error": "Plik workspaceLogo jest wymagany"}), 400
+
+    try:
+        os.makedirs(LOGO_UPLOAD_DIR, exist_ok=True)
+        filename = f"{uuid.uuid4().hex}{os.path.splitext(logo.filename)[1]}"
+        logo.save(os.path.join(LOGO_UPLOAD_DIR, filename))
+        logo_url = f"/api/uploads/logos/{filename}"
+    except OSError as e:
+        print(f"[Workspace] Blad zapisu logo: {e}")
+        return jsonify({"error": "Nie udalo sie zapisac logo"}), 500
+
+    setup.updateWorkspaceLogo(workspaceId=workspace_id, logoUrl=logo_url)
+    return jsonify({"message": "Logo zostalo zaktualizowane"}), 200
+
+@workspace_route.route('/uploads/logos/<filename>', methods=['GET'])
+def get_workspace_logo(filename):
+    return send_from_directory(LOGO_UPLOAD_DIR, filename)

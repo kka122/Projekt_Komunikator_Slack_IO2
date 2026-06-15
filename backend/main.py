@@ -15,6 +15,7 @@ from routes.auth_route.post_auth_route import post_auth_route
 from routes.message_route import message_route
 from routes.channel_route import channel_route
 from routes.user_route import user_route
+from routes.reaction_route import reaction_route
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True,
@@ -39,6 +40,7 @@ try:
     app.register_blueprint(channel_route, url_prefix="/api")
     app.register_blueprint(direct_chat_route, url_prefix="/api")
     app.register_blueprint(user_route, url_prefix="/api")
+    app.register_blueprint(reaction_route, url_prefix="/api")
 except Exception as blueprintError:
     print(f"Wystapil blad podczas rejestracji blueprinta: {blueprintError}")
     sys.exit(1)

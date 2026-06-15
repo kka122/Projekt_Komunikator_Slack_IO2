@@ -434,6 +434,69 @@ class Setup:
             session.refresh(workspace)
             return workspace, True
 
+    def listUserWorkspaces(self, email):
+        with Session(self.app_engine) as session:
+            user = session.query(User).filter(User.email == email).first()
+            if not user:
+                return []
+
+            memberships = session.query(WorkSpaceUser).filter(WorkSpaceUser.userId == user.id).all()
+
+            result = []
+            for membership in memberships:
+                workspace = session.query(Workspace).filter(Workspace.id == membership.workspaceId).first()
+                if not workspace:
+                    continue
+
+                channel_rows = (
+                    session.query(Channel, ChannelUser.lastReadAt)
+                    .join(ChannelUser, Channel.id == ChannelUser.channelId)
+                    .filter(Channel.workspaceId == workspace.id, ChannelUser.userId == user.id)
+                    .all()
+                )
+                channels = []
+                for channel, last_read_at in channel_rows:
+                    count_filter = [
+                        Message.channelId == channel.id,
+                        Message.authorId != user.id,
+                        Message.isDeleted == False,
+                    ]
+                    if last_read_at is not None:
+                        count_filter.append(Message.createAt > last_read_at)
+                    new_messages_count = session.query(Message).filter(*count_filter).count()
+                    channels.append({
+                        "id": str(channel.id),
+                        "name": channel.name,
+                        "newMessagesCount": new_messages_count,
+                    })
+
+                members = (
+                    session.query(User)
+                    .join(WorkSpaceUser, User.id == WorkSpaceUser.userId)
+                    .filter(WorkSpaceUser.workspaceId == workspace.id)
+                    .all()
+                )
+
+                result.append({
+                    "id": str(workspace.id),
+                    "name": workspace.name,
+                    "logoUrl": workspace.logoUrl,
+                    "userRole": membership.role.value,
+                    "channels": channels,
+                    "users": [self._serializeUser(m) for m in members],
+                })
+
+            return result
+
+    def updateWorkspaceLogo(self, workspaceId, logoUrl):
+        with Session(self.app_engine) as session:
+            workspace = session.query(Workspace).filter(Workspace.id == workspaceId).first()
+            if workspace is None:
+                return False
+            workspace.logoUrl = logoUrl
+            session.commit()
+            return True
+
     ################################################################################################################
     #                                              MESSAGE METHODS                                                 #
     ################################################################################################################
@@ -734,6 +797,110 @@ class Setup:
                 raise PermissionError("Brak uprawnień do usunięcia wiadomości")
 
             message.isDeleted = True
+            session.commit()
+
+    ################################################################################################################
+    #                                              REACTION METHODS                                                #
+    ################################################################################################################
+
+    # ---------------------------------- CHANNEL REACTIONS ----------------------------------
+
+    def addReactionChannel(self, workspaceId, channelId, messageId, emoji, authorEmail):
+        emoji = (emoji or "").strip()
+        if not emoji:
+            raise ValueError("Emoji jest wymagane")
+
+        with Session(self.app_engine) as session:
+            user, channel = self._getChannelForMember(session, workspaceId, channelId, authorEmail)
+
+            message = (
+                session.query(Message)
+                .filter(Message.id == self._asId(messageId), Message.channelId == channel.id, Message.isDeleted == False)
+                .first()
+            )
+            if not message:
+                raise LookupError("Wiadomość nie istnieje")
+
+            reaction = Reaction(messageId=message.id, userId=user.id, emoji=emoji)
+            session.add(reaction)
+            session.commit()
+            session.refresh(reaction)
+            return self._serializeReaction(reaction)
+
+    def deleteReactionChannel(self, workspaceId, channelId, messageId, reactionId, requesterEmail):
+        with Session(self.app_engine) as session:
+            user, channel = self._getChannelForMember(session, workspaceId, channelId, requesterEmail)
+
+            message = (
+                session.query(Message)
+                .filter(Message.id == self._asId(messageId), Message.channelId == channel.id, Message.isDeleted == False)
+                .first()
+            )
+            if not message:
+                raise LookupError("Wiadomość nie istnieje")
+
+            reaction = (
+                session.query(Reaction)
+                .filter(Reaction.id == self._asId(reactionId), Reaction.messageId == message.id)
+                .first()
+            )
+            if not reaction:
+                raise LookupError("Reakcja nie istnieje")
+
+            if reaction.userId != user.id and not self._isWorkspaceAdmin(session, user.id, channel.workspaceId):
+                raise PermissionError("Brak uprawnień do usunięcia reakcji")
+
+            session.delete(reaction)
+            session.commit()
+
+    # ---------------------------------- DIRECT CHAT REACTIONS ----------------------------------
+
+    def addReactionChat(self, workspaceId, directChatId, messageId, emoji, authorEmail):
+        emoji = (emoji or "").strip()
+        if not emoji:
+            raise ValueError("Emoji jest wymagane")
+
+        with Session(self.app_engine) as session:
+            user, chat = self._getChatForMember(session, workspaceId, directChatId, authorEmail)
+
+            message = (
+                session.query(Message)
+                .filter(Message.id == self._asId(messageId), Message.directChatId == chat.id, Message.isDeleted == False)
+                .first()
+            )
+            if not message:
+                raise LookupError("Wiadomość nie istnieje")
+
+            reaction = Reaction(messageId=message.id, userId=user.id, emoji=emoji)
+            session.add(reaction)
+            session.commit()
+            session.refresh(reaction)
+            return self._serializeReaction(reaction)
+
+    def deleteReactionChat(self, workspaceId, directChatId, messageId, reactionId, requesterEmail):
+        with Session(self.app_engine) as session:
+            user, chat = self._getChatForMember(session, workspaceId, directChatId, requesterEmail)
+
+            message = (
+                session.query(Message)
+                .filter(Message.id == self._asId(messageId), Message.directChatId == chat.id, Message.isDeleted == False)
+                .first()
+            )
+            if not message:
+                raise LookupError("Wiadomość nie istnieje")
+
+            reaction = (
+                session.query(Reaction)
+                .filter(Reaction.id == self._asId(reactionId), Reaction.messageId == message.id)
+                .first()
+            )
+            if not reaction:
+                raise LookupError("Reakcja nie istnieje")
+
+            if reaction.userId != user.id and not self._isWorkspaceAdmin(session, user.id, chat.workspaceId):
+                raise PermissionError("Brak uprawnień do usunięcia reakcji")
+
+            session.delete(reaction)
             session.commit()
 
     ################################################################################################################
