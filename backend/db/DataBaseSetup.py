@@ -438,29 +438,303 @@ class Setup:
     #                                              MESSAGE METHODS                                                 #
     ################################################################################################################
 
-    def createMessageChannel(self):
-        pass
+    @staticmethod
+    def _asId(value):
+        try:
+            return int(value)
+        except (TypeError, ValueError):
+            raise LookupError("Nieprawidłowy identyfikator")
 
-    def listAllMessageChannels(self):
-        pass
+    @staticmethod
+    def _serializeUser(user):
+        return {
+            "id": str(user.id),
+            "name": user.name,
+            "surname": user.surname,
+            "email": user.email,
+            "avatarUrl": user.avatarUrl,
+            "status": user.status.value,
+        }
 
-    def updateMessageChannels(self):
-        pass
+    @staticmethod
+    def _serializeAttachment(att):
+        return {
+            "id": str(att.id),
+            "filename": att.fileName,
+            "url": att.fileUrl,
+            "size": att.file_size,
+        }
 
-    def deleteMessageChannel(self):
-        pass
+    @staticmethod
+    def _serializeReaction(reaction):
+        return {
+            "id": str(reaction.id),
+            "emoji": reaction.emoji,
+            "user": Setup._serializeUser(reaction.user),
+        }
 
-    def createMessageChat(self):
-        pass
+    @staticmethod
+    def _serializeMessage(message):
+        return {
+            "id": str(message.id),
+            "content": message.body,
+            "sender": Setup._serializeUser(message.user),
+            "timestamp": message.createAt.isoformat() if message.createAt else None,
+            "isEdited": message.isEdited,
+            "attachments": [Setup._serializeAttachment(a) for a in message.attachments],
+            "reactions": [Setup._serializeReaction(r) for r in message.reactions],
+        }
 
-    def listAllMessageChat(self):
-        pass
+    @staticmethod
+    def _isWorkspaceAdmin(session, userId, workspaceId):
+        membership = (
+            session.query(WorkSpaceUser)
+            .filter(WorkSpaceUser.userId == userId, WorkSpaceUser.workspaceId == workspaceId)
+            .first()
+        )
+        return membership is not None and membership.role in (WorkspaceUserRole.owner, WorkspaceUserRole.admin)
 
-    def updateMessageChat(self):
-        pass
+    def _getChannelForMember(self, session, workspaceId, channelId, email):
+        """Zwraca (user, channel). Rzuca LookupError/PermissionError."""
+        user = session.query(User).filter(User.email == email).first()
+        if not user:
+            raise LookupError("Uzytkownik nie istnieje")
 
-    def deleteMessageChat(self):
-        pass
+        channel = session.query(Channel).filter(Channel.id == self._asId(channelId)).first()
+        if not channel or channel.workspaceId != self._asId(workspaceId):
+            raise LookupError("Kanał nie istnieje")
+
+        membership = (
+            session.query(ChannelUser)
+            .filter(ChannelUser.channelId == channel.id, ChannelUser.userId == user.id)
+            .first()
+        )
+        if not membership:
+            raise PermissionError("Użytkownik nie należy do kanału")
+
+        return user, channel
+
+    def _getChatForMember(self, session, workspaceId, directChatId, email):
+        """Zwraca (user, chat). Rzuca LookupError/PermissionError."""
+        user = session.query(User).filter(User.email == email).first()
+        if not user:
+            raise LookupError("Uzytkownik nie istnieje")
+
+        chat = session.query(DirectChat).filter(DirectChat.id == self._asId(directChatId)).first()
+        if not chat or chat.workspaceId != self._asId(workspaceId):
+            raise LookupError("Czat nie istnieje")
+
+        if user.id not in (chat.user1Id, chat.user2Id):
+            raise PermissionError("Użytkownik nie należy do tego czatu")
+
+        return user, chat
+
+    @staticmethod
+    def _normalizePagination(page, pageSize):
+        try:
+            page = int(page)
+            pageSize = int(pageSize)
+        except (TypeError, ValueError):
+            raise ValueError("page i pageSize muszą być liczbami")
+        if page < 1 or pageSize < 1 or pageSize > 50:
+            raise ValueError("Nieprawidłowe parametry paginacji")
+        return page, pageSize
+
+    # ---------------------------------- CHANNEL MESSAGES ----------------------------------
+
+    def createMessageChannel(self, workspaceId, channelId, authorEmail, content, attachments=None, parentMessageId=None):
+        content = (content or "").strip()
+        attachments = attachments or []
+        if not attachments:
+            raise ValueError("Wiadomość musi zawierać co najmniej jeden załącznik")
+
+        with Session(self.app_engine) as session:
+            user, channel = self._getChannelForMember(session, workspaceId, channelId, authorEmail)
+
+            parent_id = None
+            if parentMessageId is not None:
+                parent = session.query(Message).filter(Message.id == self._asId(parentMessageId)).first()
+                if not parent or parent.channelId != channel.id:
+                    raise LookupError("Wiadomość nadrzędna nie istnieje")
+                parent_id = parent.id
+
+            message = Message(
+                workspaceId=channel.workspaceId,
+                channelId=channel.id,
+                authorId=user.id,
+                body=content,
+                parentMessageId=parent_id,
+            )
+            session.add(message)
+            session.flush()
+
+            for att in attachments:
+                session.add(Attachment(
+                    messageId=message.id,
+                    userId=user.id,
+                    fileName=att["fileName"],
+                    fileUrl=att["fileUrl"],
+                    file_size=att["fileSize"],
+                ))
+
+            session.commit()
+            session.refresh(message)
+            return self._serializeMessage(message)
+
+    def listAllMessageChannels(self, workspaceId, channelId, userEmail, page=1, pageSize=20):
+        page, pageSize = self._normalizePagination(page, pageSize)
+        with Session(self.app_engine) as session:
+            self._getChannelForMember(session, workspaceId, channelId, userEmail)
+
+            messages = (
+                session.query(Message)
+                .filter(Message.channelId == self._asId(channelId), Message.isDeleted == False)
+                .order_by(Message.createAt.desc(), Message.id.desc())
+                .offset((page - 1) * pageSize)
+                .limit(pageSize)
+                .all()
+            )
+            return [self._serializeMessage(m) for m in messages]
+
+    def updateMessageChannel(self, workspaceId, channelId, messageId, content, editorEmail):
+        content = (content or "").strip()
+        if not content:
+            raise ValueError("Treść wiadomości nie może być pusta")
+
+        with Session(self.app_engine) as session:
+            user, channel = self._getChannelForMember(session, workspaceId, channelId, editorEmail)
+
+            message = (
+                session.query(Message)
+                .filter(Message.id == self._asId(messageId), Message.channelId == channel.id, Message.isDeleted == False)
+                .first()
+            )
+            if not message:
+                raise LookupError("Wiadomość nie istnieje")
+            if message.authorId != user.id:
+                raise PermissionError("Tylko autor może edytować wiadomość")
+
+            message.body = content
+            message.isEdited = True
+            session.commit()
+            session.refresh(message)
+            return self._serializeMessage(message)
+
+    def deleteMessageChannel(self, workspaceId, channelId, messageId, requesterEmail):
+        with Session(self.app_engine) as session:
+            user, channel = self._getChannelForMember(session, workspaceId, channelId, requesterEmail)
+
+            message = (
+                session.query(Message)
+                .filter(Message.id == self._asId(messageId), Message.channelId == channel.id, Message.isDeleted == False)
+                .first()
+            )
+            if not message:
+                raise LookupError("Wiadomość nie istnieje")
+
+            if message.authorId != user.id and not self._isWorkspaceAdmin(session, user.id, channel.workspaceId):
+                raise PermissionError("Brak uprawnień do usunięcia wiadomości")
+
+            message.isDeleted = True
+            session.commit()
+
+    # ---------------------------------- DIRECT CHAT MESSAGES ----------------------------------
+
+    def createMessageChat(self, workspaceId, directChatId, authorEmail, content, attachments=None, parentMessageId=None):
+        content = (content or "").strip()
+        attachments = attachments or []
+        if not attachments:
+            raise ValueError("Wiadomość musi zawierać co najmniej jeden załącznik")
+
+        with Session(self.app_engine) as session:
+            user, chat = self._getChatForMember(session, workspaceId, directChatId, authorEmail)
+
+            parent_id = None
+            if parentMessageId is not None:
+                parent = session.query(Message).filter(Message.id == self._asId(parentMessageId)).first()
+                if not parent or parent.directChatId != chat.id:
+                    raise LookupError("Wiadomość nadrzędna nie istnieje")
+                parent_id = parent.id
+
+            message = Message(
+                workspaceId=chat.workspaceId,
+                directChatId=chat.id,
+                authorId=user.id,
+                body=content,
+                parentMessageId=parent_id,
+            )
+            session.add(message)
+            session.flush()
+
+            for att in attachments:
+                session.add(Attachment(
+                    messageId=message.id,
+                    userId=user.id,
+                    fileName=att["fileName"],
+                    fileUrl=att["fileUrl"],
+                    file_size=att["fileSize"],
+                ))
+
+            session.commit()
+            session.refresh(message)
+            return self._serializeMessage(message)
+
+    def listAllMessageChats(self, workspaceId, directChatId, userEmail, page=1, pageSize=20):
+        page, pageSize = self._normalizePagination(page, pageSize)
+        with Session(self.app_engine) as session:
+            self._getChatForMember(session, workspaceId, directChatId, userEmail)
+
+            messages = (
+                session.query(Message)
+                .filter(Message.directChatId == self._asId(directChatId), Message.isDeleted == False)
+                .order_by(Message.createAt.desc(), Message.id.desc())
+                .offset((page - 1) * pageSize)
+                .limit(pageSize)
+                .all()
+            )
+            return [self._serializeMessage(m) for m in messages]
+
+    def updateMessageChat(self, workspaceId, directChatId, messageId, content, editorEmail):
+        content = (content or "").strip()
+        if not content:
+            raise ValueError("Treść wiadomości nie może być pusta")
+
+        with Session(self.app_engine) as session:
+            user, chat = self._getChatForMember(session, workspaceId, directChatId, editorEmail)
+
+            message = (
+                session.query(Message)
+                .filter(Message.id == self._asId(messageId), Message.directChatId == chat.id, Message.isDeleted == False)
+                .first()
+            )
+            if not message:
+                raise LookupError("Wiadomość nie istnieje")
+            if message.authorId != user.id:
+                raise PermissionError("Tylko autor może edytować wiadomość")
+
+            message.body = content
+            message.isEdited = True
+            session.commit()
+            session.refresh(message)
+            return self._serializeMessage(message)
+
+    def deleteMessageChat(self, workspaceId, directChatId, messageId, requesterEmail):
+        with Session(self.app_engine) as session:
+            user, chat = self._getChatForMember(session, workspaceId, directChatId, requesterEmail)
+
+            message = (
+                session.query(Message)
+                .filter(Message.id == self._asId(messageId), Message.directChatId == chat.id, Message.isDeleted == False)
+                .first()
+            )
+            if not message:
+                raise LookupError("Wiadomość nie istnieje")
+
+            if message.authorId != user.id and not self._isWorkspaceAdmin(session, user.id, chat.workspaceId):
+                raise PermissionError("Brak uprawnień do usunięcia wiadomości")
+
+            message.isDeleted = True
+            session.commit()
 
     ################################################################################################################
     #                                              DIRECT CHAT METHODS                                             #
