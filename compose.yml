@@ -26,6 +26,23 @@ services:
       kafka:
         condition: service_healthy
 
+  backend-worker:
+    container_name: backend-worker
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile-worker
+    environment:
+      FLASK_DEBUG: "0"
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: baza_danych
+      DB_USER: postgres
+      DB_PASSWORD: 1234
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      backend:
+        condition: service_started
+
   app:
     container_name: app
     build:

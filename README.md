@@ -45,7 +45,7 @@ pip install -r requirements.txt
 
 ```bash
 # to run the application
-python main.py
+./run.sh
 ```
 
 For frontend, open a new terminal for /app directory and run:
