@@ -13,7 +13,9 @@ import {
 } from "../../data/messaging.ts";
 import {useWorkspace} from "../../layouts/workspaceContext.ts";
 import {useListNavigation} from "../../hooks/useListNavigation.ts";
+import {useConversationRealtime} from "../../realtime/useRealtime.ts";
 import useModalStore from "../../store/useModalStore.ts";
+import type {TypingUser} from "../../store/useRealtimeStore.ts";
 import MessageList from "../MessageList/MessageList.tsx";
 import MessageComposer from "../MessageComposer/MessageComposer.tsx";
 import Loader from "../Loader/Loader.tsx";
@@ -38,6 +40,14 @@ const QUICK_REACTIONS: {emoji: string; hotkey: "1" | "2" | "3" | "4" | "5"}[] = 
   {emoji: "😮", hotkey: "5"},
 ];
 
+/** Build the "X is typing…" line from the users currently typing. */
+function typingLabel(users: TypingUser[]): string {
+  if (users.length === 0) return "";
+  if (users.length === 1) return `${users[0].name} is typing…`;
+  if (users.length === 2) return `${users[0].name} and ${users[1].name} are typing…`;
+  return "Several people are typing…";
+}
+
 /**
  * Full message-thread view shared by channel and direct-chat screens. Loads the
  * messages, wires the keyboard workflow (arrow navigation, `R` react, `E` edit,
@@ -58,6 +68,7 @@ function Conversation({conversation, title, subtitle}: ConversationProps): JSX.E
   const addReaction = useAddReaction(conversation);
   const removeReaction = useRemoveReaction(conversation);
   const markRead = useMarkConversationRead();
+  const {typingUsers, sendTyping} = useConversationRealtime(conversation);
 
   const listRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
@@ -191,12 +202,17 @@ function Conversation({conversation, title, subtitle}: ConversationProps): JSX.E
         />
       )}
 
+      <div className={styles.typing} aria-live="polite">
+        {typingLabel(typingUsers)}
+      </div>
+
       <MessageComposer
         textareaRef={composerRef}
         pending={sendMessage.isPending}
         placeholder={`Message ${title}`}
         onSend={(content, attachments) => sendMessage.mutate({content, attachments})}
         onEscape={() => listRef.current?.focus()}
+        onTyping={sendTyping}
       />
     </div>
   );

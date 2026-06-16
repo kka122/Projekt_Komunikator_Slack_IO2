@@ -7,6 +7,7 @@ import stripe
 from kafka.errors import KafkaError
 from db.DataBaseSetupInitialize import setup
 from kafka_producer import publish_workspace_create
+from realtime import events as rt
 
 
 load_dotenv('./.env')
@@ -114,6 +115,7 @@ def delete_workspace(workspaceId):
     email = get_jwt_identity()
     try:
         setup.deleteWorkspace(workspaceId, email)
+        rt.workspace_deleted(workspaceId)
         return jsonify({"message": "Workspace zostal usuniety"}), 200
     except PermissionError as e:
         return jsonify({"error": str(e)}), 403
@@ -156,6 +158,7 @@ def update_workspace_logo(workspaceId):
         return jsonify({"error": "Nie udalo sie zapisac logo"}), 500
 
     setup.updateWorkspaceLogo(workspaceId=workspace_id, logoUrl=logo_url)
+    rt.workspace_changed(workspace_id)
     return jsonify({"message": "Logo zostalo zaktualizowane"}), 200
 
 @workspace_route.route('/uploads/logos/<filename>', methods=['GET'])

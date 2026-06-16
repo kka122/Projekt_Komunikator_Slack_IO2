@@ -9,6 +9,7 @@ from flask_jwt_extended import (
 )
 
 from db.DataBaseSetupInitialize import setup
+from realtime import events as rt
 
 load_dotenv('./.env')
 load_dotenv('../.env')
@@ -75,6 +76,7 @@ def create_channel_message(workspaceId, channelId):
             content=content,
             attachments=saved_meta,
         )
+        rt.channel_message_new(workspaceId, channelId, message)
         return jsonify({"message": message}), 201
     except Exception as e:
         _cleanup_paths(saved_paths)
@@ -113,6 +115,7 @@ def update_channel_message(workspaceId, channelId, messageId):
             content=data["content"],
             editorEmail=email,
         )
+        rt.channel_message_updated(workspaceId, channelId, message)
         return jsonify({"message": message}), 200
     except Exception as e:
         return _handle_error(e, "Nie udalo sie zaktualizowac wiadomosci")
@@ -129,6 +132,7 @@ def delete_channel_message(workspaceId, channelId, messageId):
             messageId=messageId,
             requesterEmail=email,
         )
+        rt.channel_message_deleted(workspaceId, channelId, messageId)
         return jsonify({"message": "Wiadomosc usunieta"}), 200
     except Exception as e:
         return _handle_error(e, "Nie udalo sie usunac wiadomosci")
@@ -151,6 +155,7 @@ def create_direct_chat_message(workspaceId, directChatId):
             content=content,
             attachments=saved_meta,
         )
+        rt.dm_message_new(workspaceId, directChatId, message)
         return jsonify({"message": message}), 201
     except Exception as e:
         _cleanup_paths(saved_paths)
@@ -189,6 +194,7 @@ def update_direct_chat_message(workspaceId, directChatId, messageId):
             content=data["content"],
             editorEmail=email,
         )
+        rt.dm_message_updated(workspaceId, directChatId, message)
         return jsonify({"message": message}), 200
     except Exception as e:
         return _handle_error(e, "Nie udalo sie zaktualizowac wiadomosci")
@@ -205,6 +211,7 @@ def delete_direct_chat_message(workspaceId, directChatId, messageId):
             messageId=messageId,
             requesterEmail=email,
         )
+        rt.dm_message_deleted(workspaceId, directChatId, messageId)
         return jsonify({"message": "Wiadomosc usunieta"}), 200
     except Exception as e:
         return _handle_error(e, "Nie udalo sie usunac wiadomosci")

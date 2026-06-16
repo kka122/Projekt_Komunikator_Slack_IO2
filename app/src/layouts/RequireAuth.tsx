@@ -3,6 +3,7 @@ import {Navigate, Outlet} from "react-router";
 import {useShallow} from "zustand/react/shallow";
 import useUserStore from "../store/useUserStore.ts";
 import {useCurrentUser} from "../data/user.ts";
+import RealtimeProvider from "../realtime/RealtimeProvider.tsx";
 import Loader from "../components/Loader/Loader.tsx";
 
 /**
@@ -10,13 +11,20 @@ import Loader from "../components/Loader/Loader.tsx";
  * user — from the store, or by validating the session against `/users/me` —
  * before rendering protected routes via `<Outlet>`. Shows a loader while the
  * check is in flight and redirects to `/auth/login` on failure.
+ *
+ * Authenticated routes render inside {@link RealtimeProvider}, which owns the
+ * WebSocket connection for the session (live messages, typing, presence).
  */
 function RequireAuth(): JSX.Element {
   const user = useUserStore(useShallow((state) => state.user));
   const query = useCurrentUser();
 
   if (user || query.isSuccess) {
-    return <Outlet/>;
+    return (
+      <RealtimeProvider>
+        <Outlet/>
+      </RealtimeProvider>
+    );
   }
 
   if (query.isLoading) {

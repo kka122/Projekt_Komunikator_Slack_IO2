@@ -2,6 +2,7 @@ import {type JSX} from "react";
 import {useParams} from "react-router";
 import {useWorkspace} from "../../layouts/workspaceContext.ts";
 import {useDirectChats} from "../../data/messaging.ts";
+import {useIsOnline} from "../../realtime/useRealtime.ts";
 import Conversation from "../../components/Conversation/Conversation.tsx";
 import EmptyState from "../../components/EmptyState/EmptyState.tsx";
 import Loader from "../../components/Loader/Loader.tsx";
@@ -18,6 +19,7 @@ function DirectChatPage(): JSX.Element {
   const {data: directChats, isLoading} = useDirectChats(workspace.id);
 
   const chat = directChats?.find((item) => item.id === directChatId);
+  const online = useIsOnline(chat?.participant.id);
 
   if (isLoading) {
     return <EmptyState title="" hint={<Loader label="loading conversation"/>}/>;
@@ -34,7 +36,7 @@ function DirectChatPage(): JSX.Element {
       key={directChatId}
       conversation={{kind: "dm", workspaceId: workspace.id, directChatId}}
       title={`${participant.name} ${participant.surname}`}
-      subtitle={participant.status}
+      subtitle={online ? "online" : participant.status}
     />
   );
 }

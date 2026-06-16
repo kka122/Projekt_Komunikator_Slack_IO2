@@ -10,3 +10,5 @@ flask-jwt-extended
 kafka-python
 stripe
 bcrypt
+flask-socketio
+simple-websocket

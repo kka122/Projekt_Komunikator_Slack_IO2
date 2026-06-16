@@ -9,6 +9,7 @@ import {useUpdateProfile} from "../../data/user.ts";
 import {useLogout} from "../../data/auth.ts";
 import {UpdateCurrentUserProfileBodyStatus} from "../../api/models";
 import {useListNavigation} from "../../hooks/useListNavigation.ts";
+import {useIsOnline, useWorkspacePresence} from "../../realtime/useRealtime.ts";
 import useModalStore from "../../store/useModalStore.ts";
 import InlineHotkey from "../InlineHotkey/InlineHotkey.tsx";
 import Avatar from "../Avatar/Avatar.tsx";
@@ -47,6 +48,8 @@ function Sidebar(): JSX.Element {
   const openModal = useModalStore(useShallow((state) => state.openModal));
 
   const directChats = useDirectChats(workspace.id);
+  // Ask the server who's online in this workspace (keeps presence dots fresh).
+  useWorkspacePresence(workspace.id);
   const createChannel = useCreateChannel();
   const updateProfile = useUpdateProfile();
   const logout = useLogout();
@@ -306,13 +309,14 @@ interface RowProps {
 
 /** A single clickable sidebar row: optional avatar, label and unread badge. */
 function Row({item, active, open, onClick}: RowProps): JSX.Element {
+  const online = useIsOnline(item.user?.id);
   return (
     <button
       type="button"
       className={`${styles.row} ${active ? styles.active : ""} ${open ? styles.open : ""}`}
       onClick={onClick}
     >
-      {item.user && <Avatar user={item.user} size={22}/>}
+      {item.user && <Avatar user={item.user} size={22} online={online}/>}
       <span className={styles.label}>{item.label}</span>
       {item.unread > 0 && <span className={styles.badge}>{item.unread}</span>}
     </button>

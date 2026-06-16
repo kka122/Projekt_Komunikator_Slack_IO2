@@ -6,6 +6,7 @@ import {useAddMember, useRemoveMember, useUpdateMemberRole} from "../../data/wor
 import {useStartDirectChat} from "../../data/messaging.ts";
 import {useUserSearch} from "../../data/user.ts";
 import {useListNavigation} from "../../hooks/useListNavigation.ts";
+import {useWorkspacePresence} from "../../realtime/useRealtime.ts";
 import useModalStore from "../../store/useModalStore.ts";
 import {UpdateUserRoleBodyRole} from "../../api/models";
 import InlineHotkey from "../../components/InlineHotkey/InlineHotkey.tsx";
@@ -28,6 +29,7 @@ function MembersPage(): JSX.Element {
   const removeMember = useRemoveMember();
   const updateRole = useUpdateMemberRole();
   const startDirectChat = useStartDirectChat();
+  const online = useWorkspacePresence(workspace.id);
 
   const listRef = useRef<HTMLDivElement>(null);
   const filterRef = useRef<HTMLInputElement>(null);
@@ -181,7 +183,7 @@ function MembersPage(): JSX.Element {
         {members.length === 0 && <p className="muted">No members match “{filter}”.</p>}
         {members.map((member, index) => (
           <div key={member.id} className={`${styles.row} ${index === activeIndex ? styles.active : ""}`}>
-            <Avatar user={member}/>
+            <Avatar user={member} online={online.has(member.id)}/>
             <span className={styles.info}>
               <span className={styles.name}>
                 {member.name} {member.surname}

@@ -1149,6 +1149,27 @@ class Setup:
         with Session(self.app_engine) as session:
             return session.query(User).filter(User.id == userId).first()
 
+    def getUserWorkspaceIds(self, email):
+        """Ids of every workspace the user belongs to (for joining socket rooms)."""
+        with Session(self.app_engine) as session:
+            user = session.query(User).filter(User.email == email).first()
+            if not user:
+                return []
+            rows = (
+                session.query(WorkSpaceUser.workspaceId)
+                .filter(WorkSpaceUser.userId == user.id)
+                .all()
+            )
+            return [row[0] for row in rows]
+
+    def getDirectChatUserIds(self, directChatId):
+        """Both participant ids of a direct chat (for targeting their user rooms)."""
+        with Session(self.app_engine) as session:
+            chat = session.query(DirectChat).filter(DirectChat.id == self._asId(directChatId)).first()
+            if not chat:
+                return []
+            return [chat.user1Id, chat.user2Id]
+
     def getWorkspaceById(self, workspaceId):
         with Session(self.app_engine) as session:
             return session.query(Workspace).filter(Workspace.id == workspaceId).first()

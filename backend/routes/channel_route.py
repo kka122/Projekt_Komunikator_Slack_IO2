@@ -6,6 +6,7 @@ from flask_jwt_extended import (
 )
 
 from db.DataBaseSetupInitialize import setup
+from realtime import events as rt
 
 load_dotenv('./.env')
 load_dotenv('../.env')
@@ -50,6 +51,7 @@ def create_channel(workspaceId):
 
     try:
         setup.addChannel(workspaceId=workspaceId, name=channel_name, creatorEmail=user_email)
+        rt.workspace_changed(workspaceId)
         return jsonify({"message": "Kanał został pomyślnie utworzony"}), 201
     except ValueError as e:
         return jsonify({"error": str(e)}), 404
@@ -92,6 +94,7 @@ def update_channel_name(workspaceId, channelId):
     try:
         setup.updateChannelName(workspaceId=workspaceId, channelId=channelId, newName=channel_name,
                                 updaterEmail=user_email)
+        rt.workspace_changed(workspaceId)
         return jsonify({"message": "Nazwa kanału zaktualizowana"}), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 404
@@ -109,6 +112,7 @@ def delete_channel(workspaceId, channelId):
 
     try:
         setup.deleteChannel(workspaceId=workspaceId, channelId=channelId, creatorEmail=user_email)
+        rt.workspace_changed(workspaceId)
         return jsonify({"message": "Kanał został usunięty"}), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 404

@@ -1,10 +1,11 @@
-import {type JSX, useMemo} from "react";
-import {Navigate, Outlet, useParams} from "react-router";
+import {type JSX, useEffect, useMemo} from "react";
+import {Outlet, useNavigate, useParams} from "react-router";
 import {motion} from "framer-motion";
 import {useShallow} from "zustand/react/shallow";
 import useUserStore from "../store/useUserStore.ts";
 import {useWorkspaces} from "../data/workspaces.ts";
 import {WorkspaceUserRole} from "../api/models";
+import AnimatedMain from "../components/AnimatedMain/AnimatedMain.tsx";
 import Sidebar from "../components/Sidebar/Sidebar.tsx";
 import Loader from "../components/Loader/Loader.tsx";
 import WorkspaceContext, {type WorkspaceContextValue} from "./workspaceContext.ts";
@@ -27,6 +28,7 @@ const variants = {
  */
 function WorkspaceLayout(): JSX.Element {
   const {workspaceId} = useParams();
+  const navigate = useNavigate();
   const {data: workspaces, isLoading, isError} = useWorkspaces();
   const currentUser = useUserStore(useShallow((state) => state.user));
 
@@ -47,16 +49,22 @@ function WorkspaceLayout(): JSX.Element {
     };
   }, [workspace, currentUser]);
 
-  if (isLoading || !currentUser) {
-    return (
-      <div className={styles.fallback}>
-        <Loader label="opening workspace"/>
-      </div>
-    );
-  }
+  // Workspace vanished (deleted, or unknown id) — leave for the picker. Done in
+  // an effect, not by returning a bare <Navigate>: that renders null, and a null
+  // keyed child strands AnimatePresence's mode="wait" exit and blanks the screen.
+  const missing = !isLoading && !!currentUser && (isError || !workspace || !value);
+  useEffect(() => {
+    if (missing) navigate("/workspaces", {replace: true});
+  }, [missing, navigate]);
 
-  if (isError || !workspace || !value) {
-    return <Navigate to="/workspaces" replace/>;
+  // Always render a motion root (even while loading/redirecting) so the outlet
+  // transition can complete instead of getting stuck on a null child.
+  if (isLoading || !currentUser || missing) {
+    return (
+      <AnimatedMain className={styles.fallback}>
+        <Loader label="opening workspace"/>
+      </AnimatedMain>
+    );
   }
 
   return (

@@ -6,6 +6,7 @@ from flask_jwt_extended import (
 )
 
 from db.DataBaseSetupInitialize import setup
+from realtime import events as rt
 
 load_dotenv('./.env')
 load_dotenv('../.env')
@@ -36,6 +37,12 @@ def create_direct_chat(workspaceId):
         return jsonify({"error": "Brak userId"}), 400
     try:
         chat = setup.getOrCreateDirectChat(workspaceId, user_mail, other_user_id)
+        # Let both participants' sidebars pick up the (possibly new) chat live.
+        requester = setup.getUserByEmail(user_mail)
+        participant_ids = [int(chat["participant"]["id"])]
+        if requester is not None:
+            participant_ids.append(requester.id)
+        rt.direct_chats_changed(workspaceId, participant_ids)
         return jsonify(chat), 200
     except PermissionError as e:
         return jsonify({"error": str(e)}), 403
