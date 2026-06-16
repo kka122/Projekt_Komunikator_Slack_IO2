@@ -54,7 +54,7 @@ export function notifyMessage(
     icon,
     tag,
     renotify: true,
-  });
+  } as NotificationOptions & { renotify: boolean });
 
   notification.onclick = () => {
     window.focus();
