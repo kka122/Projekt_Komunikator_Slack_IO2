@@ -102,6 +102,13 @@ export function scopeMessagesKey(scope: ConversationScope) {
     : qk.directChatMessages(scope.workspaceId, scope.directChatId);
 }
 
+/** The in-app route for a conversation (used to open it from a notification). */
+export function scopeConversationPath(scope: ConversationScope): string {
+  return isChannelScope(scope)
+    ? `/workspaces/${scope.workspaceId}/channels/${scope.channelId}`
+    : `/workspaces/${scope.workspaceId}/dms/${scope.directChatId}`;
+}
+
 // --------------------------------------------------------------------------- //
 //  Pure cache updaters. Each takes the cached list and returns a new list,     //
 //  staying idempotent (events may be re-delivered, and the sender also gets    //

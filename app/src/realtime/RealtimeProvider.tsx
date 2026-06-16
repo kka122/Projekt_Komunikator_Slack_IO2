@@ -7,6 +7,7 @@ import {qk} from "../data/keys.ts";
 import useUserStore from "../store/useUserStore.ts";
 import useRealtimeStore from "../store/useRealtimeStore.ts";
 import {getSocket} from "./socket.ts";
+import {ensureNotificationPermission, notifyMessage} from "./notifications.ts";
 import {
   applyMessageDeleted,
   applyMessageNew,
@@ -15,6 +16,7 @@ import {
   applyReactionRemoved,
   isChannelScope,
   scopeConversationId,
+  scopeConversationPath,
   scopeMessagesKey,
   type MessageDeletedPayload,
   type MessagePayload,
@@ -49,6 +51,9 @@ function RealtimeProvider({children}: {children: ReactNode}): JSX.Element {
     const store = useRealtimeStore.getState;
     const timers = typingTimers.current;
 
+    // Ask for desktop-notification permission once the user is in the app.
+    ensureNotificationPermission();
+
     const patchMessages = (
       payload: {scope: MessagePayload["scope"]},
       updater: (list: Message[] | undefined) => Message[],
@@ -81,12 +86,20 @@ function RealtimeProvider({children}: {children: ReactNode}): JSX.Element {
 
     const onMessageNew = (payload: MessagePayload) => {
       patchMessages(payload, (list) => applyMessageNew(list, payload.message));
-      // Bump unread badges for messages that aren't ours and aren't in view.
+      // Only react to messages that aren't ours.
       if (payload.message.sender.id !== useUserStore.getState().user?.id) {
+        // Bump unread badges (the conversation may not be in view).
         if (isChannelScope(payload.scope)) {
           queryClient.invalidateQueries({queryKey: qk.workspaces});
         } else {
           queryClient.invalidateQueries({queryKey: qk.directChats(payload.scope.workspaceId)});
+        }
+        // Desktop notification, unless the user is already looking at this
+        // conversation (tab visible and its route open).
+        const path = scopeConversationPath(payload.scope);
+        const viewing = !document.hidden && window.location.pathname.startsWith(path);
+        if (!viewing) {
+          notifyMessage(payload.message, scopeConversationId(payload.scope), () => navigate(path));
         }
       }
     };
