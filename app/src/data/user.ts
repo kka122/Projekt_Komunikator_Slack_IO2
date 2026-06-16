@@ -13,8 +13,11 @@ import type {UpdateCurrentUserProfileBody, User} from "../api/models";
 import {qk} from "./keys.ts";
 import useUserStore from "../store/useUserStore.ts";
 
-// Fetches /users/me, validates with zod, and mirrors the result into the
-// global user store so synchronous consumers (avatars, guards) stay in sync.
+/**
+ * Query for the signed-in user. Fetches `/users/me`, validates it with zod, and
+ * mirrors the result into the global user store so synchronous consumers
+ * (avatars, route guards) stay in sync.
+ */
 export function useCurrentUser() {
   const setUser = useUserStore((s) => s.setUser);
 
@@ -29,6 +32,11 @@ export function useCurrentUser() {
   });
 }
 
+/**
+ * Mutation that updates the current user's profile (name, status, avatar, …).
+ * On success it refetches `/users/me`, refreshes the user store and invalidates
+ * the cached profile.
+ */
 export function useUpdateProfile() {
   const queryClient = useQueryClient();
   const setUser = useUserStore((s) => s.setUser);
@@ -45,6 +53,7 @@ export function useUpdateProfile() {
   });
 }
 
+/** Mutation that permanently deletes the account and clears local identity. */
 export function useDeleteAccount() {
   const setUser = useUserStore((s) => s.setUser);
 
@@ -54,7 +63,12 @@ export function useDeleteAccount() {
   });
 }
 
-// Lookup used when inviting members. `emailRegex` empty => disabled.
+/**
+ * Query that searches users by email regex (used when inviting members).
+ * Disabled while `emailRegex` is blank so it never fires an empty search.
+ *
+ * @param emailRegex - Email substring/pattern to match.
+ */
 export function useUserSearch(emailRegex: string) {
   return useQuery({
     queryKey: qk.userSearch(emailRegex),

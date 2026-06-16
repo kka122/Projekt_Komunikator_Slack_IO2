@@ -21,6 +21,11 @@
   }
 }
 
+/* Green ring marking a user the realtime layer reports as online. */
+.online {
+  box-shadow: 0 0 0 2px var(--color-background), 0 0 0 4px #22c55e;
+}
+
 .status {
   position: absolute;
   right: -1px;

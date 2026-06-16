@@ -12,6 +12,11 @@ import {useRegister} from "../../data/auth.ts";
 import useModalStore from "../../store/useModalStore.ts";
 import styles from "./RegisterPage.module.css";
 
+/**
+ * Registration screen (`auth/register`). Validates the form (name, surname,
+ * email, password, optional avatar) with zod, submits via {@link useRegister}
+ * and routes to login on success. Also offers Google sign-up and a login link.
+ */
 function RegisterPage(): JSX.Element {
   const navigate = useNavigate();
   const register = useRegister();

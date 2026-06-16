@@ -6,24 +6,32 @@ import {
   useAddReaction,
   useDeleteMessage,
   useEditMessage,
+  useMarkConversationRead,
   useMessages,
   useRemoveReaction,
   useSendMessage,
 } from "../../data/messaging.ts";
 import {useWorkspace} from "../../layouts/workspaceContext.ts";
 import {useListNavigation} from "../../hooks/useListNavigation.ts";
+import {useConversationRealtime} from "../../realtime/useRealtime.ts";
 import useModalStore from "../../store/useModalStore.ts";
+import type {TypingUser} from "../../store/useRealtimeStore.ts";
 import MessageList from "../MessageList/MessageList.tsx";
 import MessageComposer from "../MessageComposer/MessageComposer.tsx";
 import Loader from "../Loader/Loader.tsx";
 import styles from "./Conversation.module.css";
 
+/** Props for {@link Conversation}. */
 interface ConversationProps {
+  /** The channel or direct chat to render. */
   conversation: ConversationTarget;
+  /** Header title (e.g. `#general` or a participant's name). */
   title: string;
+  /** Optional header subtitle (e.g. the DM partner's status). */
   subtitle?: ReactNode;
 }
 
+/** Emoji presented in the quick-reaction modal, each bound to a number key. */
 const QUICK_REACTIONS: {emoji: string; hotkey: "1" | "2" | "3" | "4" | "5"}[] = [
   {emoji: "👍", hotkey: "1"},
   {emoji: "❤️", hotkey: "2"},
@@ -32,6 +40,22 @@ const QUICK_REACTIONS: {emoji: string; hotkey: "1" | "2" | "3" | "4" | "5"}[] = 
   {emoji: "😮", hotkey: "5"},
 ];
 
+/** Build the "X is typing…" line from the users currently typing. */
+function typingLabel(users: TypingUser[]): string {
+  if (users.length === 0) return "";
+  if (users.length === 1) return `${users[0].name} is typing…`;
+  if (users.length === 2) return `${users[0].name} and ${users[1].name} are typing…`;
+  return "Several people are typing…";
+}
+
+/**
+ * Full message-thread view shared by channel and direct-chat screens. Loads the
+ * messages, wires the keyboard workflow (arrow navigation, `R` react, `E` edit,
+ * `D` delete, `M` jump to composer) and renders the {@link MessageList} plus
+ * {@link MessageComposer}. Edit/delete permissions are enforced against the
+ * current user and admin role; reactions, edits and deletes flow through the
+ * messaging mutation hooks.
+ */
 function Conversation({conversation, title, subtitle}: ConversationProps): JSX.Element {
   const {currentUser, isAdmin} = useWorkspace();
   const openModal = useModalStore(useShallow((state) => state.openModal));
@@ -43,6 +67,8 @@ function Conversation({conversation, title, subtitle}: ConversationProps): JSX.E
   const deleteMessage = useDeleteMessage(conversation);
   const addReaction = useAddReaction(conversation);
   const removeReaction = useRemoveReaction(conversation);
+  const markRead = useMarkConversationRead();
+  const {typingUsers, sendTyping} = useConversationRealtime(conversation);
 
   const listRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
@@ -104,16 +130,35 @@ function Conversation({conversation, title, subtitle}: ConversationProps): JSX.E
     onSelect: (index) => react(index),
   });
 
-  // Focus the list once when the conversation opens so arrow keys work
-  // immediately; scroll to the newest message whenever the list changes.
+  const conversationId =
+    conversation.kind === "channel" ? conversation.channelId : conversation.directChatId;
+
+  // Focus the list once per chosen conversation so message arrow keys work
+  // immediately. The list only mounts after messages load, so we wait for that
+  // (skipping focus while loading would otherwise miss the first open).
+  const focusedConversation = useRef<string | null>(null);
   useEffect(() => {
-    listRef.current?.focus();
-  }, []);
+    if (messagesQuery.isLoading) return;
+    if (focusedConversation.current === conversationId) return;
+    if (listRef.current) {
+      listRef.current.focus();
+      focusedConversation.current = conversationId;
+    }
+  }, [conversationId, messagesQuery.isLoading]);
 
   useEffect(() => {
     const element = listRef.current;
     if (element) element.scrollTop = element.scrollHeight;
   }, [messages]);
+
+  // Viewing a conversation clears its unread indicator. Re-mark when the
+  // messages change too, so a message that arrives while open stays "read".
+  const markReadMutate = markRead.mutate;
+  useEffect(() => {
+    if (messagesQuery.isLoading || messagesQuery.isError) return;
+    markReadMutate(conversation);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationId, messages, messagesQuery.isLoading, messagesQuery.isError]);
 
   // Per-message actions, scoped to the list so they never fire from the composer.
   useHotkeys(
@@ -157,12 +202,17 @@ function Conversation({conversation, title, subtitle}: ConversationProps): JSX.E
         />
       )}
 
+      <div className={styles.typing} aria-live="polite">
+        {typingLabel(typingUsers)}
+      </div>
+
       <MessageComposer
         textareaRef={composerRef}
         pending={sendMessage.isPending}
         placeholder={`Message ${title}`}
         onSend={(content, attachments) => sendMessage.mutate({content, attachments})}
         onEscape={() => listRef.current?.focus()}
+        onTyping={sendTyping}
       />
     </div>
   );

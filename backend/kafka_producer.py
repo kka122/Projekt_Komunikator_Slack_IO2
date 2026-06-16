@@ -8,7 +8,7 @@ producer = None
 def get_producer():
     global producer
     if producer is None:
-        producer = KafkaProducer(bootstrap_servers = os.environ.get('KAFKA_BOOTSTRAP_SERVERS', "localhost:9092"), value_serializer = lambda x: json.dumps(x).encode('utf-8'), acks = "all", retries = 3)
+        producer = KafkaProducer(bootstrap_servers = os.environ.get('KAFKA_BOOTSTRAP_SERVERS', "localhost:29092"), value_serializer = lambda x: json.dumps(x).encode('utf-8'), acks = "all", retries = 3)
 
     return producer
 

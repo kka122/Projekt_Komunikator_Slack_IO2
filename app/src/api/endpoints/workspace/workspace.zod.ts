@@ -33,7 +33,11 @@ export const ListWorkspacesResponse = zod.object({
     zod.object({
       id: zod.string(),
       name: zod.string(),
-      logoUrl: zod.string().url(),
+      logoUrl: zod
+        .string()
+        .describe(
+          "Relative URL of the workspace logo, or empty string when unset.",
+        ),
       userRole: zod
         .enum(["owner", "admin", "member"])
         .describe("The role of the authenticated user within the workspace"),
@@ -65,6 +69,12 @@ export const ListWorkspacesResponse = zod.object({
               "freeTime",
               "offline",
             ]),
+            workspaceRole: zod
+              .enum(["owner", "admin", "member"])
+              .optional()
+              .describe(
+                "The user's role within the workspace (only set in workspace member listings).",
+              ),
           }),
         )
         .describe("List of users who are members of the workspace"),
@@ -83,6 +93,16 @@ export const AcceptWorkspacePaymentBody = zod.object({
 });
 
 export const AcceptWorkspacePaymentResponse = zod.unknown();
+
+/**
+ * Permanently deletes the workspace and all of its channels, messages and direct chats. Only the workspace owner can delete it.
+ * @summary Delete a workspace
+ */
+export const DeleteWorkspaceParams = zod.object({
+  workspaceId: zod.string().uuid().describe("The ID of the workspace."),
+});
+
+export const DeleteWorkspaceResponse = zod.unknown();
 
 /**
  * Update the logo of an existing workspace. Only the workspace owner can update the logo.

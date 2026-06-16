@@ -4,21 +4,38 @@ import Avatar from "../Avatar/Avatar.tsx";
 import {resolveAssetUrl} from "../../config/api.ts";
 import styles from "./MessageList.module.css";
 
-// Toggling a reaction either removes the caller's existing one (mineReactionId
-// set) or adds a new reaction with that emoji.
+/**
+ * Reaction click handler. When `mineReactionId` is set the caller already
+ * reacted with `emoji`, so the toggle removes that reaction; otherwise it adds a
+ * new reaction with `emoji`.
+ */
 type ReactionToggle = (message: Message, emoji: string, mineReactionId: string | null) => void;
 
+/** Props for {@link MessageList}. */
 interface MessageListProps {
+  /** Messages to render, oldest-first. */
   messages: Message[];
+  /** Index of the keyboard-selected message (highlighted). */
   activeIndex: number;
+  /** Id of the message currently being edited inline, or null. */
   editingId: string | null;
+  /** Signed-in user's id, used to flag own messages and own reactions. */
   currentUserId: string;
+  /** Ref to the scroll container (focused for keyboard navigation). */
   listRef: RefObject<HTMLDivElement | null>;
+  /** Called to persist an inline edit. */
   onEditSave: (messageId: string, content: string) => void;
+  /** Called to abandon an inline edit. */
   onEditCancel: () => void;
+  /** Called when a reaction chip is clicked (see {@link ReactionToggle}). */
   onReactionClick: ReactionToggle;
 }
 
+/**
+ * Format an ISO timestamp as a short, locale-aware "Mon D, HH:MM" label.
+ *
+ * @returns The formatted string, or `""` for an unparseable timestamp.
+ */
 function formatTime(timestamp: string): string {
   const date = new Date(timestamp);
   if (Number.isNaN(date.getTime())) return "";
@@ -30,19 +47,29 @@ function formatTime(timestamp: string): string {
   });
 }
 
+/** Format a byte count as a human-readable size (B/KB/MB). */
 function formatSize(bytes: number): string {
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / 1024 / 1024).toFixed(1)} MB`;
 }
 
+/** One emoji's aggregated reactions on a message. */
 interface GroupedReaction {
+  /** The emoji. */
   emoji: string;
+  /** How many users reacted with it. */
   count: number;
+  /** The caller's own reaction of this emoji, if any (enables toggling off). */
   mine: Reaction | null;
+  /** Any one reaction of this emoji, used for the tooltip. */
   sample: Reaction;
 }
 
+/**
+ * Collapse a flat reaction list into one {@link GroupedReaction} per emoji,
+ * counting occurrences and flagging the caller's own reaction.
+ */
 function groupReactions(reactions: Reaction[], currentUserId: string): GroupedReaction[] {
   const map = new Map<string, GroupedReaction>();
   for (const reaction of reactions) {
@@ -62,6 +89,12 @@ function groupReactions(reactions: Reaction[], currentUserId: string): GroupedRe
   return [...map.values()];
 }
 
+/**
+ * Scrollable list of messages for a conversation. Renders one
+ * {@link MessageItem} per message, highlighting the active one and switching the
+ * selected message into inline-edit mode. Shows an empty hint when there are no
+ * messages.
+ */
 function MessageList({
   messages,
   activeIndex,
@@ -94,17 +127,31 @@ function MessageList({
   );
 }
 
+/** Props for {@link MessageItem}. */
 interface MessageItemProps {
+  /** The message to render. */
   message: Message;
+  /** Whether this row is the keyboard-selected one. */
   active: boolean;
+  /** Whether this row is in inline-edit mode. */
   editing: boolean;
+  /** Whether the message was sent by the current user. */
   isMine: boolean;
+  /** Signed-in user's id (to flag own reactions). */
   currentUserId: string;
+  /** Called to persist an inline edit. */
   onEditSave: (messageId: string, content: string) => void;
+  /** Called to abandon an inline edit. */
   onEditCancel: () => void;
+  /** Called when a reaction chip is clicked (see {@link ReactionToggle}). */
   onReactionClick: ReactionToggle;
 }
 
+/**
+ * A single message row: avatar, sender, timestamp, body (or an edit textarea
+ * when `editing`), attachment links and grouped reaction chips. In edit mode,
+ * Enter saves and Escape cancels.
+ */
 function MessageItem({
   message,
   active,

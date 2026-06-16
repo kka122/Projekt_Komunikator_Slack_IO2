@@ -19,12 +19,34 @@ services:
       KAFKA_BOOTSTRAP_SERVERS: kafka:9092
     ports:
       - "5000:5000"
-    command: [ "gunicorn", "--preload", "-w", "4", "-b", "0.0.0.0:5000", "main:app" ]
+    # Single threaded worker (gthread): all REST + WebSocket traffic shares one
+    # process, so socket emits reach clients in-process with no backplane. Many
+    # threads handle the long-lived sockets concurrently. To scale to multiple
+    # workers, add a Redis backplane (SOCKETIO_MESSAGE_QUEUE=redis://...) and
+    # raise -w.
+    command: [ "gunicorn", "-k", "gthread", "-w", "1", "--threads", "200", "--timeout", "120", "-b", "0.0.0.0:5000", "main:app" ]
     depends_on:
       db:
         condition: service_healthy
       kafka:
         condition: service_healthy
+
+  backend-worker:
+    container_name: backend-worker
+    build:
+      context: .
+      dockerfile: ./backend/Dockerfile-worker
+    environment:
+      FLASK_DEBUG: "0"
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: baza_danych
+      DB_USER: postgres
+      DB_PASSWORD: 1234
+      KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+    depends_on:
+      backend:
+        condition: service_started
 
   app:
     container_name: app

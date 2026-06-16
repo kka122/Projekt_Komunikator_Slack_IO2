@@ -1,4 +1,4 @@
-import {type JSX, useRef, useState} from "react";
+import {type JSX, useEffect, useRef, useState} from "react";
 import {useNavigate} from "react-router";
 import {useShallow} from "zustand/react/shallow";
 import AnimatedMain from "../../components/AnimatedMain/AnimatedMain.tsx";
@@ -14,6 +14,12 @@ import type {Workspace} from "../../api/models";
 import {resolveAssetUrl} from "../../config/api.ts";
 import styles from "./WorkspacesPage.module.css";
 
+/**
+ * Workspace picker (`workspaces`). Lists the user's workspaces with keyboard
+ * navigation and opens one on Enter/click. Toggles the
+ * {@link CreateWorkspacePanel} to make a new one (`C`); also offers profile and
+ * logout shortcuts.
+ */
 function WorkspacesPage(): JSX.Element {
   const navigate = useNavigate();
   const openModal = useModalStore(useShallow((state) => state.openModal));
@@ -34,6 +40,12 @@ function WorkspacesPage(): JSX.Element {
     enabled: !creating,
     onSelect: (index) => open(workspaces[index]),
   });
+
+  // Focus the list when it is shown so arrow keys work immediately — the list
+  // hotkeys only fire while focus is inside it.
+  useEffect(() => {
+    if (!creating) listRef.current?.focus();
+  }, [creating]);
 
   function confirmLogout() {
     openModal({
@@ -83,12 +95,20 @@ function WorkspacesPage(): JSX.Element {
   );
 }
 
+/** Props for {@link WorkspaceRow}. */
 interface WorkspaceRowProps {
+  /** The workspace to render. */
   workspace: Workspace;
+  /** Whether this row is the keyboard-selected one. */
   active: boolean;
+  /** Click handler (selects and opens the workspace). */
   onClick: () => void;
 }
 
+/**
+ * A single workspace tile: logo (falling back to the initial when missing or
+ * broken), name, and a role/channel/member summary line.
+ */
 function WorkspaceRow({workspace, active, onClick}: WorkspaceRowProps): JSX.Element {
   const [broken, setBroken] = useState(false);
   const showLogo = workspace.logoUrl && !broken;

@@ -27,6 +27,12 @@ export const GetCurrentUserProfileResponse = zod.object({
         "freeTime",
         "offline",
       ]),
+      workspaceRole: zod
+        .enum(["owner", "admin", "member"])
+        .optional()
+        .describe(
+          "The user's role within the workspace (only set in workspace member listings).",
+        ),
     })
     .describe("The current user's profile information."),
 });
@@ -89,6 +95,12 @@ export const GetUserProfileByEmailResponse = zod.object({
         "freeTime",
         "offline",
       ]),
+      workspaceRole: zod
+        .enum(["owner", "admin", "member"])
+        .optional()
+        .describe(
+          "The user's role within the workspace (only set in workspace member listings).",
+        ),
     }),
   ),
 });

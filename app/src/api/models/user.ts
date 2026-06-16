@@ -5,6 +5,7 @@
  * OpenAPI spec version: 1.0.0
  */
 import type { UserStatus } from "./userStatus";
+import type { UserWorkspaceRole } from "./userWorkspaceRole";
 
 export interface User {
   /** Unique identifier for the user */
@@ -18,4 +19,6 @@ export interface User {
   /** URL of the user's avatar image */
   avatarUrl: string;
   status: UserStatus;
+  /** The user's role within the workspace (only set in workspace member listings). */
+  workspaceRole?: UserWorkspaceRole;
 }

@@ -30,7 +30,7 @@ export const getListWorkspacesResponseMock = (
   ).map(() => ({
     id: faker.string.alpha({ length: { min: 10, max: 20 } }),
     name: faker.string.alpha({ length: { min: 10, max: 20 } }),
-    logoUrl: faker.internet.url(),
+    logoUrl: faker.string.alpha({ length: { min: 10, max: 20 } }),
     userRole: faker.helpers.arrayElement(["owner", "admin", "member"] as const),
     channels: Array.from(
       { length: faker.number.int({ min: 1, max: 10 }) },
@@ -58,6 +58,10 @@ export const getListWorkspacesResponseMock = (
         "freeTime",
         "offline",
       ] as const),
+      workspaceRole: faker.helpers.arrayElement([
+        faker.helpers.arrayElement(["owner", "admin", "member"] as const),
+        undefined,
+      ]),
     })),
   })),
   ...overrideResponse,
@@ -132,6 +136,27 @@ export const getAcceptWorkspacePaymentMockHandler = (
   );
 };
 
+export const getDeleteWorkspaceMockHandler = (
+  overrideResponse?:
+    | void
+    | ((
+        info: Parameters<Parameters<typeof http.delete>[1]>[0],
+      ) => Promise<void> | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.delete(
+    "*/workspaces/:workspaceId",
+    async (info: Parameters<Parameters<typeof http.delete>[1]>[0]) => {
+      if (typeof overrideResponse === "function") {
+        await overrideResponse(info);
+      }
+
+      return new HttpResponse(null, { status: 200 });
+    },
+    options,
+  );
+};
+
 export const getUpdateWorkspaceLogoMockHandler = (
   overrideResponse?:
     | void
@@ -156,5 +181,6 @@ export const getWorkspaceMock = () => [
   getCreateWorkspaceMockHandler(),
   getListWorkspacesMockHandler(),
   getAcceptWorkspacePaymentMockHandler(),
+  getDeleteWorkspaceMockHandler(),
   getUpdateWorkspaceLogoMockHandler(),
 ];

@@ -41,6 +41,20 @@ export const ListChannelsResponse = zod.object({
 });
 
 /**
+ * Marks the channel as read for the authenticated user, clearing its unread message count.
+ * @summary Mark a channel as read
+ */
+export const MarkChannelReadParams = zod.object({
+  workspaceId: zod.string().uuid().describe("The ID of the workspace."),
+  channelId: zod
+    .string()
+    .uuid()
+    .describe("The unique identifier of the channel."),
+});
+
+export const MarkChannelReadResponse = zod.unknown();
+
+/**
  * Update the name of an existing channel within the specified workspace. Only owners and admins of the workspace can update channel names.
  * @summary Update the name of a channel
  */

@@ -17,6 +17,7 @@ from routes.channel_route import channel_route
 from routes.user_route import user_route
 from routes.attachments_route import attachments_route
 from routes.reaction_route import reaction_route
+from realtime import init_realtime, socketio
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True,
@@ -47,7 +48,11 @@ except Exception as blueprintError:
     print(f"Wystapil blad podczas rejestracji blueprinta: {blueprintError}")
     sys.exit(1)
 
+# Attach the WebSocket layer (real-time messages, reactions, typing, presence).
+init_realtime(app)
+
 if __name__ == "__main__":
     debug = os.environ.get("FLASK_DEBUG", "1") == "1"
-    app.run(debug=debug, host="0.0.0.0", port=5000)
+    # socketio.run replaces app.run so the dev server speaks WebSocket too.
+    socketio.run(app, debug=debug, host="0.0.0.0", port=5000, allow_unsafe_werkzeug=True)
 

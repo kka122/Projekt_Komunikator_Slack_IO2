@@ -1,4 +1,4 @@
-from sqlalchemy import create_engine, Column, Integer, String, Text, text, Enum, DateTime, ForeignKey, Boolean, CheckConstraint
+from sqlalchemy import create_engine, Column, Integer, String, Text, text, Enum, DateTime, ForeignKey, Boolean, CheckConstraint, and_
 from sqlalchemy.orm import declarative_base, relationship, Session
 from db.DataTypes import WorkspaceUserRole, UserStatus
 from datetime import datetime
@@ -335,11 +335,59 @@ class Setup:
             if channel.workspaceId != int(workspaceId):
                 raise ValueError("Kanał nie należy do podanego workspaceId")
 
-            session.query(ChannelUser).filter(ChannelUser.channelId == channelId).delete()
+            message_ids = [
+                row[0]
+                for row in session.query(Message.id).filter(Message.channelId == channel.id).all()
+            ]
+            if message_ids:
+                session.query(Reaction).filter(Reaction.messageId.in_(message_ids)).delete(synchronize_session=False)
+                session.query(Attachment).filter(Attachment.messageId.in_(message_ids)).delete(synchronize_session=False)
 
-            session.query(Message).filter(Message.channelId == channelId).delete()
+            session.query(ChannelUser).filter(ChannelUser.channelId == channel.id).delete(synchronize_session=False)
+            session.query(Message).filter(Message.channelId == channel.id).delete(synchronize_session=False)
 
             session.delete(channel)
+            session.commit()
+
+    def deleteWorkspace(self, workspaceId, requesterEmail):
+        with Session(self.app_engine) as session:
+            ws_id = int(workspaceId)
+            user = session.query(User).filter(User.email == requesterEmail).first()
+            if not user:
+                raise ValueError("Uzytkownik nie istnieje")
+
+            workspace = session.query(Workspace).filter(Workspace.id == ws_id).first()
+            if not workspace:
+                raise ValueError("Workspace nie istnieje")
+
+            membership = (
+                session.query(WorkSpaceUser)
+                .filter(WorkSpaceUser.workspaceId == ws_id, WorkSpaceUser.userId == user.id)
+                .first()
+            )
+            if not membership or membership.role != WorkspaceUserRole.owner:
+                raise PermissionError("Tylko wlasciciel moze usunac workspace")
+
+            message_ids = [r[0] for r in session.query(Message.id).filter(Message.workspaceId == ws_id).all()]
+            channel_ids = [r[0] for r in session.query(Channel.id).filter(Channel.workspaceId == ws_id).all()]
+            dm_ids = [r[0] for r in session.query(DirectChat.id).filter(DirectChat.workspaceId == ws_id).all()]
+
+            if message_ids:
+                session.query(Reaction).filter(Reaction.messageId.in_(message_ids)).delete(synchronize_session=False)
+                session.query(Attachment).filter(Attachment.messageId.in_(message_ids)).delete(synchronize_session=False)
+            session.query(Message).filter(Message.workspaceId == ws_id).delete(synchronize_session=False)
+
+            if channel_ids:
+                session.query(ChannelUser).filter(ChannelUser.channelId.in_(channel_ids)).delete(synchronize_session=False)
+            session.query(Channel).filter(Channel.workspaceId == ws_id).delete(synchronize_session=False)
+
+            if dm_ids:
+                session.query(DirectChatUser).filter(DirectChatUser.directChatId.in_(dm_ids)).delete(synchronize_session=False)
+            session.query(DirectChat).filter(DirectChat.workspaceId == ws_id).delete(synchronize_session=False)
+
+            session.query(WorkSpaceUser).filter(WorkSpaceUser.workspaceId == ws_id).delete(synchronize_session=False)
+
+            session.delete(workspace)
             session.commit()
 
     def updateChannelName(self, workspaceId, channelId, newName, updaterEmail):
@@ -450,8 +498,8 @@ class Setup:
 
                 channel_rows = (
                     session.query(Channel, ChannelUser.lastReadAt)
-                    .join(ChannelUser, Channel.id == ChannelUser.channelId)
-                    .filter(Channel.workspaceId == workspace.id, ChannelUser.userId == user.id)
+                    .outerjoin(ChannelUser, and_(Channel.id == ChannelUser.channelId, ChannelUser.userId == user.id))
+                    .filter(Channel.workspaceId == workspace.id)
                     .all()
                 )
                 channels = []
@@ -470,12 +518,25 @@ class Setup:
                         "newMessagesCount": new_messages_count,
                     })
 
-                members = (
-                    session.query(User)
+                member_rows = (
+                    session.query(User, WorkSpaceUser.role)
                     .join(WorkSpaceUser, User.id == WorkSpaceUser.userId)
                     .filter(WorkSpaceUser.workspaceId == workspace.id)
                     .all()
                 )
+
+                role_order = {
+                    WorkspaceUserRole.owner: 0,
+                    WorkspaceUserRole.admin: 1,
+                    WorkspaceUserRole.member: 2,
+                }
+                member_rows.sort(
+                    key=lambda row: (role_order.get(row[1], 99), row[0].name.lower(), row[0].surname.lower())
+                )
+                users = [
+                    {**self._serializeUser(member), "workspaceRole": role.value}
+                    for member, role in member_rows
+                ]
 
                 result.append({
                     "id": str(workspace.id),
@@ -483,7 +544,7 @@ class Setup:
                     "logoUrl": workspace.logoUrl,
                     "userRole": membership.role.value,
                     "channels": channels,
-                    "users": [self._serializeUser(m) for m in members],
+                    "users": users,
                 })
 
             return result
@@ -542,7 +603,7 @@ class Setup:
             "id": str(message.id),
             "content": message.body,
             "sender": Setup._serializeUser(message.user),
-            "timestamp": message.createAt.isoformat() if message.createAt else None,
+            "timestamp": message.createAt.astimezone().isoformat() if message.createAt else None,
             "isEdited": message.isEdited,
             "attachments": [Setup._serializeAttachment(a) for a in message.attachments],
             "reactions": [Setup._serializeReaction(r) for r in message.reactions],
@@ -567,12 +628,12 @@ class Setup:
             raise LookupError("Kanał nie istnieje")
 
         membership = (
-            session.query(ChannelUser)
-            .filter(ChannelUser.channelId == channel.id, ChannelUser.userId == user.id)
+            session.query(WorkSpaceUser)
+            .filter(WorkSpaceUser.workspaceId == channel.workspaceId, WorkSpaceUser.userId == user.id)
             .first()
         )
         if not membership:
-            raise PermissionError("Użytkownik nie należy do kanału")
+            raise PermissionError("Użytkownik nie należy do tego workspace")
 
         return user, channel
 
@@ -608,8 +669,8 @@ class Setup:
     def createMessageChannel(self, workspaceId, channelId, authorEmail, content, attachments=None, parentMessageId=None):
         content = (content or "").strip()
         attachments = attachments or []
-        if not attachments:
-            raise ValueError("Wiadomość musi zawierać co najmniej jeden załącznik")
+        if not content and not attachments:
+            raise ValueError("Wiadomość musi zawierać treść lub załącznik")
 
         with Session(self.app_engine) as session:
             user, channel = self._getChannelForMember(session, workspaceId, channelId, authorEmail)
@@ -642,7 +703,8 @@ class Setup:
 
             session.commit()
             session.refresh(message)
-            return self._serializeMessage(message)
+            serialized = self._serializeMessage(message)
+            return serialized
 
     def listAllMessageChannels(self, workspaceId, channelId, userEmail, page=1, pageSize=20):
         page, pageSize = self._normalizePagination(page, pageSize)
@@ -707,8 +769,8 @@ class Setup:
     def createMessageChat(self, workspaceId, directChatId, authorEmail, content, attachments=None, parentMessageId=None):
         content = (content or "").strip()
         attachments = attachments or []
-        if not attachments:
-            raise ValueError("Wiadomość musi zawierać co najmniej jeden załącznik")
+        if not content and not attachments:
+            raise ValueError("Wiadomość musi zawierać treść lub załącznik")
 
         with Session(self.app_engine) as session:
             user, chat = self._getChatForMember(session, workspaceId, directChatId, authorEmail)
@@ -973,6 +1035,77 @@ class Setup:
 
             return result
 
+    def getOrCreateDirectChat(self, workspaceId, userEmail, otherUserId):
+        with Session(self.app_engine) as session:
+            ws_id = int(workspaceId)
+            user = session.query(User).filter(User.email == userEmail).first()
+            if not user:
+                raise ValueError("Uzytkownik nie istnieje")
+
+            try:
+                other_id = int(otherUserId)
+            except (TypeError, ValueError):
+                raise ValueError("Nieprawidlowy identyfikator uzytkownika")
+            if other_id == user.id:
+                raise ValueError("Nie mozna rozpoczac czatu z samym soba")
+
+            other = session.query(User).filter(User.id == other_id).first()
+            if not other:
+                raise ValueError("Uzytkownik nie istnieje")
+
+            for uid in (user.id, other.id):
+                member = (
+                    session.query(WorkSpaceUser)
+                    .filter(WorkSpaceUser.workspaceId == ws_id, WorkSpaceUser.userId == uid)
+                    .first()
+                )
+                if not member:
+                    raise PermissionError("Uzytkownik nie nalezy do tego workspace")
+
+            chat = (
+                session.query(DirectChat)
+                .filter(
+                    DirectChat.workspaceId == ws_id,
+                    ((DirectChat.user1Id == user.id) & (DirectChat.user2Id == other.id))
+                    | ((DirectChat.user1Id == other.id) & (DirectChat.user2Id == user.id)),
+                )
+                .first()
+            )
+            if not chat:
+                chat = DirectChat(workspaceId=ws_id, user1Id=user.id, user2Id=other.id)
+                session.add(chat)
+                session.commit()
+                session.refresh(chat)
+
+            return {
+                "id": str(chat.id),
+                "participant": {
+                    "id": str(other.id),
+                    "name": other.name,
+                    "surname": other.surname,
+                    "email": other.email,
+                    "avatarUrl": other.avatarUrl,
+                    "status": other.status.value,
+                },
+                "newMessagesCount": 0,
+            }
+
+    def markChannelRead(self, workspaceId, channelId, userEmail):
+        with Session(self.app_engine) as session:
+            user, channel = self._getChannelForMember(session, workspaceId, channelId, userEmail)
+
+            read = (
+                session.query(ChannelUser)
+                .filter(ChannelUser.channelId == channel.id, ChannelUser.userId == user.id)
+                .first()
+            )
+            if read:
+                read.lastReadAt = datetime.now()
+            else:
+                read = ChannelUser(channelId=channel.id, userId=user.id, lastReadAt=datetime.now())
+                session.add(read)
+            session.commit()
+
     def markDirectChatRead(self, workspaceId, directChatId, userEmail):
         with Session(self.app_engine) as session:
             user = session.query(User).filter(User.email == userEmail).first()
@@ -1015,6 +1148,27 @@ class Setup:
     def getUserById(self, userId):
         with Session(self.app_engine) as session:
             return session.query(User).filter(User.id == userId).first()
+
+    def getUserWorkspaceIds(self, email):
+        """Ids of every workspace the user belongs to (for joining socket rooms)."""
+        with Session(self.app_engine) as session:
+            user = session.query(User).filter(User.email == email).first()
+            if not user:
+                return []
+            rows = (
+                session.query(WorkSpaceUser.workspaceId)
+                .filter(WorkSpaceUser.userId == user.id)
+                .all()
+            )
+            return [row[0] for row in rows]
+
+    def getDirectChatUserIds(self, directChatId):
+        """Both participant ids of a direct chat (for targeting their user rooms)."""
+        with Session(self.app_engine) as session:
+            chat = session.query(DirectChat).filter(DirectChat.id == self._asId(directChatId)).first()
+            if not chat:
+                return []
+            return [chat.user1Id, chat.user2Id]
 
     def getWorkspaceById(self, workspaceId):
         with Session(self.app_engine) as session:

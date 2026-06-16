@@ -2,6 +2,7 @@ import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
   acceptWorkspacePayment,
   createWorkspace,
+  deleteWorkspace,
   listWorkspaces,
   updateWorkspaceLogo,
 } from "../api/endpoints/workspace/workspace.ts";
@@ -24,6 +25,11 @@ import type {
 } from "../api/models";
 import {qk} from "./keys.ts";
 
+/**
+ * Query for the signed-in user's workspaces. The workspace payload embeds its
+ * channels and members, so most workspace-scoped screens read from this one
+ * query and the mutations below invalidate it.
+ */
 export function useWorkspaces() {
   return useQuery({
     queryKey: qk.workspaces,
@@ -34,6 +40,12 @@ export function useWorkspaces() {
   });
 }
 
+/**
+ * Mutation that starts workspace creation. The workspace is provisional until
+ * paid for; this returns the Stripe client secret used to confirm payment.
+ *
+ * @returns The Stripe payment-intent client secret.
+ */
 export function useCreateWorkspace() {
   return useMutation({
     mutationFn: async (data: CreateWorkspaceBody): Promise<string> => {
@@ -43,6 +55,10 @@ export function useCreateWorkspace() {
   });
 }
 
+/**
+ * Mutation that confirms a workspace payment server-side (after Stripe
+ * succeeds), then refreshes the workspace list so the new one appears.
+ */
 export function useAcceptWorkspacePayment() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -51,6 +67,19 @@ export function useAcceptWorkspacePayment() {
   });
 }
 
+/**
+ * Mutation that permanently deletes a workspace (owner only), then refreshes
+ * the workspace list. Callers navigate away from the deleted workspace.
+ */
+export function useDeleteWorkspace() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (workspaceId: string) => deleteWorkspace(workspaceId),
+    onSuccess: () => queryClient.invalidateQueries({queryKey: qk.workspaces}),
+  });
+}
+
+/** Mutation that uploads a new workspace logo, then refreshes the list. */
 export function useUpdateWorkspaceLogo() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -62,6 +91,7 @@ export function useUpdateWorkspaceLogo() {
 
 // ----- Channels (a channel lives inside the workspace payload) -----
 
+/** Mutation that creates a channel in a workspace, then refreshes the list. */
 export function useCreateChannel() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -71,6 +101,7 @@ export function useCreateChannel() {
   });
 }
 
+/** Mutation that renames a channel, then refreshes the workspace list. */
 export function useRenameChannel() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -87,6 +118,7 @@ export function useRenameChannel() {
   });
 }
 
+/** Mutation that deletes a channel (and its messages), then refreshes. */
 export function useDeleteChannel() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -98,6 +130,7 @@ export function useDeleteChannel() {
 
 // ----- Members -----
 
+/** Mutation that adds a user to a workspace, then refreshes the list. */
 export function useAddMember() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -107,6 +140,7 @@ export function useAddMember() {
   });
 }
 
+/** Mutation that removes a user from a workspace, then refreshes the list. */
 export function useRemoveMember() {
   const queryClient = useQueryClient();
   return useMutation({
@@ -116,6 +150,7 @@ export function useRemoveMember() {
   });
 }
 
+/** Mutation that changes a member's role (admin/member), then refreshes. */
 export function useUpdateMemberRole() {
   const queryClient = useQueryClient();
   return useMutation({

@@ -16,6 +16,21 @@ import WorkspaceSettingsPage from "./pages/WorkspaceSettingsPage/WorkspaceSettin
 import ProfileSettingsPage from "./pages/ProfileSettingsPage/ProfileSettingsPage.tsx";
 import NotFoundPage from "./pages/NotFoundPage/NotFoundPage.tsx";
 
+/**
+ * Application router.
+ *
+ * Route tree:
+ * - `/` — {@link Root} shell (renders the global modal + animated outlet).
+ *   - index → {@link HomePage}; `auth/login`, `auth/register` (public).
+ *   - {@link RequireAuth} guard wraps every authenticated route:
+ *     - `workspaces` → {@link WorkspacesPage}.
+ *     - `workspaces/:workspaceId` → {@link WorkspaceLayout} (sidebar + outlet),
+ *       nesting the channel, direct-chat, members and settings screens.
+ *     - `settings` → {@link ProfileSettingsPage}.
+ *   - `*` → {@link NotFoundPage}.
+ *
+ * {@link RouteError} is the root error boundary for the whole tree.
+ */
 const router = createBrowserRouter([
   {
     path: "/",
@@ -48,6 +63,7 @@ const router = createBrowserRouter([
   }
 ])
 
+/** Root component: mounts the {@link router}. Rendered once from `main.tsx`. */
 function App() {
   return <RouterProvider router={router}/>
 }

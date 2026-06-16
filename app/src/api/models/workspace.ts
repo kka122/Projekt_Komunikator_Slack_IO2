@@ -11,6 +11,7 @@ import type { WorkspaceUserRole } from "./workspaceUserRole";
 export interface Workspace {
   id: string;
   name: string;
+  /** Relative URL of the workspace logo, or empty string when unset. */
   logoUrl: string;
   /** The role of the authenticated user within the workspace */
   userRole: WorkspaceUserRole;

@@ -77,6 +77,10 @@ components:
         status:
           type: string
           enum: [ online, meeting, vacations, notDisturb, workAtHome, freeTime, offline ]
+        workspaceRole:
+          type: string
+          enum: [ owner, admin, member ]
+          description: The user's role within the workspace (only set in workspace member listings).
 
     # ----- Channel -----
     Channel:
@@ -106,8 +110,8 @@ components:
           example: My Workspace
         logoUrl:
           type: string
-          format: uri
-          example: https://example.com/workspace-logo.png
+          description: Relative URL of the workspace logo, or empty string when unset.
+          example: /api/uploads/logos/abc123.png
         userRole:
           type: string
           enum: [ owner, admin, member ]
@@ -136,8 +140,7 @@ components:
           description: Name of the attached file.
         url:
           type: string
-          format: uri
-          description: URL where the attachment can be accessed.
+          description: Relative URL where the attachment can be accessed.
         size:
           type: integer
           description: Size of the attached file in bytes.
@@ -840,6 +843,26 @@ paths:
           $ref: '#/components/responses/402'
 
   /workspaces/{workspaceId}:
+    delete:
+      operationId: deleteWorkspace
+      tags: [ Workspace ]
+      summary: Delete a workspace
+      description: Permanently deletes the workspace and all of its channels, messages and direct chats. Only the workspace owner can delete it.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+      responses:
+        '200':
+          description: Workspace deleted successfully
+
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
     patch:
       operationId: updateWorkspaceLogo
       tags: [ Workspace ]
@@ -917,6 +940,28 @@ paths:
         '404':
           $ref: '#/components/responses/404'
 
+  /workspaces/{workspaceId}/channels/{channelId}/read:
+    post:
+      operationId: markChannelRead
+      tags: [ Channel ]
+      summary: Mark a channel as read
+      description: Marks the channel as read for the authenticated user, clearing its unread message count.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/ChannelID'
+      responses:
+        '200':
+          description: Channel marked as read.
+
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
   /workspaces/{workspaceId}/channels/{channelId}:
     patch:
       operationId: updateChannelName
@@ -987,6 +1032,65 @@ paths:
 
         '400':
           $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+    post:
+      operationId: createDirectChat
+      tags: [ Direct Chat ]
+      summary: Open or create a direct chat with another user
+      description: Returns the existing direct chat with the given user in the workspace, creating it if none exists.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [ userId ]
+              properties:
+                userId:
+                  type: string
+                  description: Id of the other participant.
+      responses:
+        '200':
+          description: The existing or newly created direct chat.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DirectChat'
+
+        '400':
+          $ref: '#/components/responses/400'
+        '401':
+          $ref: '#/components/responses/401'
+        '403':
+          $ref: '#/components/responses/403'
+        '404':
+          $ref: '#/components/responses/404'
+
+  /workspaces/{workspaceId}/direct-chats/{directChatId}/read:
+    post:
+      operationId: markDirectChatRead
+      tags: [ Direct Chat ]
+      summary: Mark a direct chat as read
+      description: Marks the direct chat as read for the authenticated user, clearing its unread message count.
+      security:
+        - TokenAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/WorkspaceID'
+        - $ref: '#/components/parameters/DirectChatID'
+      responses:
+        '200':
+          description: Direct chat marked as read.
+
         '401':
           $ref: '#/components/responses/401'
         '403':

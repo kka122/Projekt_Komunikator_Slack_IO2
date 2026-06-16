@@ -8,3 +8,12 @@
   bottom: 0;
   left: 0;
 }
+
+/* Anchor to the nearest positioned ancestor (e.g. the layout main column)
+   instead of the viewport, so the bar stays within that column. */
+.contained {
+  position: absolute;
+  width: auto;
+  left: 0;
+  right: 0;
+}

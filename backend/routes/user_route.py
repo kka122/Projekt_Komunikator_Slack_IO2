@@ -6,6 +6,7 @@ from flask_jwt_extended import jwt_required, get_jwt_identity
 from sqlalchemy.exc import DataError
 from db.DataBaseSetupInitialize import setup
 from db.DataTypes import UserStatus
+from realtime import events as rt
 
 load_dotenv('./.env')
 load_dotenv('../.env')
@@ -65,6 +66,11 @@ def update_current_user_profile():
 
     if not setup.updateUserProfile(email=email, name=name.strip(), surname=surname.strip(), status=status,avatarUrl=avatar_url):
         return jsonify({"error": "Uzytkownik nie istnieje"}), 404
+
+    # Fan the change out so other members see the new status/name/avatar live.
+    user = setup.getUserByEmail(email)
+    if user is not None:
+        rt.user_profile_changed(user.id, setup.getUserWorkspaceIds(email))
 
     return jsonify({"message": "Profil zaktualizowany pomyslnie"}), 200
 
@@ -131,6 +137,8 @@ def add_user_to_workspace(userId, workspaceId):
         return jsonify({"error": "Uzytkownik jest juz czlonkiem workspace"}), 400
 
     setup.addUserToWorkspace(workspaceId=workspace_id, userId=user_id)
+    rt.workspace_changed(workspace_id)        # existing members see the new member
+    rt.user_workspaces_changed(user_id)       # the added user sees the new workspace
     return jsonify({"message": "Uzytkownik zostal dodany do workspace"}), 200
 
 @user_route.route('/users/<userId>/workspaces/<workspaceId>', methods=['DELETE'])
@@ -161,6 +169,8 @@ def remove_user_from_workspace(userId, workspaceId):
         return jsonify({"error": "Uzytkownik nie jest czlonkiem tego workspace"}), 404
 
     setup.removeUserFromWorkspace(workspaceId=workspace_id, userId=user_id)
+    rt.workspace_changed(workspace_id)        # remaining members see the updated list
+    rt.user_workspaces_changed(user_id)       # the removed user loses the workspace
     return jsonify({"message": "Uzytkownik zostal usuniety z workspace"}), 200
 
 
@@ -196,6 +206,7 @@ def update_user_role_in_workspace(userId, workspaceId):
     if not setup.updateUserRoleInWorkspace(workspaceId=workspace_id, userId=user_id, newRole=role):
         return jsonify({"error": "Uzytkownik nie jest czlonkiem tego workspace"}), 404
 
+    rt.workspace_changed(workspace_id)
     return jsonify({"message": "Rola uzytkownika zostala zaktualizowana"}), 200
 
 @user_route.route('/uploads/avatars/<filename>', methods=['GET'])

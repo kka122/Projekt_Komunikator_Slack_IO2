@@ -4,10 +4,13 @@
  * Szponcik communicator API
  * OpenAPI spec version: 1.0.0
  */
-import { useQuery } from "@tanstack/react-query";
+import { useMutation, useQuery } from "@tanstack/react-query";
 import type {
+  MutationFunction,
   QueryFunction,
   QueryKey,
+  UseMutationOptions,
+  UseMutationResult,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
@@ -16,6 +19,8 @@ import axios from "axios";
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from "axios";
 
 import type {
+  CreateDirectChatBody,
+  DirectChat,
   DirectChatListResponse,
   N400Response,
   N401Response,
@@ -114,3 +119,176 @@ export function useListDirectChats<
 
   return { ...query, queryKey: queryOptions.queryKey };
 }
+
+/**
+ * Returns the existing direct chat with the given user in the workspace, creating it if none exists.
+ * @summary Open or create a direct chat with another user
+ */
+export const createDirectChat = (
+  workspaceId: string,
+  createDirectChatBody: CreateDirectChatBody,
+  options?: AxiosRequestConfig,
+): Promise<AxiosResponse<DirectChat>> => {
+  return axios.post(
+    `/workspaces/${workspaceId}/direct-chats`,
+    createDirectChatBody,
+    options,
+  );
+};
+
+export const getCreateDirectChatMutationOptions = <
+  TError = AxiosError<
+    N400Response | N401Response | N403Response | N404Response
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createDirectChat>>,
+    TError,
+    { workspaceId: string; data: CreateDirectChatBody },
+    TContext
+  >;
+  axios?: AxiosRequestConfig;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof createDirectChat>>,
+  TError,
+  { workspaceId: string; data: CreateDirectChatBody },
+  TContext
+> => {
+  const mutationKey = ["createDirectChat"];
+  const { mutation: mutationOptions, axios: axiosOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, axios: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof createDirectChat>>,
+    { workspaceId: string; data: CreateDirectChatBody }
+  > = (props) => {
+    const { workspaceId, data } = props ?? {};
+
+    return createDirectChat(workspaceId, data, axiosOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type CreateDirectChatMutationResult = NonNullable<
+  Awaited<ReturnType<typeof createDirectChat>>
+>;
+export type CreateDirectChatMutationBody = CreateDirectChatBody;
+export type CreateDirectChatMutationError = AxiosError<
+  N400Response | N401Response | N403Response | N404Response
+>;
+
+/**
+ * @summary Open or create a direct chat with another user
+ */
+export const useCreateDirectChat = <
+  TError = AxiosError<
+    N400Response | N401Response | N403Response | N404Response
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof createDirectChat>>,
+    TError,
+    { workspaceId: string; data: CreateDirectChatBody },
+    TContext
+  >;
+  axios?: AxiosRequestConfig;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof createDirectChat>>,
+  TError,
+  { workspaceId: string; data: CreateDirectChatBody },
+  TContext
+> => {
+  return useMutation(getCreateDirectChatMutationOptions(options));
+};
+/**
+ * Marks the direct chat as read for the authenticated user, clearing its unread message count.
+ * @summary Mark a direct chat as read
+ */
+export const markDirectChatRead = (
+  workspaceId: string,
+  directChatId: string,
+  options?: AxiosRequestConfig,
+): Promise<AxiosResponse<void>> => {
+  return axios.post(
+    `/workspaces/${workspaceId}/direct-chats/${directChatId}/read`,
+    undefined,
+    options,
+  );
+};
+
+export const getMarkDirectChatReadMutationOptions = <
+  TError = AxiosError<N401Response | N403Response | N404Response>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof markDirectChatRead>>,
+    TError,
+    { workspaceId: string; directChatId: string },
+    TContext
+  >;
+  axios?: AxiosRequestConfig;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof markDirectChatRead>>,
+  TError,
+  { workspaceId: string; directChatId: string },
+  TContext
+> => {
+  const mutationKey = ["markDirectChatRead"];
+  const { mutation: mutationOptions, axios: axiosOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, axios: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof markDirectChatRead>>,
+    { workspaceId: string; directChatId: string }
+  > = (props) => {
+    const { workspaceId, directChatId } = props ?? {};
+
+    return markDirectChatRead(workspaceId, directChatId, axiosOptions);
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type MarkDirectChatReadMutationResult = NonNullable<
+  Awaited<ReturnType<typeof markDirectChatRead>>
+>;
+
+export type MarkDirectChatReadMutationError = AxiosError<
+  N401Response | N403Response | N404Response
+>;
+
+/**
+ * @summary Mark a direct chat as read
+ */
+export const useMarkDirectChatRead = <
+  TError = AxiosError<N401Response | N403Response | N404Response>,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof markDirectChatRead>>,
+    TError,
+    { workspaceId: string; directChatId: string },
+    TContext
+  >;
+  axios?: AxiosRequestConfig;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof markDirectChatRead>>,
+  TError,
+  { workspaceId: string; directChatId: string },
+  TContext
+> => {
+  return useMutation(getMarkDirectChatReadMutationOptions(options));
+};

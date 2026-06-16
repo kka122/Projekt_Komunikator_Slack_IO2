@@ -11,6 +11,16 @@ import queryClient from "./config/queryClient.ts";
 import {API_BASE_URL} from "./config/api.ts";
 import {setupAuthInterceptors} from "./api/httpAuth.ts";
 
+/**
+ * Application entry point. Configures axios globally (send cookies + base URL),
+ * installs the CSRF/refresh interceptors, then mounts {@link App} wrapped in the
+ * provider stack:
+ * - {@link GoogleOAuthProvider} — Google sign-in.
+ * - {@link QueryClientProvider} — react-query cache ({@link queryClient}).
+ * - {@link HotkeysProvider} — global keyboard-shortcut context.
+ */
+
+// withCredentials lets the httpOnly JWT cookies ride along on every request.
 axios.defaults.withCredentials = true;
 axios.defaults.baseURL = API_BASE_URL
 

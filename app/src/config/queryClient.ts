@@ -1,7 +1,13 @@
 import {QueryClient} from "@tanstack/react-query";
 
-// Backend is not wired up yet; keep retries off so a dead API fails fast
-// instead of stalling the UI, and let screens render their error state.
+/**
+ * Shared react-query client for the whole app (passed to `QueryClientProvider`
+ * in `main.tsx`).
+ *
+ * Defaults: retries off so a dead API fails fast and screens can render their
+ * error state instead of stalling; no refetch on window focus; queries stay
+ * fresh for 30s before they become eligible for background refetch.
+ */
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {

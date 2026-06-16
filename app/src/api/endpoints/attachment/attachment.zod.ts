@@ -24,3 +24,19 @@ export const DeleteAttachmentFromChannelMessageParams = zod.object({
 });
 
 export const DeleteAttachmentFromChannelMessageResponse = zod.unknown();
+
+/**
+ * Delete an existing attachment from a specific message within a direct chat. Only the author of the message or workspace admins can delete attachments.
+ * @summary Delete an attachment from a message in a direct chat
+ */
+export const DeleteAttachmentFromDirectChatMessageParams = zod.object({
+  workspaceId: zod.string().uuid().describe("The ID of the workspace."),
+  directChatId: zod.string().uuid().describe("The ID of the direct chat."),
+  messageId: zod
+    .string()
+    .uuid()
+    .describe("The unique identifier of the message."),
+  attachmentId: zod.string().uuid().describe("The ID of the attachment."),
+});
+
+export const DeleteAttachmentFromDirectChatMessageResponse = zod.unknown();

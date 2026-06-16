@@ -9,7 +9,7 @@ import { faker } from "@faker-js/faker";
 import { HttpResponse, http } from "msw";
 import type { RequestHandlerOptions } from "msw";
 
-import type { DirectChatListResponse } from "../../models";
+import type { DirectChat, DirectChatListResponse } from "../../models";
 
 export const getListDirectChatsResponseMock = (
   overrideResponse: Partial<Extract<DirectChatListResponse, object>> = {},
@@ -34,9 +34,41 @@ export const getListDirectChatsResponseMock = (
         "freeTime",
         "offline",
       ] as const),
+      workspaceRole: faker.helpers.arrayElement([
+        faker.helpers.arrayElement(["owner", "admin", "member"] as const),
+        undefined,
+      ]),
     },
     newMessagesCount: faker.number.int(),
   })),
+  ...overrideResponse,
+});
+
+export const getCreateDirectChatResponseMock = (
+  overrideResponse: Partial<Extract<DirectChat, object>> = {},
+): DirectChat => ({
+  id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+  participant: {
+    id: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    name: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    surname: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    email: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    avatarUrl: faker.string.alpha({ length: { min: 10, max: 20 } }),
+    status: faker.helpers.arrayElement([
+      "online",
+      "meeting",
+      "vacations",
+      "notDisturb",
+      "workAtHome",
+      "freeTime",
+      "offline",
+    ] as const),
+    workspaceRole: faker.helpers.arrayElement([
+      faker.helpers.arrayElement(["owner", "admin", "member"] as const),
+      undefined,
+    ]),
+  },
+  newMessagesCount: faker.number.int(),
   ...overrideResponse,
 });
 
@@ -63,4 +95,53 @@ export const getListDirectChatsMockHandler = (
     options,
   );
 };
-export const getDirectChatMock = () => [getListDirectChatsMockHandler()];
+
+export const getCreateDirectChatMockHandler = (
+  overrideResponse?:
+    | DirectChat
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<DirectChat> | DirectChat),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    "*/workspaces/:workspaceId/direct-chats",
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      return HttpResponse.json(
+        overrideResponse !== undefined
+          ? typeof overrideResponse === "function"
+            ? await overrideResponse(info)
+            : overrideResponse
+          : getCreateDirectChatResponseMock(),
+        { status: 200 },
+      );
+    },
+    options,
+  );
+};
+
+export const getMarkDirectChatReadMockHandler = (
+  overrideResponse?:
+    | void
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<void> | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    "*/workspaces/:workspaceId/direct-chats/:directChatId/read",
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      if (typeof overrideResponse === "function") {
+        await overrideResponse(info);
+      }
+
+      return new HttpResponse(null, { status: 200 });
+    },
+    options,
+  );
+};
+export const getDirectChatMock = () => [
+  getListDirectChatsMockHandler(),
+  getCreateDirectChatMockHandler(),
+  getMarkDirectChatReadMockHandler(),
+];

@@ -147,3 +147,125 @@ export const useDeleteAttachmentFromChannelMessage = <
     getDeleteAttachmentFromChannelMessageMutationOptions(options),
   );
 };
+/**
+ * Delete an existing attachment from a specific message within a direct chat. Only the author of the message or workspace admins can delete attachments.
+ * @summary Delete an attachment from a message in a direct chat
+ */
+export const deleteAttachmentFromDirectChatMessage = (
+  workspaceId: string,
+  directChatId: string,
+  messageId: string,
+  attachmentId: string,
+  options?: AxiosRequestConfig,
+): Promise<AxiosResponse<void>> => {
+  return axios.delete(
+    `/workspaces/${workspaceId}/direct-chats/${directChatId}/messages/${messageId}/attachments/${attachmentId}`,
+    options,
+  );
+};
+
+export const getDeleteAttachmentFromDirectChatMessageMutationOptions = <
+  TError = AxiosError<
+    N400Response | N401Response | N403Response | N404Response
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteAttachmentFromDirectChatMessage>>,
+    TError,
+    {
+      workspaceId: string;
+      directChatId: string;
+      messageId: string;
+      attachmentId: string;
+    },
+    TContext
+  >;
+  axios?: AxiosRequestConfig;
+}): UseMutationOptions<
+  Awaited<ReturnType<typeof deleteAttachmentFromDirectChatMessage>>,
+  TError,
+  {
+    workspaceId: string;
+    directChatId: string;
+    messageId: string;
+    attachmentId: string;
+  },
+  TContext
+> => {
+  const mutationKey = ["deleteAttachmentFromDirectChatMessage"];
+  const { mutation: mutationOptions, axios: axiosOptions } = options
+    ? options.mutation &&
+      "mutationKey" in options.mutation &&
+      options.mutation.mutationKey
+      ? options
+      : { ...options, mutation: { ...options.mutation, mutationKey } }
+    : { mutation: { mutationKey }, axios: undefined };
+
+  const mutationFn: MutationFunction<
+    Awaited<ReturnType<typeof deleteAttachmentFromDirectChatMessage>>,
+    {
+      workspaceId: string;
+      directChatId: string;
+      messageId: string;
+      attachmentId: string;
+    }
+  > = (props) => {
+    const { workspaceId, directChatId, messageId, attachmentId } = props ?? {};
+
+    return deleteAttachmentFromDirectChatMessage(
+      workspaceId,
+      directChatId,
+      messageId,
+      attachmentId,
+      axiosOptions,
+    );
+  };
+
+  return { mutationFn, ...mutationOptions };
+};
+
+export type DeleteAttachmentFromDirectChatMessageMutationResult = NonNullable<
+  Awaited<ReturnType<typeof deleteAttachmentFromDirectChatMessage>>
+>;
+
+export type DeleteAttachmentFromDirectChatMessageMutationError = AxiosError<
+  N400Response | N401Response | N403Response | N404Response
+>;
+
+/**
+ * @summary Delete an attachment from a message in a direct chat
+ */
+export const useDeleteAttachmentFromDirectChatMessage = <
+  TError = AxiosError<
+    N400Response | N401Response | N403Response | N404Response
+  >,
+  TContext = unknown,
+>(options?: {
+  mutation?: UseMutationOptions<
+    Awaited<ReturnType<typeof deleteAttachmentFromDirectChatMessage>>,
+    TError,
+    {
+      workspaceId: string;
+      directChatId: string;
+      messageId: string;
+      attachmentId: string;
+    },
+    TContext
+  >;
+  axios?: AxiosRequestConfig;
+}): UseMutationResult<
+  Awaited<ReturnType<typeof deleteAttachmentFromDirectChatMessage>>,
+  TError,
+  {
+    workspaceId: string;
+    directChatId: string;
+    messageId: string;
+    attachmentId: string;
+  },
+  TContext
+> => {
+  return useMutation(
+    getDeleteAttachmentFromDirectChatMessageMutationOptions(options),
+  );
+};

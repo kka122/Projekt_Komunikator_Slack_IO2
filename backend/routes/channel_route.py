@@ -6,6 +6,7 @@ from flask_jwt_extended import (
 )
 
 from db.DataBaseSetupInitialize import setup
+from realtime import events as rt
 
 load_dotenv('./.env')
 load_dotenv('../.env')
@@ -50,6 +51,7 @@ def create_channel(workspaceId):
 
     try:
         setup.addChannel(workspaceId=workspaceId, name=channel_name, creatorEmail=user_email)
+        rt.workspace_changed(workspaceId)
         return jsonify({"message": "Kanał został pomyślnie utworzony"}), 201
     except ValueError as e:
         return jsonify({"error": str(e)}), 404
@@ -92,6 +94,7 @@ def update_channel_name(workspaceId, channelId):
     try:
         setup.updateChannelName(workspaceId=workspaceId, channelId=channelId, newName=channel_name,
                                 updaterEmail=user_email)
+        rt.workspace_changed(workspaceId)
         return jsonify({"message": "Nazwa kanału zaktualizowana"}), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 404
@@ -109,8 +112,23 @@ def delete_channel(workspaceId, channelId):
 
     try:
         setup.deleteChannel(workspaceId=workspaceId, channelId=channelId, creatorEmail=user_email)
+        rt.workspace_changed(workspaceId)
         return jsonify({"message": "Kanał został usunięty"}), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 404
     except Exception as e:
         return jsonify({"error": f"Wystąpił błąd podczas usuwania kanału: {str(e)}"}), 500
+
+@channel_route.route("/workspaces/<workspaceId>/channels/<channelId>/read", methods=["POST"])
+@jwt_required()
+def mark_channel_read(workspaceId, channelId):
+    user_email = get_jwt_identity()
+    try:
+        setup.markChannelRead(workspaceId=workspaceId, channelId=channelId, userEmail=user_email)
+        return jsonify({"message": "Oznaczono jako przeczytane"}), 200
+    except PermissionError as e:
+        return jsonify({"error": str(e)}), 403
+    except (ValueError, LookupError) as e:
+        return jsonify({"error": str(e)}), 404
+    except Exception as e:
+        return jsonify({"error": f"Wystąpił błąd: {str(e)}"}), 500

@@ -6,6 +6,7 @@ from flask_jwt_extended import (
 )
 
 from db.DataBaseSetupInitialize import setup
+from realtime import events as rt
 
 load_dotenv('./.env')
 load_dotenv('../.env')
@@ -21,6 +22,7 @@ def add_reaction_to_channel_message(workspaceId, channelId, messageId):
     emoji = data.get("emoji")
     try:
         reaction = setup.addReactionChannel(workspaceId, channelId, messageId, emoji, user_email)
+        rt.channel_reaction_added(workspaceId, channelId, messageId, reaction)
         return jsonify(reaction), 201
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
@@ -38,6 +40,7 @@ def remove_reaction_from_channel_message(workspaceId, channelId, messageId, reac
     user_email = get_jwt_identity()
     try:
         setup.deleteReactionChannel(workspaceId, channelId, messageId, reactionId, user_email)
+        rt.channel_reaction_removed(workspaceId, channelId, messageId, reactionId)
         return jsonify({"message": "Reakcja zostala usunieta"}), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
@@ -57,6 +60,7 @@ def add_reaction_to_direct_chat_message(workspaceId, directChatId, messageId):
     emoji = data.get("emoji")
     try:
         reaction = setup.addReactionChat(workspaceId, directChatId, messageId, emoji, user_email)
+        rt.dm_reaction_added(workspaceId, directChatId, messageId, reaction)
         return jsonify(reaction), 201
     except ValueError as e:
         return jsonify({"error": str(e)}), 400
@@ -74,6 +78,7 @@ def remove_reaction_from_direct_chat_message(workspaceId, directChatId, messageI
     user_email = get_jwt_identity()
     try:
         setup.deleteReactionChat(workspaceId, directChatId, messageId, reactionId, user_email)
+        rt.dm_reaction_removed(workspaceId, directChatId, messageId, reactionId)
         return jsonify({"message": "Reakcja zostala usunieta"}), 200
     except ValueError as e:
         return jsonify({"error": str(e)}), 400

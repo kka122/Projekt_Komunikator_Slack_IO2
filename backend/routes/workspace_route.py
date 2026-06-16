@@ -7,6 +7,7 @@ import stripe
 from kafka.errors import KafkaError
 from db.DataBaseSetupInitialize import setup
 from kafka_producer import publish_workspace_create
+from realtime import events as rt
 
 
 load_dotenv('./.env')
@@ -36,8 +37,20 @@ def create_workspace():
     if not stripe.api_key:
         return jsonify({"error": "Brak STRIPE_SECRET_KEY"}), 500
 
+    logo_url = ""
+    logo = request.files.get("workspaceLogo")
+    if logo is not None and logo.filename:
+        try:
+            os.makedirs(LOGO_UPLOAD_DIR, exist_ok=True)
+            filename = f"{uuid.uuid4().hex}{os.path.splitext(logo.filename)[1]}"
+            logo.save(os.path.join(LOGO_UPLOAD_DIR, filename))
+            logo_url = f"/api/uploads/logos/{filename}"
+        except OSError as e:
+            print(f"[Workspace] Blad zapisu logo: {e}")
+            return jsonify({"error": "Nie udalo sie zapisac logo"}), 500
+
     try:
-        intent = stripe.PaymentIntent.create(amount = WORKSPACE_PRICE_GROSZE,currency=CURRENCY,metadata={"owner_email":email,"workspace_name":workspace_name},automatic_payment_methods={"enabled": True, "allow_redirects": "never"},)
+        intent = stripe.PaymentIntent.create(amount = WORKSPACE_PRICE_GROSZE,currency=CURRENCY,metadata={"owner_email":email,"workspace_name":workspace_name,"logo_url":logo_url},automatic_payment_methods={"enabled": True, "allow_redirects": "never"},)
     except stripe.error.StripeError as e:
         print(f"[Workspace] Blad Stripe przy tworzeniu PaymentIntent: {e}")
         return jsonify({"error": "Nie udalo sie zainicjowac platnosci"}), 502
@@ -71,11 +84,13 @@ def accept_workspace_payment():
           return jsonify({"error": "Platnosc nie zostala zakonczona"}), 402
 
     workspace_name = metadata.get("workspace_name") or "Workspace"
+    logo_url = metadata.get("logo_url") or ""
     try:
         publish_workspace_create({
             "workspace_name": workspace_name,
             "owner_email": email,
             "stripe_payment_intent_id": payment_intent_id,
+            "logo_url": logo_url,
         })
     except KafkaError as e:
         print(f"[Workspace] Kafka niedostepna: {e}")
@@ -93,6 +108,21 @@ def list_workspaces():
 
     workspaces = setup.listUserWorkspaces(email)
     return jsonify({"workspaces": workspaces}), 200
+
+@workspace_route.route('/workspaces/<workspaceId>', methods=['DELETE'])
+@jwt_required()
+def delete_workspace(workspaceId):
+    email = get_jwt_identity()
+    try:
+        setup.deleteWorkspace(workspaceId, email)
+        rt.workspace_deleted(workspaceId)
+        return jsonify({"message": "Workspace zostal usuniety"}), 200
+    except PermissionError as e:
+        return jsonify({"error": str(e)}), 403
+    except (ValueError, LookupError) as e:
+        return jsonify({"error": str(e)}), 404
+    except Exception as e:
+        return jsonify({"error": f"Wystapil blad podczas usuwania workspace: {str(e)}"}), 500
 
 @workspace_route.route('/workspaces/<workspaceId>', methods=['PATCH'])
 @jwt_required()
@@ -128,6 +158,7 @@ def update_workspace_logo(workspaceId):
         return jsonify({"error": "Nie udalo sie zapisac logo"}), 500
 
     setup.updateWorkspaceLogo(workspaceId=workspace_id, logoUrl=logo_url)
+    rt.workspace_changed(workspace_id)
     return jsonify({"message": "Logo zostalo zaktualizowane"}), 200
 
 @workspace_route.route('/uploads/logos/<filename>', methods=['GET'])

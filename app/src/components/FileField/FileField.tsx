@@ -3,17 +3,26 @@ import {type Hotkey} from "@tanstack/react-hotkeys";
 import InlineHotkey from "../InlineHotkey/InlineHotkey.tsx";
 import styles from "./FileField.module.css";
 
+/** Props for {@link FileField}. */
 interface FileFieldProps {
+  /** Visible label text (rendered as an {@link InlineHotkey}). */
   label: string;
+  /** Key that opens the file picker. */
   hotkeyKey: Hotkey;
+  /** Currently selected file, or null. */
   file: File | null;
+  /** Called with the chosen file (or null when cleared). */
   onChange: (file: File | null) => void;
+  /** Accepted MIME types for the picker. Defaults to "image/*". */
   accept?: string;
+  /** Which occurrence of `hotkeyKey` in the label to highlight. Defaults to 0. */
   letterIndex?: number;
 }
 
-// File picker driven by a hotkey: the visible label is an InlineHotkey that
-// clicks a hidden <input type="file">.
+/**
+ * Hotkey-driven file picker: the visible label is an {@link InlineHotkey} that
+ * clicks a hidden `<input type="file">`. Shows the selected file name beside it.
+ */
 function FileField({
   label,
   hotkeyKey,

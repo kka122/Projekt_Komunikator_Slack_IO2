@@ -18,7 +18,7 @@
 }
 
 .list:focus-visible {
-  box-shadow: inset 0 0 0 0.12rem var(--color-primary);
+  box-shadow: inset 0 0 0 0.12rem color-mix(in srgb, var(--color-primary) 45%, var(--color-background));
   border-radius: 0.4rem;
 }
 

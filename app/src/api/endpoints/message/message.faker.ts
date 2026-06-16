@@ -32,6 +32,10 @@ export const getListChannelMessagesResponseMock = (
         "freeTime",
         "offline",
       ] as const),
+      workspaceRole: faker.helpers.arrayElement([
+        faker.helpers.arrayElement(["owner", "admin", "member"] as const),
+        undefined,
+      ]),
     },
     timestamp: faker.date.past().toISOString().slice(0, 19) + "Z",
     attachments: faker.helpers.arrayElement([
@@ -41,7 +45,7 @@ export const getListChannelMessagesResponseMock = (
       ).map(() => ({
         id: faker.string.alpha({ length: { min: 10, max: 20 } }),
         filename: faker.string.alpha({ length: { min: 10, max: 20 } }),
-        url: faker.internet.url(),
+        url: faker.string.alpha({ length: { min: 10, max: 20 } }),
         size: faker.number.int(),
       })),
       undefined,
@@ -68,6 +72,10 @@ export const getListChannelMessagesResponseMock = (
             "freeTime",
             "offline",
           ] as const),
+          workspaceRole: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["owner", "admin", "member"] as const),
+            undefined,
+          ]),
         },
       })),
       undefined,
@@ -101,6 +109,10 @@ export const getListDirectChatMessagesResponseMock = (
         "freeTime",
         "offline",
       ] as const),
+      workspaceRole: faker.helpers.arrayElement([
+        faker.helpers.arrayElement(["owner", "admin", "member"] as const),
+        undefined,
+      ]),
     },
     timestamp: faker.date.past().toISOString().slice(0, 19) + "Z",
     attachments: faker.helpers.arrayElement([
@@ -110,7 +122,7 @@ export const getListDirectChatMessagesResponseMock = (
       ).map(() => ({
         id: faker.string.alpha({ length: { min: 10, max: 20 } }),
         filename: faker.string.alpha({ length: { min: 10, max: 20 } }),
-        url: faker.internet.url(),
+        url: faker.string.alpha({ length: { min: 10, max: 20 } }),
         size: faker.number.int(),
       })),
       undefined,
@@ -137,6 +149,10 @@ export const getListDirectChatMessagesResponseMock = (
             "freeTime",
             "offline",
           ] as const),
+          workspaceRole: faker.helpers.arrayElement([
+            faker.helpers.arrayElement(["owner", "admin", "member"] as const),
+            undefined,
+          ]),
         },
       })),
       undefined,

@@ -70,6 +70,27 @@ export const getListChannelsMockHandler = (
   );
 };
 
+export const getMarkChannelReadMockHandler = (
+  overrideResponse?:
+    | void
+    | ((
+        info: Parameters<Parameters<typeof http.post>[1]>[0],
+      ) => Promise<void> | void),
+  options?: RequestHandlerOptions,
+) => {
+  return http.post(
+    "*/workspaces/:workspaceId/channels/:channelId/read",
+    async (info: Parameters<Parameters<typeof http.post>[1]>[0]) => {
+      if (typeof overrideResponse === "function") {
+        await overrideResponse(info);
+      }
+
+      return new HttpResponse(null, { status: 200 });
+    },
+    options,
+  );
+};
+
 export const getUpdateChannelNameMockHandler = (
   overrideResponse?:
     | void
@@ -114,6 +135,7 @@ export const getDeleteChannelMockHandler = (
 export const getChannelMock = () => [
   getCreateChannelMockHandler(),
   getListChannelsMockHandler(),
+  getMarkChannelReadMockHandler(),
   getUpdateChannelNameMockHandler(),
   getDeleteChannelMockHandler(),
 ];

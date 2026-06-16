@@ -2,8 +2,11 @@ import {type JSX} from "react";
 import {useRouteError} from "react-router";
 import AnimatedMain from "../../components/AnimatedMain/AnimatedMain.tsx";
 
-// Root error boundary. Uses a plain anchor (not useNavigate) so it stays safe
-// even if an error happens above the navigation context.
+/**
+ * Root route error boundary (`errorElement`). Renders the thrown error's message
+ * and a link home. Uses a plain `<a>` rather than `useNavigate`, so it stays
+ * safe even when the error happens above the navigation context.
+ */
 function RouteError(): JSX.Element {
   const error = useRouteError();
   const message = error instanceof Error ? error.message : "Something went wrong.";

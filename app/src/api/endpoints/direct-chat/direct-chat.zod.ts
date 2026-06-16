@@ -34,6 +34,12 @@ export const ListDirectChatsResponse = zod.object({
             "freeTime",
             "offline",
           ]),
+          workspaceRole: zod
+            .enum(["owner", "admin", "member"])
+            .optional()
+            .describe(
+              "The user's role within the workspace (only set in workspace member listings).",
+            ),
         })
         .describe("The other participant in the direct chat"),
       newMessagesCount: zod
@@ -42,3 +48,57 @@ export const ListDirectChatsResponse = zod.object({
     }),
   ),
 });
+
+/**
+ * Returns the existing direct chat with the given user in the workspace, creating it if none exists.
+ * @summary Open or create a direct chat with another user
+ */
+export const CreateDirectChatParams = zod.object({
+  workspaceId: zod.string().uuid().describe("The ID of the workspace."),
+});
+
+export const CreateDirectChatBody = zod.object({
+  userId: zod.string().describe("Id of the other participant."),
+});
+
+export const CreateDirectChatResponse = zod.object({
+  id: zod.string().describe("Unique identifier for the direct chat"),
+  participant: zod
+    .object({
+      id: zod.string().describe("Unique identifier for the user"),
+      name: zod.string().describe("Name of the user"),
+      surname: zod.string().describe("Surname of the user"),
+      email: zod.string().describe("Email address of the user"),
+      avatarUrl: zod.string().describe("URL of the user's avatar image"),
+      status: zod.enum([
+        "online",
+        "meeting",
+        "vacations",
+        "notDisturb",
+        "workAtHome",
+        "freeTime",
+        "offline",
+      ]),
+      workspaceRole: zod
+        .enum(["owner", "admin", "member"])
+        .optional()
+        .describe(
+          "The user's role within the workspace (only set in workspace member listings).",
+        ),
+    })
+    .describe("The other participant in the direct chat"),
+  newMessagesCount: zod
+    .number()
+    .describe("Number of new messages in the direct chat"),
+});
+
+/**
+ * Marks the direct chat as read for the authenticated user, clearing its unread message count.
+ * @summary Mark a direct chat as read
+ */
+export const MarkDirectChatReadParams = zod.object({
+  workspaceId: zod.string().uuid().describe("The ID of the workspace."),
+  directChatId: zod.string().uuid().describe("The ID of the direct chat."),
+});
+
+export const MarkDirectChatReadResponse = zod.unknown();

@@ -32,6 +32,10 @@ export const getGetCurrentUserProfileResponseMock = (
       "freeTime",
       "offline",
     ] as const),
+    workspaceRole: faker.helpers.arrayElement([
+      faker.helpers.arrayElement(["owner", "admin", "member"] as const),
+      undefined,
+    ]),
   },
   ...overrideResponse,
 });
@@ -57,6 +61,10 @@ export const getGetUserProfileByEmailResponseMock = (
       "freeTime",
       "offline",
     ] as const),
+    workspaceRole: faker.helpers.arrayElement([
+      faker.helpers.arrayElement(["owner", "admin", "member"] as const),
+      undefined,
+    ]),
   })),
   ...overrideResponse,
 });

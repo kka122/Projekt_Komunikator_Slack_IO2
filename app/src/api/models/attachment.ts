@@ -10,7 +10,7 @@ export interface Attachment {
   id: string;
   /** Name of the attached file. */
   filename: string;
-  /** URL where the attachment can be accessed. */
+  /** Relative URL where the attachment can be accessed. */
   url: string;
   /** Size of the attached file in bytes. */
   size: number;
