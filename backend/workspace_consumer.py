@@ -1,9 +1,13 @@
 import json
 import os
+from dotenv import load_dotenv
+
+load_dotenv('./.env')
+load_dotenv('../.env')
+
 from kafka import KafkaConsumer
 from db.DataBaseSetupInitialize import setup
 from kafka_producer import WORKSPACE_CREATE_TOPIC
-from dotenv import load_dotenv
 
 def main():
     consumer = KafkaConsumer(WORKSPACE_CREATE_TOPIC,bootstrap_servers = os.environ.get("KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"), group_id = "workspace-create-workers", value_deserializer=lambda m: json.loads(m.decode("UTF-8")),auto_offset_reset="earliest",enable_auto_commit=False)
