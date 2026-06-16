@@ -12,6 +12,11 @@ import Avatar from "../../components/Avatar/Avatar.tsx";
 import Loader from "../../components/Loader/Loader.tsx";
 import styles from "./MembersPage.module.css";
 
+/**
+ * Workspace members screen (`members`). Lists members with keyboard navigation;
+ * the owner can change a member's role (`R`), remove a member (`D`) and invite
+ * new users by searching email (`A`). Non-owners see a read-only roster.
+ */
 function MembersPage(): JSX.Element {
   const {workspace, currentUser, isOwner} = useWorkspace();
   const openModal = useModalStore(useShallow((state) => state.openModal));

@@ -6,6 +6,12 @@ import Conversation from "../../components/Conversation/Conversation.tsx";
 import EmptyState from "../../components/EmptyState/EmptyState.tsx";
 import Loader from "../../components/Loader/Loader.tsx";
 
+/**
+ * Route screen for `dms/:directChatId`. Loads the workspace's direct chats,
+ * finds the one in the URL and renders it as a {@link Conversation} (the
+ * partner's name as title, their status as subtitle). Shows a loader while
+ * fetching and an {@link EmptyState} when not found.
+ */
 function DirectChatPage(): JSX.Element {
   const {workspace} = useWorkspace();
   const {directChatId} = useParams();

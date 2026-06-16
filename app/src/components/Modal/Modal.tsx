@@ -6,14 +6,22 @@ import {useShallow} from "zustand/react/shallow";
 import InlineHotkey from "../InlineHotkey/InlineHotkey.tsx";
 import styles from './Modal.module.css'
 
+/** Fade variants for the modal dialog. */
 const variants = {
   initial: {opacity: 0},
   animate: {opacity: 1},
   exit: {opacity: 0}
 }
 
+/** Props for {@link Modal}: motion `<dialog>` props forwarded to the element. */
 type ModalProps = HTMLMotionProps<'dialog'>
 
+/**
+ * The app's single global modal, driven by {@link useModalStore}. Mounted once
+ * in {@link Root}. Renders the store's `content` plus a row of hotkey-bound
+ * options (or a default "Ok"); each option runs its action then closes. Escape
+ * always dismisses.
+ */
 function Modal({...props}: ModalProps): JSX.Element {
   const {
     isOpen,

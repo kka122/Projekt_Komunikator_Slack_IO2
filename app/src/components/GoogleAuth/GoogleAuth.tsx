@@ -12,6 +12,13 @@ import useUserStore from "../../store/useUserStore.ts";
 import {useNavigate} from "react-router";
 import {getCurrentUserProfile} from "../../api/endpoints/user/user.ts";
 
+/**
+ * Google sign-in control. Renders Google's own login button (hidden behind an
+ * {@link InlineHotkey} so the `[G]` shortcut triggers it) and, on a successful
+ * credential, calls the backend `googleAuth` endpoint, fetches the profile,
+ * stores the user and redirects to `/workspaces`. Errors surface through the
+ * global modal.
+ */
 function GoogleAuth(): JSX.Element {
   const googleLoginRef = useRef<HTMLDivElement>(null);
   const openModal = useModalStore(useShallow(state => state.openModal))

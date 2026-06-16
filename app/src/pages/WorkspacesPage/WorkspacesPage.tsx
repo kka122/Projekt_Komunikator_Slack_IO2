@@ -14,6 +14,12 @@ import type {Workspace} from "../../api/models";
 import {resolveAssetUrl} from "../../config/api.ts";
 import styles from "./WorkspacesPage.module.css";
 
+/**
+ * Workspace picker (`workspaces`). Lists the user's workspaces with keyboard
+ * navigation and opens one on Enter/click. Toggles the
+ * {@link CreateWorkspacePanel} to make a new one (`C`); also offers profile and
+ * logout shortcuts.
+ */
 function WorkspacesPage(): JSX.Element {
   const navigate = useNavigate();
   const openModal = useModalStore(useShallow((state) => state.openModal));
@@ -83,12 +89,20 @@ function WorkspacesPage(): JSX.Element {
   );
 }
 
+/** Props for {@link WorkspaceRow}. */
 interface WorkspaceRowProps {
+  /** The workspace to render. */
   workspace: Workspace;
+  /** Whether this row is the keyboard-selected one. */
   active: boolean;
+  /** Click handler (selects and opens the workspace). */
   onClick: () => void;
 }
 
+/**
+ * A single workspace tile: logo (falling back to the initial when missing or
+ * broken), name, and a role/channel/member summary line.
+ */
 function WorkspaceRow({workspace, active, onClick}: WorkspaceRowProps): JSX.Element {
   const [broken, setBroken] = useState(false);
   const showLogo = workspace.logoUrl && !broken;

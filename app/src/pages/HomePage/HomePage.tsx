@@ -4,6 +4,10 @@ import {useNavigate} from "react-router";
 import InlineHotkey from "../../components/InlineHotkey/InlineHotkey.tsx";
 import styles from './HomePage.module.css'
 
+/**
+ * Public landing page (`/`). Pitches the keyboard-first product and offers
+ * hotkey links to login, register or jump straight into the workspaces app.
+ */
 function HomePage(): JSX.Element {
   const navigate = useNavigate();
 

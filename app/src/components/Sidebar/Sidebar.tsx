@@ -15,17 +15,31 @@ import Avatar from "../Avatar/Avatar.tsx";
 import Loader from "../Loader/Loader.tsx";
 import styles from "./Sidebar.module.css";
 
+/** A single navigable sidebar entry — a channel or a direct chat. */
 interface NavItem {
+  /** Stable React key (`channel-<id>` / `dm-<id>`). */
   key: string;
+  /** Whether this entry is a channel or a direct chat. */
   kind: "channel" | "dm";
+  /** Channel or direct-chat id. */
   id: string;
+  /** Display label (`#name` for channels, the partner's name for DMs). */
   label: string;
+  /** Unread message count, rendered as a badge. */
   unread: number;
+  /** For DMs, the other participant (drives the avatar). */
   user?: import("../../api/models").User;
 }
 
+/** Selectable presence-status values for the quick status switcher. */
 const STATUS_VALUES = Object.values(UpdateCurrentUserProfileBodyStatus);
 
+/**
+ * Workspace sidebar: the keyboard-navigable list of channels and direct chats
+ * plus all workspace-level actions. Provides search (`/`), arrow/Enter
+ * navigation, channel creation (admins), a status switcher, a help modal, and
+ * footer shortcuts to members, settings, profile, workspace switch and logout.
+ */
 function Sidebar(): JSX.Element {
   const {workspace, currentUser, isAdmin} = useWorkspace();
   const navigate = useNavigate();
@@ -262,13 +276,19 @@ function Sidebar(): JSX.Element {
   );
 }
 
+/** Props for {@link Row}. */
 interface RowProps {
+  /** The channel/DM entry to render. */
   item: NavItem;
+  /** Whether this row is the keyboard-selected one. */
   active: boolean;
+  /** Whether this row's conversation is the one currently open. */
   open: boolean;
+  /** Click handler (selects and navigates to the entry). */
   onClick: () => void;
 }
 
+/** A single clickable sidebar row: optional avatar, label and unread badge. */
 function Row({item, active, open, onClick}: RowProps): JSX.Element {
   return (
     <button

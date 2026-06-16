@@ -9,14 +9,20 @@ import InlineHotkey from "../InlineHotkey/InlineHotkey.tsx";
 import StripePaymentForm from "../StripePaymentForm/StripePaymentForm.tsx";
 import styles from "./CreateWorkspacePanel.module.css";
 
+/** Props for {@link CreateWorkspacePanel}. */
 interface CreateWorkspacePanelProps {
+  /** Called after the workspace is fully created and payment confirmed. */
   onDone: () => void;
+  /** Called when the user cancels at either step. */
   onCancel: () => void;
 }
 
-// Two-step workspace creation: name the workspace (which returns a Stripe
-// client secret), then pay to confirm. Payment confirmation is reported back
-// to the API via accept-payment before the workspace becomes usable.
+/**
+ * Two-step workspace creation flow. Step 1 names the workspace (and optional
+ * logo), which returns a Stripe client secret. Step 2 collects payment via
+ * {@link StripePaymentForm}; the confirmed intent is reported back through
+ * accept-payment before the workspace becomes usable.
+ */
 function CreateWorkspacePanel({onDone, onCancel}: CreateWorkspacePanelProps): JSX.Element {
   const openModal = useModalStore(useShallow((state) => state.openModal));
   const createWorkspace = useCreateWorkspace();

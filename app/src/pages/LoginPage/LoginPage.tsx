@@ -11,6 +11,11 @@ import {useLogin} from "../../data/auth.ts";
 import useModalStore from "../../store/useModalStore.ts";
 import styles from "./LoginPage.module.css";
 
+/**
+ * Login screen (`auth/login`). Validates email/password with zod, submits via
+ * {@link useLogin} and redirects to `/workspaces` on success. Also offers Google
+ * sign-in and a link to register; errors surface through the global modal.
+ */
 function LoginPage(): JSX.Element {
   const navigate = useNavigate();
   const login = useLogin();

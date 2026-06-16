@@ -10,6 +10,11 @@ import FileField from "../../components/FileField/FileField.tsx";
 import EmptyState from "../../components/EmptyState/EmptyState.tsx";
 import styles from "./WorkspaceSettingsPage.module.css";
 
+/**
+ * Workspace settings screen (`settings`), admin/owner only. Updates the
+ * workspace logo and manages channels: keyboard-navigable list with rename
+ * (`R`) and delete (`D`). Non-admins see an {@link EmptyState}.
+ */
 function WorkspaceSettingsPage(): JSX.Element {
   const {workspace, isAdmin} = useWorkspace();
   const openModal = useModalStore(useShallow((state) => state.openModal));

@@ -2,16 +2,25 @@ import {type JSX, type KeyboardEvent, type RefObject, useRef, useState} from "re
 import InlineHotkey from "../InlineHotkey/InlineHotkey.tsx";
 import styles from "./MessageComposer.module.css";
 
+/** Props for {@link MessageComposer}. */
 interface MessageComposerProps {
+  /** Ref to the textarea, so the parent can focus it (e.g. on the `M` hotkey). */
   textareaRef: RefObject<HTMLTextAreaElement | null>;
+  /** Whether a send is in flight — disables the send action. */
   pending: boolean;
+  /** Textarea placeholder text. */
   placeholder: string;
+  /** Called with the trimmed content and any attachments when the user sends. */
   onSend: (content: string, attachments: File[]) => void;
+  /** Called when Escape is pressed (parent typically refocuses the list). */
   onEscape: () => void;
 }
 
-// Bottom composer: Enter sends, Shift+Enter inserts a newline, Escape hands
-// focus back to the message list. Files attach via the [A] hotkey.
+/**
+ * Bottom message composer. Enter sends, Shift+Enter inserts a newline, Escape
+ * calls `onEscape`. Files attach via the `[A]` hotkey and can be removed before
+ * sending; the input clears after a successful send.
+ */
 function MessageComposer({
   textareaRef,
   pending,

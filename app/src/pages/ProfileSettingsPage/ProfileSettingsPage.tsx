@@ -19,6 +19,11 @@ import styles from "./ProfileSettingsPage.module.css";
 
 const STATUS_VALUES = Object.values(UpdateCurrentUserProfileBodyStatus);
 
+/**
+ * Profile settings screen (`/settings`). Edits name, surname, email, avatar and
+ * presence status. Status changes are sent independently of the main form (see
+ * {@link applyStatus}). Also exposes account deletion and logout.
+ */
 function ProfileSettingsPage(): JSX.Element {
   const navigate = useNavigate();
   const user = useUserStore(useShallow((state) => state.user));

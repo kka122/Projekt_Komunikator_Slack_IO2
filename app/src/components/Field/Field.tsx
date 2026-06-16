@@ -3,20 +3,33 @@ import {type Hotkey} from "@tanstack/react-hotkeys";
 import InlineHotkey from "../InlineHotkey/InlineHotkey.tsx";
 import styles from "./Field.module.css";
 
+/** Props for {@link Field}. */
 interface FieldProps {
+  /** Visible label text (rendered as an {@link InlineHotkey}). */
   label: string;
+  /** Key that focuses this field. */
   hotkeyKey: Hotkey;
+  /** Controlled input value. */
   value: string;
+  /** Called with the new value on every keystroke. */
   onChange: (value: string) => void;
+  /** Input `type` (e.g. "email", "password"). Ignored when `multiline`. Defaults to "text". */
   type?: string;
+  /** Placeholder text. */
   placeholder?: string;
+  /** Native `autocomplete` hint. */
   autoComplete?: string;
+  /** Which occurrence of `hotkeyKey` in the label to highlight. Defaults to 0. */
   letterIndex?: number;
+  /** Render a `<textarea>` instead of an `<input>`. Defaults to false. */
   multiline?: boolean;
 }
 
-// Labeled input whose label is an InlineHotkey: pressing the key focuses the
-// field. Escape blurs so the surrounding screen's hotkeys take over again.
+/**
+ * Labeled text field whose label is an {@link InlineHotkey}: pressing the key
+ * focuses the input. Escape blurs so the surrounding screen's hotkeys take over
+ * again. Renders an `<input>` or, when `multiline`, a `<textarea>`.
+ */
 function Field({
   label,
   hotkeyKey,

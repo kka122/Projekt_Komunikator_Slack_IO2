@@ -24,18 +24,26 @@ import {
 import type {DirectChat, Message} from "../api/models";
 import {qk} from "./keys.ts";
 
-// A conversation is either a channel or a direct chat. Every messaging hook
-// branches on this so screens can stay agnostic about which one they render.
+/**
+ * A messaging target: either a channel or a direct chat. Discriminated by
+ * `kind`. Every messaging hook branches on this so screens can stay agnostic
+ * about which one they render.
+ */
 export type Conversation =
   | {kind: "channel"; workspaceId: string; channelId: string}
   | {kind: "dm"; workspaceId: string; directChatId: string};
 
+/** Resolve the react-query key for a conversation's message list. */
 function conversationKey(conversation: Conversation) {
   return conversation.kind === "channel"
     ? qk.channelMessages(conversation.workspaceId, conversation.channelId)
     : qk.directChatMessages(conversation.workspaceId, conversation.directChatId);
 }
 
+/**
+ * Query for the workspace's direct chats. Disabled until a workspace id is
+ * available.
+ */
 export function useDirectChats(workspaceId: string) {
   return useQuery({
     queryKey: qk.directChats(workspaceId),
@@ -47,6 +55,13 @@ export function useDirectChats(workspaceId: string) {
   });
 }
 
+/**
+ * Query for a conversation's messages (channel or DM), paginated.
+ *
+ * @param conversation - The channel or direct chat to read.
+ * @param pageSize - Messages per page. Defaults to 20.
+ * @param page - 1-based page number. Defaults to 1.
+ */
 export function useMessages(conversation: Conversation, pageSize = 20, page = 1) {
   return useQuery({
     queryKey: [...conversationKey(conversation), pageSize, page],
@@ -71,6 +86,10 @@ export function useMessages(conversation: Conversation, pageSize = 20, page = 1)
   });
 }
 
+/**
+ * Mutation that posts a new message (with optional file attachments) to the
+ * conversation, then invalidates its message list.
+ */
 export function useSendMessage(conversation: Conversation) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -85,6 +104,7 @@ export function useSendMessage(conversation: Conversation) {
   });
 }
 
+/** Mutation that edits a message's text, then refreshes the conversation. */
 export function useEditMessage(conversation: Conversation) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -97,6 +117,7 @@ export function useEditMessage(conversation: Conversation) {
   });
 }
 
+/** Mutation that deletes a message by id, then refreshes the conversation. */
 export function useDeleteMessage(conversation: Conversation) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -109,6 +130,7 @@ export function useDeleteMessage(conversation: Conversation) {
   });
 }
 
+/** Mutation that adds an emoji reaction to a message in the conversation. */
 export function useAddReaction(conversation: Conversation) {
   const queryClient = useQueryClient();
   return useMutation({
@@ -121,6 +143,7 @@ export function useAddReaction(conversation: Conversation) {
   });
 }
 
+/** Mutation that removes one of the caller's reactions (by reaction id). */
 export function useRemoveReaction(conversation: Conversation) {
   const queryClient = useQueryClient();
   return useMutation({
