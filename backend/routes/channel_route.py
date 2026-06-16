@@ -114,3 +114,17 @@ def delete_channel(workspaceId, channelId):
         return jsonify({"error": str(e)}), 404
     except Exception as e:
         return jsonify({"error": f"Wystąpił błąd podczas usuwania kanału: {str(e)}"}), 500
+
+@channel_route.route("/workspaces/<workspaceId>/channels/<channelId>/read", methods=["POST"])
+@jwt_required()
+def mark_channel_read(workspaceId, channelId):
+    user_email = get_jwt_identity()
+    try:
+        setup.markChannelRead(workspaceId=workspaceId, channelId=channelId, userEmail=user_email)
+        return jsonify({"message": "Oznaczono jako przeczytane"}), 200
+    except PermissionError as e:
+        return jsonify({"error": str(e)}), 403
+    except (ValueError, LookupError) as e:
+        return jsonify({"error": str(e)}), 404
+    except Exception as e:
+        return jsonify({"error": f"Wystąpił błąd: {str(e)}"}), 500

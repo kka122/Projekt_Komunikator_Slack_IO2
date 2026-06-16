@@ -1,13 +1,15 @@
 import {type JSX, useEffect, useRef, useState} from "react";
+import {useNavigate} from "react-router";
 import {useHotkey} from "@tanstack/react-hotkeys";
 import {useShallow} from "zustand/react/shallow";
 import {useWorkspace} from "../../layouts/workspaceContext.ts";
-import {useDeleteChannel, useRenameChannel, useUpdateWorkspaceLogo} from "../../data/workspaces.ts";
+import {useDeleteChannel, useDeleteWorkspace, useRenameChannel, useUpdateWorkspaceLogo} from "../../data/workspaces.ts";
 import {useListNavigation} from "../../hooks/useListNavigation.ts";
 import useModalStore from "../../store/useModalStore.ts";
 import InlineHotkey from "../../components/InlineHotkey/InlineHotkey.tsx";
 import FileField from "../../components/FileField/FileField.tsx";
 import EmptyState from "../../components/EmptyState/EmptyState.tsx";
+import WebhooksSection from "../../components/WebhooksSection/WebhooksSection.tsx";
 import styles from "./WorkspaceSettingsPage.module.css";
 
 /**
@@ -16,13 +18,15 @@ import styles from "./WorkspaceSettingsPage.module.css";
  * (`R`) and delete (`D`). Non-admins see an {@link EmptyState}.
  */
 function WorkspaceSettingsPage(): JSX.Element {
-  const {workspace, isAdmin} = useWorkspace();
+  const {workspace, isAdmin, isOwner} = useWorkspace();
+  const navigate = useNavigate();
   const openModal = useModalStore(useShallow((state) => state.openModal));
   const isModalOpen = useModalStore((state) => state.isOpen);
 
   const updateLogo = useUpdateWorkspaceLogo();
   const renameChannel = useRenameChannel();
   const deleteChannel = useDeleteChannel();
+  const deleteWorkspace = useDeleteWorkspace();
 
   const channelsRef = useRef<HTMLDivElement>(null);
   const renameRef = useRef<HTMLInputElement>(null);
@@ -59,6 +63,25 @@ function WorkspaceSettingsPage(): JSX.Element {
       content: `Delete #${channel.name}? This removes its messages.`,
       options: [
         {label: "Delete", hotkey: "D", function: () => deleteChannel.mutate({workspaceId: workspace.id, channelId: channel.id})},
+        {label: "Cancel", hotkey: "C", function: () => undefined},
+      ],
+    });
+  };
+
+  const confirmDeleteWorkspace = () => {
+    if (deleteWorkspace.isPending) return;
+    openModal({
+      content: `Delete ${workspace.name}? This permanently removes all its channels, messages and chats.`,
+      options: [
+        {
+          label: "Delete",
+          hotkey: "D",
+          function: () =>
+            deleteWorkspace.mutate(workspace.id, {
+              onSuccess: () => navigate("/workspaces"),
+              onError: () => openModal({content: "Could not delete the workspace."}),
+            }),
+        },
         {label: "Cancel", hotkey: "C", function: () => undefined},
       ],
     });
@@ -149,6 +172,18 @@ function WorkspaceSettingsPage(): JSX.Element {
           ))}
         </div>
       </section>
+
+      <WebhooksSection/>
+
+      {isOwner && (
+        <section className={styles.section}>
+          <h3>Danger zone</h3>
+          <p className="muted">Deleting the workspace is permanent and removes all of its channels, messages and chats.</p>
+          <InlineHotkey hotkeyFunction={confirmDeleteWorkspace} hotkeyKey="X" isBlocked={deleteWorkspace.isPending} className="danger">
+            {deleteWorkspace.isPending ? "Deleting..." : "Delete workspace"}
+          </InlineHotkey>
+        </section>
+      )}
     </div>
   );
 }

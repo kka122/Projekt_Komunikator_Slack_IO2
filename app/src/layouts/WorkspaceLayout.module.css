@@ -17,6 +17,8 @@
   min-width: 0;
   min-height: 0;
   background-color: var(--color-background);
+  /* Positioning context for contained bottom bars (e.g. the members HintBar). */
+  position: relative;
 }
 
 .fallback {

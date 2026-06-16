@@ -6,6 +6,8 @@
   min-height: 0;
   overflow-y: auto;
   padding: 1.5rem;
+  /* Reserve room for the fixed HintBar so the last rows aren't hidden. */
+  padding-bottom: 4.5rem;
 }
 
 .header {
@@ -19,6 +21,18 @@
   text-align: left;
 }
 
+.filter {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  max-width: 36rem;
+}
+
+.filter input {
+  flex: 1;
+  padding: 0.35rem 0.6rem;
+}
+
 .list {
   display: flex;
   flex-direction: column;
@@ -29,7 +43,7 @@
 }
 
 .list:focus-visible {
-  box-shadow: inset 0 0 0 0.12rem var(--color-primary);
+  box-shadow: inset 0 0 0 0.12rem color-mix(in srgb, var(--color-primary) 45%, var(--color-background));
   border-radius: 0.4rem;
 }
 
@@ -56,6 +70,19 @@
 
 .name {
   font-weight: 700;
+}
+
+.role {
+  margin-left: 0.5rem;
+  padding: 0.05rem 0.4rem;
+  font-size: 0.65rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-primary);
+  background-color: color-mix(in srgb, var(--color-primary) 12%, transparent);
+  border-radius: 0.7rem;
+  vertical-align: middle;
 }
 
 .email {

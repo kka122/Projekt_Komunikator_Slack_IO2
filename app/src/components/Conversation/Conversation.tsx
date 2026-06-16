@@ -6,6 +6,7 @@ import {
   useAddReaction,
   useDeleteMessage,
   useEditMessage,
+  useMarkConversationRead,
   useMessages,
   useRemoveReaction,
   useSendMessage,
@@ -56,6 +57,7 @@ function Conversation({conversation, title, subtitle}: ConversationProps): JSX.E
   const deleteMessage = useDeleteMessage(conversation);
   const addReaction = useAddReaction(conversation);
   const removeReaction = useRemoveReaction(conversation);
+  const markRead = useMarkConversationRead();
 
   const listRef = useRef<HTMLDivElement>(null);
   const composerRef = useRef<HTMLTextAreaElement>(null);
@@ -117,16 +119,35 @@ function Conversation({conversation, title, subtitle}: ConversationProps): JSX.E
     onSelect: (index) => react(index),
   });
 
-  // Focus the list once when the conversation opens so arrow keys work
-  // immediately; scroll to the newest message whenever the list changes.
+  const conversationId =
+    conversation.kind === "channel" ? conversation.channelId : conversation.directChatId;
+
+  // Focus the list once per chosen conversation so message arrow keys work
+  // immediately. The list only mounts after messages load, so we wait for that
+  // (skipping focus while loading would otherwise miss the first open).
+  const focusedConversation = useRef<string | null>(null);
   useEffect(() => {
-    listRef.current?.focus();
-  }, []);
+    if (messagesQuery.isLoading) return;
+    if (focusedConversation.current === conversationId) return;
+    if (listRef.current) {
+      listRef.current.focus();
+      focusedConversation.current = conversationId;
+    }
+  }, [conversationId, messagesQuery.isLoading]);
 
   useEffect(() => {
     const element = listRef.current;
     if (element) element.scrollTop = element.scrollHeight;
   }, [messages]);
+
+  // Viewing a conversation clears its unread indicator. Re-mark when the
+  // messages change too, so a message that arrives while open stays "read".
+  const markReadMutate = markRead.mutate;
+  useEffect(() => {
+    if (messagesQuery.isLoading || messagesQuery.isError) return;
+    markReadMutate(conversation);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [conversationId, messages, messagesQuery.isLoading, messagesQuery.isError]);
 
   // Per-message actions, scoped to the list so they never fire from the composer.
   useHotkeys(

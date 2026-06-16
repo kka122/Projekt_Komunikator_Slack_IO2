@@ -6,15 +6,20 @@ import styles from "./HintBar.module.css";
 interface HintBarProps {
   /** Hotkey hints to display — typically a row of {@link InlineHotkey}s. */
   children: ReactNode;
+  /**
+   * Anchor to the nearest positioned ancestor (e.g. the layout's main column)
+   * instead of the viewport, so the bar doesn't overlay a sibling sidebar.
+   */
+  contained?: boolean;
 }
 
 /**
  * Persistent bottom strip that advertises the active screen's hotkeys. Thin
  * wrapper over {@link BottomMenu} with hint-row styling.
  */
-function HintBar({children}: HintBarProps): JSX.Element {
+function HintBar({children, contained}: HintBarProps): JSX.Element {
   return (
-    <BottomMenu>
+    <BottomMenu contained={contained}>
       <div className={styles.hintBar}>{children}</div>
     </BottomMenu>
   );

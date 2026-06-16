@@ -1,4 +1,4 @@
-import {type JSX, useRef, useState} from "react";
+import {type JSX, useEffect, useRef, useState} from "react";
 import {useNavigate} from "react-router";
 import {useShallow} from "zustand/react/shallow";
 import AnimatedMain from "../../components/AnimatedMain/AnimatedMain.tsx";
@@ -40,6 +40,12 @@ function WorkspacesPage(): JSX.Element {
     enabled: !creating,
     onSelect: (index) => open(workspaces[index]),
   });
+
+  // Focus the list when it is shown so arrow keys work immediately — the list
+  // hotkeys only fire while focus is inside it.
+  useEffect(() => {
+    if (!creating) listRef.current?.focus();
+  }, [creating]);
 
   function confirmLogout() {
     openModal({

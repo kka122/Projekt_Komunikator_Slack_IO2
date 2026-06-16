@@ -2,6 +2,7 @@ import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {
   acceptWorkspacePayment,
   createWorkspace,
+  deleteWorkspace,
   listWorkspaces,
   updateWorkspaceLogo,
 } from "../api/endpoints/workspace/workspace.ts";
@@ -62,6 +63,18 @@ export function useAcceptWorkspacePayment() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (data: AcceptPaymentBody) => acceptWorkspacePayment(data),
+    onSuccess: () => queryClient.invalidateQueries({queryKey: qk.workspaces}),
+  });
+}
+
+/**
+ * Mutation that permanently deletes a workspace (owner only), then refreshes
+ * the workspace list. Callers navigate away from the deleted workspace.
+ */
+export function useDeleteWorkspace() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (workspaceId: string) => deleteWorkspace(workspaceId),
     onSuccess: () => queryClient.invalidateQueries({queryKey: qk.workspaces}),
   });
 }

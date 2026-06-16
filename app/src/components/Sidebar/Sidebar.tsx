@@ -99,6 +99,12 @@ function Sidebar(): JSX.Element {
     if (creating) createRef.current?.focus();
   }, [creating]);
 
+  // Focus the nav list once on mount so arrow keys work immediately, matching
+  // the message list — the list hotkeys only fire while focus is inside it.
+  useEffect(() => {
+    navRef.current?.focus();
+  }, []);
+
   function submitChannel(event?: FormEvent) {
     event?.preventDefault();
     const name = channelName.trim();
@@ -160,6 +166,12 @@ function Sidebar(): JSX.Element {
     });
   }
 
+  // Channel and DM ids can collide, so the open check must match the kind too.
+  const activeKind: NavItem["kind"] | null = params.channelId
+    ? "channel"
+    : params.directChatId
+      ? "dm"
+      : null;
   const activeId = params.channelId ?? params.directChatId;
 
   return (
@@ -181,7 +193,11 @@ function Sidebar(): JSX.Element {
           onKeyDown={(event) => {
             if (event.key === "Escape") {
               setSearch("");
-              event.currentTarget.blur();
+              navRef.current?.focus();
+            } else if (event.key === "ArrowDown" || event.key === "Enter") {
+              // Hand off from the filter to the list so arrow nav takes over.
+              event.preventDefault();
+              navRef.current?.focus();
             }
           }}
         />
@@ -198,7 +214,7 @@ function Sidebar(): JSX.Element {
               key={item.key}
               item={item}
               active={index === activeIndex}
-              open={activeId === item.id}
+              open={item.kind === activeKind && activeId === item.id}
               onClick={() => {
                 setActiveIndex(index);
                 openItem(item);
@@ -218,7 +234,7 @@ function Sidebar(): JSX.Element {
               key={item.key}
               item={item}
               active={index === activeIndex}
-              open={activeId === item.id}
+              open={item.kind === activeKind && activeId === item.id}
               onClick={() => {
                 setActiveIndex(index);
                 openItem(item);

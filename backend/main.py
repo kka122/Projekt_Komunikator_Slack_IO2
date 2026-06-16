@@ -17,6 +17,7 @@ from routes.channel_route import channel_route
 from routes.user_route import user_route
 from routes.attachments_route import attachments_route
 from routes.reaction_route import reaction_route
+from routes.webhook_route import webhook_route
 
 app = Flask(__name__)
 CORS(app, supports_credentials=True,
@@ -43,6 +44,7 @@ try:
     app.register_blueprint(user_route, url_prefix="/api")
     app.register_blueprint(reaction_route, url_prefix="/api")
     app.register_blueprint(attachments_route, url_prefix="/api")
+    app.register_blueprint(webhook_route, url_prefix="/api")
 except Exception as blueprintError:
     print(f"Wystapil blad podczas rejestracji blueprinta: {blueprintError}")
     sys.exit(1)

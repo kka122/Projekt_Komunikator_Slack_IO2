@@ -19,4 +19,10 @@ export const qk = {
     ["workspaces", workspaceId, "direct-chats", directChatId, "messages"] as const,
   /** User lookup by email regex (member invites). */
   userSearch: (emailRegex: string) => ["users", "search", emailRegex] as const,
+  /** Incoming webhooks in a workspace. */
+  incomingWebhooks: (workspaceId: string) =>
+    ["workspaces", workspaceId, "incoming-webhooks"] as const,
+  /** Outgoing webhooks in a workspace. */
+  outgoingWebhooks: (workspaceId: string) =>
+    ["workspaces", workspaceId, "outgoing-webhooks"] as const,
 };

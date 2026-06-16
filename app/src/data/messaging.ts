@@ -1,5 +1,6 @@
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
-import {listDirectChats} from "../api/endpoints/direct-chat/direct-chat.ts";
+import {createDirectChat, listDirectChats, markDirectChatRead} from "../api/endpoints/direct-chat/direct-chat.ts";
+import {markChannelRead} from "../api/endpoints/channel/channel.ts";
 import {ListDirectChatsResponse} from "../api/endpoints/direct-chat/direct-chat.zod.ts";
 import {
   createChannelMessage,
@@ -52,6 +53,42 @@ export function useDirectChats(workspaceId: string) {
       const response = await listDirectChats(workspaceId);
       return ListDirectChatsResponse.parse(response.data).directChats;
     },
+  });
+}
+
+/**
+ * Mutation that marks a conversation read for the current user, then refreshes
+ * the unread counts shown in the sidebar (channels live in the workspaces
+ * query, direct chats in the direct-chats query).
+ */
+export function useMarkConversationRead() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (conversation: Conversation) =>
+      conversation.kind === "channel"
+        ? markChannelRead(conversation.workspaceId, conversation.channelId)
+        : markDirectChatRead(conversation.workspaceId, conversation.directChatId),
+    onSuccess: (_data, conversation) => {
+      queryClient.invalidateQueries({queryKey: qk.workspaces});
+      queryClient.invalidateQueries({queryKey: qk.directChats(conversation.workspaceId)});
+    },
+  });
+}
+
+/**
+ * Mutation that opens (or creates) a direct chat with another workspace user
+ * and refreshes the chat list. Resolves to the chat's id so the caller can
+ * navigate straight to it.
+ */
+export function useStartDirectChat() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({workspaceId, userId}: {workspaceId: string; userId: string}): Promise<string> => {
+      const response = await createDirectChat(workspaceId, {userId});
+      return response.data.id;
+    },
+    onSuccess: (_id, {workspaceId}) =>
+      queryClient.invalidateQueries({queryKey: qk.directChats(workspaceId)}),
   });
 }
 
