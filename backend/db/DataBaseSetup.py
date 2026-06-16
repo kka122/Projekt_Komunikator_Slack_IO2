@@ -4,46 +4,6 @@ from db.DataTypes import WorkspaceUserRole, UserStatus
 from datetime import datetime
 from sqlalchemy.exc import IntegrityError
 import bcrypt
-import secrets
-import hmac
-import hashlib
-import json
-import threading
-import requests
-
-
-def _post_webhook(url, payload, secret=None):
-    """Best-effort POST to an outgoing webhook URL. Runs in a daemon thread so
-    it never blocks the request; failures are swallowed (logged)."""
-    headers = {"Content-Type": "application/json"}
-    body = json.dumps(payload).encode("utf-8")
-    if secret:
-        signature = hmac.new(secret.encode("utf-8"), body, hashlib.sha256).hexdigest()
-        headers["X-Szponcik-Signature"] = f"sha256={signature}"
-    try:
-        requests.post(url, data=body, headers=headers, timeout=5)
-    except Exception as e:
-        print(f"[Webhook] Wysylka nieudana ({url}): {e}")
-
-
-def _format_outgoing(fmt, event_type, payload):
-    """Shape the payload for the target. native = our envelope; slack/discord =
-    a single text field those platforms render."""
-    if fmt == "slack":
-        return {"text": _summarize_event(event_type, payload)}
-    if fmt == "discord":
-        return {"content": _summarize_event(event_type, payload)}
-    return {"event": event_type, "data": payload}
-
-
-def _summarize_event(event_type, payload):
-    if event_type == "message.created":
-        return f"#{payload.get('channelName', '')}: {payload.get('author', '')}: {payload.get('content', '')}"
-    if event_type == "channel.created":
-        return f"New channel #{payload.get('channelName', '')} created."
-    if event_type == "member.added":
-        return f"{payload.get('memberEmail', '')} joined the workspace."
-    return event_type
 
 Base = declarative_base()
 
@@ -191,33 +151,6 @@ class DirectChatUser(Base):
 
     direct_chat = relationship("DirectChat", back_populates="reads")
     user = relationship("User")
-
-
-class IncomingWebhook(Base):
-    __tablename__ = "incoming_webhook"
-    id = Column(Integer, primary_key=True)
-    workspaceId = Column(Integer, ForeignKey("workspace.id"), nullable=False)
-    channelId = Column(Integer, ForeignKey("channel.id"), nullable=False)
-    creatorId = Column(Integer, ForeignKey("user.id"), nullable=False)
-    name = Column(String, nullable=False)
-    token = Column(String, nullable=False, unique=True)
-    createAt = Column(DateTime, default=datetime.now)
-
-
-class OutgoingWebhook(Base):
-    __tablename__ = "outgoing_webhook"
-    id = Column(Integer, primary_key=True)
-    workspaceId = Column(Integer, ForeignKey("workspace.id"), nullable=False)
-    creatorId = Column(Integer, ForeignKey("user.id"), nullable=False)
-    name = Column(String, nullable=False)
-    url = Column(String, nullable=False)
-    # "native" (our JSON + HMAC), "slack" or "discord" (relay payload shape).
-    format = Column(String, nullable=False, default="native")
-    # Comma-separated event types: message.created, channel.created, member.added.
-    events = Column(String, nullable=False, default="")
-    secret = Column(String, nullable=False)
-    isActive = Column(Boolean, nullable=False, default=True)
-    createAt = Column(DateTime, default=datetime.now)
 
 
 class Setup:
@@ -387,10 +320,6 @@ class Setup:
             session.add(new_membership)
             session.commit()
             session.refresh(new_channel)
-            self._dispatchOutgoing(new_channel.workspaceId, "channel.created", {
-                "channelId": str(new_channel.id),
-                "channelName": new_channel.name,
-            })
             return new_channel
 
     def deleteChannel(self, workspaceId, channelId, creatorEmail):
@@ -775,13 +704,6 @@ class Setup:
             session.commit()
             session.refresh(message)
             serialized = self._serializeMessage(message)
-
-            self._dispatchOutgoing(channel.workspaceId, "message.created", {
-                "channelId": str(channel.id),
-                "channelName": channel.name,
-                "author": f"{user.name} {user.surname}",
-                "content": content,
-            })
             return serialized
 
     def listAllMessageChannels(self, workspaceId, channelId, userEmail, page=1, pageSize=20):
@@ -1227,172 +1149,6 @@ class Setup:
         with Session(self.app_engine) as session:
             return session.query(User).filter(User.id == userId).first()
 
-    ################################################################################################################
-    #                                              WEBHOOK METHODS                                                 #
-    ################################################################################################################
-
-    def _requireWorkspaceAdmin(self, session, workspaceId, email):
-        user = session.query(User).filter(User.email == email).first()
-        if not user:
-            raise ValueError("Uzytkownik nie istnieje")
-        if not self._isWorkspaceAdmin(session, user.id, int(workspaceId)):
-            raise PermissionError("Tylko wlasciciele i administratorzy moga zarzadzac webhookami")
-        return user
-
-    @staticmethod
-    def _serializeIncomingWebhook(hook):
-        return {
-            "id": str(hook.id),
-            "channelId": str(hook.channelId),
-            "name": hook.name,
-            "url": f"/api/hooks/in/{hook.token}",
-            "createdAt": hook.createAt.astimezone().isoformat() if hook.createAt else None,
-        }
-
-    @staticmethod
-    def _serializeOutgoingWebhook(hook):
-        return {
-            "id": str(hook.id),
-            "name": hook.name,
-            "url": hook.url,
-            "format": hook.format,
-            "events": [e for e in hook.events.split(",") if e],
-            "isActive": hook.isActive,
-            "createdAt": hook.createAt.astimezone().isoformat() if hook.createAt else None,
-        }
-
-    def createIncomingWebhook(self, workspaceId, channelId, email, name):
-        with Session(self.app_engine) as session:
-            user = self._requireWorkspaceAdmin(session, workspaceId, email)
-            channel = session.query(Channel).filter(Channel.id == int(channelId)).first()
-            if not channel or channel.workspaceId != int(workspaceId):
-                raise LookupError("Kanał nie istnieje")
-
-            hook = IncomingWebhook(
-                workspaceId=int(workspaceId),
-                channelId=int(channelId),
-                creatorId=user.id,
-                name=(name or "Webhook").strip() or "Webhook",
-                token=secrets.token_urlsafe(32),
-            )
-            session.add(hook)
-            session.commit()
-            session.refresh(hook)
-            return self._serializeIncomingWebhook(hook)
-
-    def listIncomingWebhooks(self, workspaceId, email):
-        with Session(self.app_engine) as session:
-            self._requireWorkspaceAdmin(session, workspaceId, email)
-            hooks = session.query(IncomingWebhook).filter(IncomingWebhook.workspaceId == int(workspaceId)).all()
-            return [self._serializeIncomingWebhook(h) for h in hooks]
-
-    def deleteIncomingWebhook(self, workspaceId, webhookId, email):
-        with Session(self.app_engine) as session:
-            self._requireWorkspaceAdmin(session, workspaceId, email)
-            hook = (
-                session.query(IncomingWebhook)
-                .filter(IncomingWebhook.id == int(webhookId), IncomingWebhook.workspaceId == int(workspaceId))
-                .first()
-            )
-            if not hook:
-                raise LookupError("Webhook nie istnieje")
-            session.delete(hook)
-            session.commit()
-
-    def postViaIncomingWebhook(self, token, text):
-        text = (text or "").strip()
-        if not text:
-            raise ValueError("Wiadomość nie może być pusta")
-        with Session(self.app_engine) as session:
-            hook = session.query(IncomingWebhook).filter(IncomingWebhook.token == token).first()
-            if not hook:
-                raise LookupError("Webhook nie istnieje")
-
-            channel = session.query(Channel).filter(Channel.id == hook.channelId).first()
-            if not channel:
-                raise LookupError("Kanał nie istnieje")
-
-            message = Message(
-                workspaceId=hook.workspaceId,
-                channelId=hook.channelId,
-                authorId=hook.creatorId,
-                body=text,
-            )
-            session.add(message)
-            session.commit()
-            session.refresh(message)
-            self._dispatchOutgoing(hook.workspaceId, "message.created", {
-                "channelId": str(hook.channelId),
-                "channelName": channel.name,
-                "author": hook.name,
-                "content": text,
-            })
-            return {"status": "ok"}
-
-    def createOutgoingWebhook(self, workspaceId, email, name, url, fmt, events):
-        if not url or not url.startswith(("http://", "https://")):
-            raise ValueError("Nieprawidłowy URL")
-        fmt = fmt if fmt in ("native", "slack", "discord") else "native"
-        valid_events = {"message.created", "channel.created", "member.added"}
-        events = [e for e in (events or []) if e in valid_events]
-        with Session(self.app_engine) as session:
-            user = self._requireWorkspaceAdmin(session, workspaceId, email)
-            hook = OutgoingWebhook(
-                workspaceId=int(workspaceId),
-                creatorId=user.id,
-                name=(name or "Webhook").strip() or "Webhook",
-                url=url,
-                format=fmt,
-                events=",".join(events),
-                secret=secrets.token_urlsafe(24),
-                isActive=True,
-            )
-            session.add(hook)
-            session.commit()
-            session.refresh(hook)
-            return {**self._serializeOutgoingWebhook(hook), "secret": hook.secret}
-
-    def listOutgoingWebhooks(self, workspaceId, email):
-        with Session(self.app_engine) as session:
-            self._requireWorkspaceAdmin(session, workspaceId, email)
-            hooks = session.query(OutgoingWebhook).filter(OutgoingWebhook.workspaceId == int(workspaceId)).all()
-            return [self._serializeOutgoingWebhook(h) for h in hooks]
-
-    def deleteOutgoingWebhook(self, workspaceId, webhookId, email):
-        with Session(self.app_engine) as session:
-            self._requireWorkspaceAdmin(session, workspaceId, email)
-            hook = (
-                session.query(OutgoingWebhook)
-                .filter(OutgoingWebhook.id == int(webhookId), OutgoingWebhook.workspaceId == int(workspaceId))
-                .first()
-            )
-            if not hook:
-                raise LookupError("Webhook nie istnieje")
-            session.delete(hook)
-            session.commit()
-
-    def _dispatchOutgoing(self, workspaceId, event_type, payload):
-        """Fire all matching outgoing webhooks for a workspace event. Never
-        raises — webhook delivery must not break the triggering action."""
-        try:
-            with Session(self.app_engine) as session:
-                hooks = (
-                    session.query(OutgoingWebhook)
-                    .filter(OutgoingWebhook.workspaceId == int(workspaceId), OutgoingWebhook.isActive == True)
-                    .all()
-                )
-                targets = [
-                    (h.url, h.format, h.secret)
-                    for h in hooks
-                    if event_type in h.events.split(",")
-                ]
-            for url, fmt, secret in targets:
-                body = _format_outgoing(fmt, event_type, payload)
-                sign = secret if fmt == "native" else None
-                threading.Thread(target=_post_webhook, args=(url, body, sign), daemon=True).start()
-        except Exception as e:
-            print(f"[Webhook] Dispatch error: {e}")
-
     def getWorkspaceById(self, workspaceId):
         with Session(self.app_engine) as session:
             return session.query(Workspace).filter(Workspace.id == workspaceId).first()
@@ -1460,11 +1216,6 @@ class Setup:
         with Session(self.app_engine) as session:
             session.add(WorkSpaceUser(workspaceId=workspaceId, userId=userId, role=WorkspaceUserRole.member))
             session.commit()
-            added = session.query(User).filter(User.id == userId).first()
-        self._dispatchOutgoing(workspaceId, "member.added", {
-            "memberId": str(userId),
-            "memberEmail": added.email if added else "",
-        })
 
     def removeUserFromWorkspace(self, workspaceId, userId):
         with Session(self.app_engine) as session:

@@ -9,7 +9,6 @@ import useModalStore from "../../store/useModalStore.ts";
 import InlineHotkey from "../../components/InlineHotkey/InlineHotkey.tsx";
 import FileField from "../../components/FileField/FileField.tsx";
 import EmptyState from "../../components/EmptyState/EmptyState.tsx";
-import WebhooksSection from "../../components/WebhooksSection/WebhooksSection.tsx";
 import styles from "./WorkspaceSettingsPage.module.css";
 
 /**
@@ -172,8 +171,6 @@ function WorkspaceSettingsPage(): JSX.Element {
           ))}
         </div>
       </section>
-
-      <WebhooksSection/>
 
       {isOwner && (
         <section className={styles.section}>
